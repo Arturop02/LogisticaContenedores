@@ -1,0 +1,559 @@
+﻿
+@{
+    ViewBag.Title = "Dibujando Patio";
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Editor de patios</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/konva@9.0.0/konva.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        #container {
+            width: 1200px;
+            height: 800px;
+            border: 1px solid black;
+            margin-top: 10px;
+        }
+    </style>
+
+</head>
+<body>
+    <h2>Dibujar Patios</h2>
+    <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
+    <br />
+    <br />
+    <label for="escalaInput">Escala:</label>
+    <input type="number" id="escalaInput" value="0.5" step="0.1" min="0.1" />
+    <br />
+    <br />
+    <button id="crearPatioBtn">Iniciar Dibujo</button>
+    <button id="guardarBtn" disabled>Guardar</button>
+    <select id="selectPatio">
+        <option value="">Selecciona un patio</option>
+    </select>
+
+    <div id="container"></div>
+
+    <script>
+
+        function Linea() {
+            this.PuntoInicial=null
+
+        }
+
+        let layer;
+        const escala = parseFloat($('#escalaInput').val());
+        $(document).ready(function () {
+            let stage = new Konva.Stage({
+                container: 'container',
+                width: 1200,
+                height: 800
+            });
+
+            //Instanciar las capas en el escenario
+            layer = new Konva.Layer();
+            stage.add(layer);
+
+            //Variables de arreglos que permiten el dibujo
+            let puntos = [];
+            let puntosVisuales = [];
+            let lineas = [];
+            let textoMedida = [];
+
+            //Valores temporales para calcular tamaños
+            let lineaActual = null;
+            let puntoInicioTemporal = null;
+            let textoMedidaTemporal = null;
+            let circuloInicio = null;
+            let circuloFin = null;
+
+            //Variables booleanas
+            let moviendo = false;
+            let dibujando = false;
+            let dibujandoLinea = false;
+
+            //Boton que permite la creacion del patio
+            $('#crearPatioBtn').on('click', function () {
+                dibujando = true;
+                dibujandoLinea = false;
+                puntos = [];
+                puntosVisuales.forEach(p => p.destroy());
+                lineas.forEach(l => l.destroy());
+                puntosVisuales = [];
+                lineas = [];
+                puntoInicioTemporal = null;
+                lineaActual = null;
+                layer.destroyChildren();
+                layer.draw();
+                $('#guardarBtn').prop('disabled', false);
+            });
+
+            //Evento que permite el zoom al girar la rueda del raton
+            stage.on('wheel', (e) => {
+                e.evt.preventDefault();
+                const escalaAnterior = stage.scaleX();
+                const cursor = stage.getPointerPosition();
+
+                const escalarPor = 1.01;
+                const direccion = e.evt.deltaY > 0 ? 1 : -1;
+                const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
+
+                stage.scale({ x: nuevaEscala, y: nuevaEscala });
+
+                const mousePointTo = {
+                    x: (cursor.x - stage.x()) / escalaAnterior,
+                    y: (cursor.y - stage.y()) / escalaAnterior
+                };
+                stage.position({
+                    x: cursor.x - mousePointTo.x * nuevaEscala,
+                    y: cursor.y - mousePointTo.y * nuevaEscala
+                });
+                stage.batchDraw();
+            });
+
+            //Evento que permite dibujar si se da clic
+            stage.on('mousedown', function (e) {
+                if (!dibujando) return;
+
+                //Condicion para moverse por el escenario si se da clic derecho
+                if (e.evt.button == 2) {
+                    moviendo = true;
+                    stage.draggable(true);
+                    stage.startDrag();
+                }
+
+                //Instrucciones que permiten que el cursor mantenga su posicion absoluta
+                //a pesar que se modifique el tamaño del escenario(stage)
+                const transform = stage.getAbsoluteTransform().copy();
+                transform.invert();
+                const pos = transform.point(stage.getPointerPosition());
+                puntoInicioTemporal = pos;
+
+                //Se dibuja la linea basado en los puntos de la posicion
+                lineaActual = new Konva.Line({
+                    points: [pos.x, pos.y, pos.x, pos.y],
+                    stroke: 'blue',
+                    strokeWidth: 2
+                });
+
+                textoMedidaTemporal = new Konva.Text({
+                    x: pos.x,
+                    y: pos.y,
+                    text: '',
+                    fontSize: 14,
+                    fill: 'black',
+                    padding: 4
+                });
+
+                circuloInicio = new Konva.Circle({
+                    x: pos.x,
+                    y: pos.y,
+                    radius: 5,
+                    fill: 'red',
+                    draggable: true
+                });
+
+                circuloFin = new Konva.Circle({
+                    x: pos.x,
+                    y: pos.y,
+                    radius: 5,
+                    fill: 'red',
+                    draggable: true
+                });
+
+                //Se añade la linea dibujada a la capa
+                layer.add(lineaActual);
+                layer.add(textoMedidaTemporal);
+                layer.add(circuloInicio);
+                layer.add(circuloFin);
+                dibujandoLinea = true;
+            });
+
+            //Acciones que se realizan al arrastrar el mouse
+            stage.on('mousemove', function (e) {
+                //Se verifica que ninguna de las condiciones sea falsa
+                if (!dibujando || !dibujandoLinea || !lineaActual) return;
+
+                const transform = stage.getAbsoluteTransform().copy();
+                transform.invert();
+                const pos = transform.point(stage.getPointerPosition());
+
+                //Variable que permite obtener los puntos de inicio y final de una linea en su respectivo stage
+                const puntosLinea = [puntoInicioTemporal.x, puntoInicioTemporal.y, pos.x, pos.y];
+                circuloFin.position(pos);
+
+                //Calculo para obtener la equivalencia en metros segun los pixeles
+                const dx = pos.x - puntoInicioTemporal.x;
+                const dy = pos.y - puntoInicioTemporal.y;
+                const distancia = Math.sqrt(dx * dx + dy * dy);
+                const distanciaMetros = distancia * escala;
+
+                //Se dibuja y se añade al layer el texto en metros segun la posicion
+                textoMedidaTemporal.text(`${distanciaMetros.toFixed(2)}m`);
+                textoMedidaTemporal.position({
+                    x: (puntoInicioTemporal.x + pos.x) / 2,
+                    y: (puntoInicioTemporal.y + pos.y) / 2
+                });
+
+                layer.batchDraw();
+            });
+
+            //Acciones que se realizan al dejar de hacer un clic sostenido
+            stage.on('mouseup', function (e) {
+                if (e.evt.button === 2) {
+                    moviendo = false;
+                    stage.draggable(false);
+                }
+                if (!dibujando || !dibujandoLinea) return;
+
+                circuloInicio.on('dragmove', function () {
+                    const posInicio = circuloInicio.position();
+                    const posFin = circuloFin.position();
+                    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
+
+                    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
+                    layer.batchDraw();
+                });
+
+                circuloFin.on('dragmove', function () {
+                    const posInicio = circuloInicio.position();
+                    const posFin = circuloFin.position();
+                    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
+
+                    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
+                    layer.batchDraw();
+                });
+
+                lineas.push(lineaActual);
+                textoMedida.push(textoMedidaTemporal);
+                puntos.push(circuloInicio, circuloFin);
+
+                lineaActual = null;
+                textoMedidaTemporal = null;
+                circuloInicio = null;
+                circuloFin = null;
+                dibujandoLinea = false;
+                /*//Instrucciones que permiten que el cursor mantenga su posicion absoluta
+                //a pesar que se modifique el tamaño del escenario(stage)
+                const transform = stage.getAbsoluteTransform().copy();
+                transform.invert();
+                const pos = transform.point(stage.getPointerPosition());
+
+                /*if (lineaActual) lineaActual.destroy();
+                if (textoMedidaTemporal) textoMedidaTemporal.destroy();
+
+                const { linea, texto } = dibujarMedidas(puntoInicioTemporal, pos, escala, layer);
+                lineas.push(linea);
+                textoMedida.push(texto);
+
+                dibujandoLinea = false;
+                puntoInicioTemporal = false;
+                lineaActual = null;
+                textoMedidaTemporal = null;
+
+                //dibujando = false;
+
+                //Variables apra obtener los puntos de inicio y de final actuales
+                const inicio = puntoInicioTemporal;
+                const fin = pos;
+
+                //Dibujando punto de inicio
+                const puntoInicio = new Konva.Circle({
+                    x: inicio.x,
+                    y: inicio.y,
+                    radius: 5,
+                    fill: 'red',
+                    stroke: 'black',
+                    strokeWidth: 1,
+                    draggable: true
+                });
+
+                //Dibujando punto de fin
+                const puntoFin = new Konva.Circle({
+                    x: fin.x,
+                    y: fin.y,
+                    radius: 5,
+                    fill: 'red',
+                    stroke: 'black',
+                    strokeWidth: 1,
+                    draggable: true
+                });
+
+                //Añadir a la capa los puntos dibujados
+                layer.add(puntoInicio);
+                layer.add(puntoFin);
+                puntosVisuales.push(puntoInicio, puntoFin);
+
+                //Actualizar las dimensiones de la linea al mover el punto de inicio
+                puntoInicio.on('dragmove', () => {
+                    actualizarLinea(lineaActual, puntoInicio, puntoFin);
+                });
+
+                //Actualizar las dimensiones de la linea al mover el punto de fin
+                puntoFin.on('dragmove', () => {
+                    actualizarLinea(lineaActual, puntoInicio, puntoFin);
+                });
+
+                //Se agregan los puntos al arreglo llamado puntos
+                puntos.push(inicio);
+                puntos.push(fin);
+
+                //Se añade la linea a los arreglos
+                puntosVisuales.push(lineaActual);
+                lineas.push(lineaActual);
+
+                dibujandoLinea = false;
+                lineaActual = null;
+
+                //Se agrega al arreglo textoMedida el texto y de limpian los datos
+                if (textoMedidaTemporal) {
+                    textoMedida.push(textoMedidaTemporal);
+                    textoMedidaTemporal = null;
+                }
+                puntoInicioTemporal = null;
+                layer.draw();*/
+            });
+
+            //Instrucciones al dar click en el boton guardar
+            $('#guardarBtn').on('click', function () {
+                //Se declara el punto de inicio y punto final de cada linea
+                const puntoFinal = puntos[puntos.length - 1];
+                const puntoInicial = puntos[0];
+
+                //Variable cierre creada usando la funcion dibujarMedidas
+                const cierre = dibujarMedidas(puntoInicial, puntoFinal, escala, layer);
+
+                //Se agrega la linea al conjunto de arreglos y se dibuja
+                lineas.push(cierre.linea);
+                puntosVisuales.push(cierre.texto);
+                layer.draw();
+
+                //Se guarda el nombre del input con el id nombreInput
+                const nombre = $('#nombreInput').val();
+
+                //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
+                //el array puntos con un for
+                const vertices = [];
+                for (let i = 0; i < puntos.length; i += 2) {
+                    vertices.push({ x: puntos[i].x, y: puntos[i].y, orden: vertices.length });
+                }
+
+                //Condicion que envia una alerta si alguno de los campos no se ha completado
+                if (!nombre || !escala || vertices.length === 0) {
+                    alert("Por favor, completa todos los campos y dibuja el patio antes de guardar.");
+                    return;
+                }
+
+                //Metodo POST usando jquery y ajax para comunicar con la BD
+                $.ajax({
+                    url: '/Patio/GuardarPatio',
+                    method: 'POST',
+                    data: JSON.stringify({
+                        nombre: nombre,
+                        escala: escala,
+                        vertices: vertices
+                    }),
+                    contentType: 'application/json',
+                    success: function (res) {
+                        alert("Guardado correctamente");
+                        dibujando = false;
+                        $('#guardarBtn').prop('disabled', true);
+                    }
+                });
+            });
+
+            //Metodo get que obtiene desde un JSON los datos desde la BD
+            $.getJSON('/Patio/ListarPatios', function (data) {
+                data.forEach(p => {
+                    $('#selectPatio').append(`<option value="${p.Id}">${p.Nombre}</option>`);
+                });
+            });
+
+            //Lista desplegable que muestra los patios ya registrados en DB
+            $(`#selectPatio`).on('change', function () {
+                const id = $(this).val();
+
+                layer.destroyChildren();
+                layer.draw();
+
+                if (!id) return;
+                //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
+                $.getJSON('/Patio/ObtenerPatioId', { id: id }, function (p) {
+                    if (!p || !p.Vertices) return;
+
+                    let puntos = [];
+                    p.Vertices.forEach(v => {
+                        puntos.push(v.X, v.Y);
+                    });
+
+                    //Se dibuja una figura en la capa segun el orden en el que se obtienen los vertices
+                    let figura = new Konva.Line({
+                        points: puntos,
+                        stroke: 'black',
+                        strokeWidth: 2,
+                        closed: true
+                    });
+
+                    layer.add(figura);
+                    layer.draw();
+                });
+            });
+        });
+
+        function dibujarMedidas(p1, p2, escala, layer) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
+            const distanciaMetros = distanciaPixeles * escala;
+
+            const linea = new Konva.Line({
+                points: [p1.x, p1.y, p2.x, p2.y],
+                stroke: 'black',
+                strokeWidth: 2,
+            });
+
+            const texto = new Konva.Text({
+                x: (p1.x + p2.x) / 2,
+                y: (p1.y + p2.y) / 2,
+                text: `${distanciaMetros.toFixed(2)}m`,
+                fontSize: 16,
+                fill: 'black',
+                padding: 4,
+                background: 'white'
+            });
+
+            const circuloPuntoInicio = new Konva.Circle({
+                x: p1.x,
+                y: p1.y,
+                radius: 5,
+                fill: 'red',
+                draggable: true
+            });
+
+            const circuloPuntoFin = new Konva.Circle({
+                x: p2.x,
+                y: p2.y,
+                radius: 5,
+                fill: 'blue',
+                draggable: true
+            });
+
+            circuloPuntoInicio.on('dragmove', () => {
+                const nuevoInicio = { x: circuloPuntoInicio.x(), y: circuloPuntoInicio.y() };
+                const nuevoFin = { x: circuloPuntoFin.x(), y: circuloPuntoFin.y() };
+
+                linea.points([nuevoInicio.x, nuevoInicio.y, nuevoFin.x, nuevoFin.y]);
+
+                const dx = nuevoFin.x - nuevoInicio.x;
+                const dy = nuevoFin.y - nuevoInicio.y;
+                const distancia = Math.sqrt(dx * dx + dy * dy) * escala;
+
+                texto.x((nuevoInicio.x + nuevoFin.x) / 2);
+                texto.y((nuevoInicio.y + nuevoFin.y) / 2);
+                texto.text(`${distancia.toFixed(2)}m`);
+
+                layer.batchDraw();
+            });
+
+            circuloPuntoFin.on('dragmove', () => {
+                const nuevoInicio = { x: circuloPuntoInicio.x(), y: circuloPuntoInicio.y() };
+                const nuevoFin = { x: circuloPuntoFin.x(), y: circuloPuntoFin.y() };
+
+                linea.points([nuevoInicio.x, nuevoInicio.y, nuevoFin.x, nuevoFin.y]);
+
+                const dx = nuevoFin - nuevoInicio.x;
+                const dy = nuevoFin.y - nuevoInicio.y;
+                const distancia = Math.sqrt(dx * dx + dy * dy) * escala;
+
+                texto.x((nuevoInicio.x + nuevoFin.x) / 2);
+                texto.y((nuevoInicio.y + nuevoFin.y) / 2);
+                texto.text(`${distancia.toFixed(2)}m`);
+
+                layer.batchDraw();
+            });
+
+            layer.add(linea);
+            layer.add(texto);
+            layer.add(circuloPuntoInicio);
+            layer.add(circuloPuntoFin);
+            layer.draw();
+
+            return {
+                linea,
+                texto,
+                circuloPuntoInicio,
+                circuloPuntoFin
+            };
+        }
+
+        function actualizarTextoMedida(p1, p2, texto) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const distanciaMetros = Math.sqrt(dx * dx + dy * dy) * escala;
+
+            texto.text(`${distanciaMetros.toFixed(2)}m`);
+            texto.position({
+                x: (p1.x + p2.x) / 2,
+                y: (p1.y + p2.y) / 2
+            })
+        }
+
+        /*function actualizarLinea(linea, punto1, punto2) {
+            puntos = [punto1.x(), punto1.y(), punto2.x(), punto2.y()];
+            linea.points(puntos);
+
+            if (linea.textoMedida) {
+                linea.textoMedida.destroy();
+            }
+
+            const dx = punto2.x() - punto1.x();
+            const dy = punto2.y() - punto1.y();
+            const distancia = Math.sqrt(dx * dx + dy * dy);
+            const distanciaMetros = distancia * escala;
+
+            const texto = new Konva.Text({
+                x: (punto1.x() + punto2.x()) / 2,
+                y: (punto1.y() + punto2.y()) / 2,
+                text: `${distanciaMetros.toFixed(2)}m`,
+                fontSize: 14,
+                fill: 'black',
+                padding: 4,
+                background: 'white'
+            });
+
+            layer.add(texto);
+            layer.textoMedida = texto;
+            layer.draw();
+        }*/
+
+        /*function reutilizarPuntos(punto) {
+            punto.on('mousedown', function (e) {
+                if (!dibujando) return;
+
+                puntoInicioTemporal = { x: punto.x(), y: punto.y() };
+                kineaActual = new Konva.Line({
+                    points: [puntoInicioTemporal.x, puntoInicioTemporal.y, puntoInicioTemporal.x, puntoInicioTemporal.y],
+                    stroke: 'blue',
+                    strokeWidth: 2
+                });
+                layer.add(lineaActual);
+                dibujandoLinea = false
+            });
+        }*/
+
+    </script>
+</body>
+</html>
+
