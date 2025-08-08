@@ -48,9 +48,108 @@
 
     <script>
 
-        function Linea() {
-            this.PuntoInicial=null
+        var Lienso = {
+            lstPunto: [],
+            PuntoActual: null,
+            AgregarPunto: function (x, y) {
+                var punto = new Punto();
+                punto.Posicion.x = x;
+                punto.Posicion.y = y;
+                
 
+                this.lstPunto.push(punto);
+
+                if (this.PuntoActual != null) {
+                    var linea = new Linea(this.PuntoActual, punto);
+                    this.PuntoActual.lstRelacionado.push(punto);
+                    punto.lstRelacionado.push(linea);
+                }
+                punto.Dibujar();
+                this.PuntoActual = punto;
+            }
+        };
+
+        var enumTipoGrafico = {
+            Linea: 'Linea',
+            Punto: 'Punto'
+        };
+
+        function Linea(puntoInicial, puntoFinal) {
+            this.Tipo = enumTipoGrafico.Linea;
+            this.Grafico = null;
+            this.GraficoTexto = null;
+            this.lstRelacionado = [];
+
+            this.PuntoInicial = puntoInicial
+            this.PuntoFinal = puntoFinal;
+
+            this.Eliminar = function () {
+                this.Grafico.destroy();
+                this.GraficoTexto.destroy();
+            }
+
+            this.Dibujar = function () {
+                if (this.Grafico != null)
+                    this.Eliminar();
+                
+                this.Grafico = new Konva.Line({
+                    points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
+                    stroke: 'blue',
+                    strokeWidth: 2
+                });
+
+                const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
+                const dy = this.PuntoFinal.Posicion.y - this.PuntoInicial.Posicion.y;
+                const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
+                const distanciaMetros = distanciaPixeles * escala;
+
+                this.GraficoTexto = new Konva.Text({
+                    x: (this.PuntoInicial.Posicion.x + this.PuntoFinal.Posicion.x) / 2,
+                    y: (this.PuntoInicial.Posicion.y + this.PuntoFinal.Posicion.y) / 2,
+                    text: `${distanciaMetros.toFixed(2)}m`,
+                    fontSize: 16,
+                    fill: 'black',
+                    padding: 4,
+                    background: 'white'
+                });
+
+                layer.add(this.Grafico);
+                layer.add(this.GraficoTexto);
+            }
+        }
+
+        function Punto() {
+            this.Tipo = enumTipoGrafico.Punto;
+            this.Grafico = null;
+            this.lstRelacionado = [];
+
+            this.Posicion = { x: null, y: null };
+
+            this.Eliminar = function () {
+                this.Grafico.destroy();
+
+                this.lstRelacionado.forEach(function (item) {
+                    item.Eliminar();
+                });
+            }
+
+            this.Dibujar = function () {
+                if (this.Grafico != null)
+                    this.Eliminar();
+
+                this.Grafico = new Konva.Circle({
+                    x: this.Posicion.x,
+                    y: this.Posicion.y,
+                    radius: 5,
+                    fill: 'red',
+                    draggable: true
+                });
+                layer.add(this.Grafico);
+
+                this.lstRelacionado.forEach(function (item) {
+                    item.Dibujar();
+                });
+            }
         }
 
         let layer;
@@ -67,6 +166,7 @@
             stage.add(layer);
 
             //Variables de arreglos que permiten el dibujo
+            var puntoTemp = null;
             let puntos = [];
             let puntosVisuales = [];
             let lineas = [];
@@ -82,7 +182,7 @@
             //Variables booleanas
             let moviendo = false;
             let dibujando = false;
-            let dibujandoLinea = false;
+            var dibujandoLinea = false;
 
             //Boton que permite la creacion del patio
             $('#crearPatioBtn').on('click', function () {
@@ -141,100 +241,117 @@
                 const pos = transform.point(stage.getPointerPosition());
                 puntoInicioTemporal = pos;
 
-                //Se dibuja la linea basado en los puntos de la posicion
-                lineaActual = new Konva.Line({
-                    points: [pos.x, pos.y, pos.x, pos.y],
-                    stroke: 'blue',
-                    strokeWidth: 2
-                });
-
-                textoMedidaTemporal = new Konva.Text({
-                    x: pos.x,
-                    y: pos.y,
-                    text: '',
-                    fontSize: 14,
-                    fill: 'black',
-                    padding: 4
-                });
-
-                circuloInicio = new Konva.Circle({
-                    x: pos.x,
-                    y: pos.y,
-                    radius: 5,
-                    fill: 'red',
-                    draggable: true
-                });
-
-                circuloFin = new Konva.Circle({
-                    x: pos.x,
-                    y: pos.y,
-                    radius: 5,
-                    fill: 'red',
-                    draggable: true
-                });
-
-                //Se añade la linea dibujada a la capa
-                layer.add(lineaActual);
-                layer.add(textoMedidaTemporal);
-                layer.add(circuloInicio);
-                layer.add(circuloFin);
+                Lienso.AgregarPunto(pos.x, pos.y);
+                Lienso.AgregarPunto(pos.x, pos.y);
                 dibujandoLinea = true;
+                console.log(dibujandoLinea);
+
+                //Se dibuja la linea basado en los puntos de la posicion
+                //lineaActual = new Konva.Line({
+                //    points: [pos.x, pos.y, pos.x, pos.y],
+                //    stroke: 'blue',
+                //    strokeWidth: 2
+                //});
+
+                //textoMedidaTemporal = new Konva.Text({
+                //    x: pos.x,
+                //    y: pos.y,
+                //    text: '',
+                //    fontSize: 14,
+                //    fill: 'black',
+                //    padding: 4
+                //});
+
+                //circuloInicio = new Konva.Circle({
+                //    x: pos.x,
+                //    y: pos.y,
+                //    radius: 5,
+                //    fill: 'red',
+                //    draggable: true
+                //});
+
+                //circuloFin = new Konva.Circle({
+                //    x: pos.x,
+                //    y: pos.y,
+                //    radius: 5,
+                //    fill: 'red',
+                //    draggable: true
+                //});
+
+                ////Se añade la linea dibujada a la capa
+                //layer.add(lineaActual);
+                //layer.add(textoMedidaTemporal);
+                //layer.add(circuloInicio);
+                //layer.add(circuloFin);
+                
             });
 
             //Acciones que se realizan al arrastrar el mouse
             stage.on('mousemove', function (e) {
+                console.log('mousemove');
                 //Se verifica que ninguna de las condiciones sea falsa
-                if (!dibujando || !dibujandoLinea || !lineaActual) return;
+                //if (!dibujando && !dibujandoLinea && !lineaActual) return;
 
                 const transform = stage.getAbsoluteTransform().copy();
                 transform.invert();
                 const pos = transform.point(stage.getPointerPosition());
 
-                //Variable que permite obtener los puntos de inicio y final de una linea en su respectivo stage
-                const puntosLinea = [puntoInicioTemporal.x, puntoInicioTemporal.y, pos.x, pos.y];
-                circuloFin.position(pos);
+                
+                if (dibujandoLinea) {
+                    console.log(pos);
+                    Lienso.PuntoActual.Posicion.x = pos.x;
+                    Lienso.PuntoActual.Posicion.y = pos.y;
+                    Lienso.PuntoActual.Dibujar();
+                }
+                
 
-                //Calculo para obtener la equivalencia en metros segun los pixeles
-                const dx = pos.x - puntoInicioTemporal.x;
-                const dy = pos.y - puntoInicioTemporal.y;
-                const distancia = Math.sqrt(dx * dx + dy * dy);
-                const distanciaMetros = distancia * escala;
+                ////Variable que permite obtener los puntos de inicio y final de una linea en su respectivo stage
+                //const puntosLinea = [puntoInicioTemporal.x, puntoInicioTemporal.y, pos.x, pos.y];
+                //circuloFin.position(pos);
 
-                //Se dibuja y se añade al layer el texto en metros segun la posicion
-                textoMedidaTemporal.text(`${distanciaMetros.toFixed(2)}m`);
-                textoMedidaTemporal.position({
-                    x: (puntoInicioTemporal.x + pos.x) / 2,
-                    y: (puntoInicioTemporal.y + pos.y) / 2
-                });
+                ////Calculo para obtener la equivalencia en metros segun los pixeles
+                //const dx = pos.x - puntoInicioTemporal.x;
+                //const dy = pos.y - puntoInicioTemporal.y;
+                //const distancia = Math.sqrt(dx * dx + dy * dy);
+                //const distanciaMetros = distancia * escala;
 
-                layer.batchDraw();
+                ////Se dibuja y se añade al layer el texto en metros segun la posicion
+                //textoMedidaTemporal.text(`${distanciaMetros.toFixed(2)}m`);
+                //textoMedidaTemporal.position({
+                //    x: (puntoInicioTemporal.x + pos.x) / 2,
+                //    y: (puntoInicioTemporal.y + pos.y) / 2
+                //});
+
+                //layer.batchDraw();
             });
 
             //Acciones que se realizan al dejar de hacer un clic sostenido
             stage.on('mouseup', function (e) {
+                console.log('mouseup');
                 if (e.evt.button === 2) {
                     moviendo = false;
                     stage.draggable(false);
                 }
                 if (!dibujando || !dibujandoLinea) return;
 
-                circuloInicio.on('dragmove', function () {
-                    const posInicio = circuloInicio.position();
-                    const posFin = circuloFin.position();
-                    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
+                //circuloInicio.on('dragmove', function () {
+                //    const posInicio = circuloInicio.position();
+                //    const posFin = circuloFin.position();
+                //    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
 
-                    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
-                    layer.batchDraw();
-                });
+                //    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
+                //    layer.batchDraw();
+                //});
 
-                circuloFin.on('dragmove', function () {
-                    const posInicio = circuloInicio.position();
-                    const posFin = circuloFin.position();
-                    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
+                //circuloFin.on('dragmove', function () {
+                //    console.log('dragmove');
+                //    const posInicio = circuloInicio.position();
+                //    const posFin = circuloFin.position();
+                //    lineaActual.points([posInicio.x, posInicio.y, posFin.x, posFin.y]);
 
-                    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
-                    layer.batchDraw();
-                });
+                //    actualizarTextoMedida(posInicio, posFin, textoMedidaTemporal);
+                //    layer.batchDraw();
+                //});
 
                 lineas.push(lineaActual);
                 textoMedida.push(textoMedidaTemporal);
@@ -244,7 +361,7 @@
                 textoMedidaTemporal = null;
                 circuloInicio = null;
                 circuloFin = null;
-                dibujandoLinea = false;
+                //dibujandoLinea = false;
                 /*//Instrucciones que permiten que el cursor mantenga su posicion absoluta
                 //a pesar que se modifique el tamaño del escenario(stage)
                 const transform = stage.getAbsoluteTransform().copy();

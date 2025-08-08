@@ -10,6 +10,7 @@ namespace DibujandoPatio.Controllers
     {
         public ActionResult Index()
         {
+            return RedirectToAction("Index", "Patio");
             return View();
         }
 
