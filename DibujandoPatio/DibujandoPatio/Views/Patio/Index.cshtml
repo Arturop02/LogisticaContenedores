@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/konva@9.0.0/konva.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/linq-1.2.3.js"></script>
 
 
     <style>
@@ -46,23 +47,59 @@
 
     <div id="container"></div>
 
+    <script type="text/javascript">
+        function throttle(func, limit) {
+            var inThrottle=false;
+            return function (...args) {
+                if (!inThrottle) {
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                    func.apply(this, args);
+                }
+            }
+        }
+
+    </script>
+
     <script>
 
+        var enumEstadoLienzo = {
+            Agregando:'Agregando',
+            Moviendo:'Moviendo',
+            Editando:'Editando',
+        };
+
+        var enumBotton = {
+            ClickIzquierdo: 0,
+            ClickDerecho: 2
+        }
+
         var Lienzo = {
+            Estado: null,
             lstPunto: [],
             PuntoActual: null,
             Cerrar: function () {
+                if (this.PuntoActual != null)
+                    this.PuntoActual.Eliminar();
+
                 var puntoInicial = this.lstPunto[0];
-                var puntoFinal = this.lstPunto[this.lstPunto.length - 2];
+                var puntoFinal = this.lstPunto[this.lstPunto.length - 1];
 
-                var linea = new Linea(puntoInicial, puntoFinal);
-
-                puntoInicial.lstRelacionado.push(linea);
-                puntoFinal.lstRelacionado.push(linea);
+                this.RelacionarPuntos(puntoInicial, puntoFinal);
 
                 puntoInicial.Dibujar();
                 puntoFinal.Dibujar();
-                this.PuntoActual = null;
+
+                this.Estado = enumEstadoLienzo.Editando;
+                this.AjustarOrden();
+            },
+            RelacionarPuntos: function (punto1, punto2) {
+                var linea = new Linea(punto1, punto2);
+                punto1.lstRelacionado.push(linea);
+                punto2.lstRelacionado.push(linea);
+
+                linea.lstRelacionado.push(punto1);
+                linea.lstRelacionado.push(punto2);
             },
             AgregarPunto: function (x, y) {
                 var punto = new Punto();
@@ -72,12 +109,17 @@
                 this.lstPunto.push(punto);
 
                 if (this.PuntoActual != null) {
-                    var linea = new Linea(this.PuntoActual, punto);
-                    this.PuntoActual.lstRelacionado.push(punto);
-                    punto.lstRelacionado.push(linea);
+                    this.RelacionarPuntos(this.PuntoActual, punto);
                 }
                 punto.Dibujar();
                 this.PuntoActual = punto;
+
+                this.AjustarOrden();
+            },
+            AjustarOrden: function () {
+                this.lstPunto.toReversed().forEach(item => {
+                    item.MoverArriba();
+                });
             },
             HabilitarArrastrable: function (habilitar) {
                 if (habilitar) {
@@ -112,24 +154,25 @@
             this.Eliminar = function () {
                 this.Grafico?.destroy();
                 this.GraficoTexto?.destroy();
+                this.lstRelacionado.forEach(item => {
+                    item.lstRelacionado.RemoveAll(c => c == this);
+                });
             }
 
             this.Dibujar = function () {
-                if (this.Grafico != null)
-                    this.Eliminar();
 
-                this.Grafico = new Konva.Line({
+                var cfgGraficoLinea = {
                     points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
                     stroke: 'blue',
                     strokeWidth: 2
-                });
+                };
 
                 const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
                 const dy = this.PuntoFinal.Posicion.y - this.PuntoInicial.Posicion.y;
                 const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
                 const distanciaMetros = distanciaPixeles * escala;
 
-                this.GraficoTexto = new Konva.Text({
+                var cfgGraficoTexto = {
                     x: (this.PuntoInicial.Posicion.x + this.PuntoFinal.Posicion.x) / 2,
                     y: (this.PuntoInicial.Posicion.y + this.PuntoFinal.Posicion.y) / 2,
                     text: `${distanciaMetros.toFixed(2)}m`,
@@ -137,10 +180,21 @@
                     fill: 'black',
                     padding: 4,
                     background: 'white'
-                });
+                };
 
-                layer.add(this.Grafico);
-                layer.add(this.GraficoTexto);
+                if (this.Grafico == null) {
+                    this.Grafico = new Konva.Line(cfgGraficoLinea);
+                    this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+
+                    layer.add(this.Grafico);
+                    layer.add(this.GraficoTexto);
+                } else {
+                    this.Grafico.setAttrs(cfgGraficoLinea);
+                    this.Grafico.getLayer().batchDraw();
+
+                    this.GraficoTexto.setAttrs(cfgGraficoTexto);
+                    this.GraficoTexto.getLayer().batchDraw();
+                }
             }
         }
 
@@ -154,32 +208,57 @@
 
             this.Eliminar = function () {
                 this.Grafico.destroy();
+                Lienzo.lstPunto.RemoveAll(c => c == this);
+                if (Lienzo.PuntoActual == this)
+                    Lienzo.PuntoActual = null;
+
 
                 this.lstRelacionado.forEach(function (item) {
                     item.Eliminar();
                 });
+
+                return this;
             }
 
             this.Dibujar = function () {
-                if (this.Grafico != null)
-                    this.Eliminar();
 
-                this.Grafico = new Konva.Circle({
+                var cfgGrafico = {
                     x: this.Posicion.x,
                     y: this.Posicion.y,
-                    radius: 5,
+                    radius: 10,
                     fill: 'red',
                     draggable: false
-                });
-                this.Grafico.on('mousedown', function () {
-                    //Lienzo.PuntoActual = this;
-                });
+                };
 
-                layer.add(this.Grafico);
+                if (this.Grafico == null)
+                {
+                    this.Grafico = new Konva.Circle(cfgGrafico);
+                    layer.add(this.Grafico);
+
+                    this.Grafico.on('mousedown', throttle((e) => {
+                        if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+                            Lienzo.Estado = enumEstadoLienzo.Moviendo;
+                            Lienzo.PuntoActual = this;
+                        } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+                            Lienzo.Estado = enumEstadoLienzo.Editando;
+                            Lienzo.PuntoActual = null;
+                        } else if (Lienzo.Estado === enumEstadoLienzo.Agregando && Lienzo.lstPunto.length >= 3 && Lienzo.lstPunto[0] === this) {
+                            Lienzo.Cerrar();
+                        }
+                    }, 300));
+                }
+                else {
+                    this.Grafico.setAttrs(cfgGrafico);
+                    this.Grafico.getLayer().batchDraw();
+                }
 
                 this.lstRelacionado.forEach(function (item) {
                     item.Dibujar();
                 });
+            }
+
+            this.MoverArriba = function () {
+                this.Grafico.moveToTop();
             }
         }
 
@@ -207,8 +286,7 @@
 
             //Boton que permite la creacion del patio
             $('#crearPatioBtn').on('click', function () {
-                dibujando = true;
-                dibujandoLinea = false;
+                Lienzo.Estado = enumEstadoLienzo.Agregando;
                 layer.destroyChildren();
                 layer.draw();
                 $('#guardarBtn').prop('disabled', false);
@@ -239,45 +317,40 @@
 
             //Evento que permite dibujar si se da clic
             stage.on('mousedown', function (e) {
-                if (!dibujando) return;
-                console.log(e);
-                const targetTag = e.target.getType();
-                const htmlTarget = e.evt.target;
+                switch (e.evt.button) {
+                    case enumBotton.ClickDerecho: {
+                        Lienzo.HabilitarArrastrable(true);
+                        break;
+                    }
+                    case enumBotton.ClickIzquierdo: {
+                        if (Lienzo.Estado === enumEstadoLienzo.Agregando) {
+                            const transform = stage.getAbsoluteTransform().copy();
+                            transform.invert();
+                            const posicion = transform.point(stage.getPointerPosition());
 
-                if (botonesIgnorados.includes(htmlTarget.id)) return;
-
-                const pos = stage.getPointerPosition();
-                if (pos.x < 0 || pos.y < 0 || pos.x > stage.width() || pos.y > stage.height()) {
-                    console.log('Clic fuera del stage');
-                    return;
+                            Lienzo.AgregarPunto(posicion.x, posicion.y);
+                            if (Lienzo.lstPunto.length == 0)
+                                Lienzo.AgregarPunto(posicion.x, posicion.y);
+                        }                        
+                        break;
+                    }
                 }
-                
-                if (e.evt.button == 2) {
-                    Lienzo.HabilitarArrastrable(true);
-                    return;
-                }
-
-                const transform = stage.getAbsoluteTransform().copy();
-                transform.invert();
-                const posicion = transform.point(stage.getPointerPosition());
-
-                Lienzo.AgregarPunto(posicion.x, posicion.y);
-                if (Lienzo.lstPunto.length == 0)
-                    Lienzo.AgregarPunto(posicion.x, posicion.y);
-                dibujandoLinea = true;
             });
 
             //Acciones que se realizan al arrastrar el mouse
             stage.on('mousemove', function (e) {
-                const transform = stage.getAbsoluteTransform().copy();
-                transform.invert();
-                const pos = transform.point(stage.getPointerPosition());
+                
+                if ([enumEstadoLienzo.Agregando, enumEstadoLienzo.Editando, enumEstadoLienzo.Moviendo].includes(Lienzo.Estado)) {
+                    
+                    if (Lienzo.PuntoActual != null) {
+                        const transform = stage.getAbsoluteTransform().copy();
+                        transform.invert();
+                        const pos = transform.point(stage.getPointerPosition());
 
-
-                if (dibujandoLinea && Lienzo.PuntoActual != null) {
-                    Lienzo.PuntoActual.Posicion.x = pos.x;
-                    Lienzo.PuntoActual.Posicion.y = pos.y;
-                    Lienzo.PuntoActual.Dibujar();
+                        Lienzo.PuntoActual.Posicion.x = pos.x;
+                        Lienzo.PuntoActual.Posicion.y = pos.y;
+                        Lienzo.PuntoActual.Dibujar();
+                    }
                 }
             });
 
