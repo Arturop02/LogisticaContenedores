@@ -130,7 +130,7 @@
                 } else {
                     this.Stage.draggable(false);
                     //if (this._contextualMenuHandler) {
-                        this.Stage.container().removeEventListener('contextmenu', this._contextualMenuHandler);
+                        //this.Stage.container().removeEventListener('contextmenu', this._contextualMenuHandler);
                         //this._contextualMenuHandler = null;
                     //}
                 }
@@ -225,7 +225,7 @@
                 var cfgGrafico = {
                     x: this.Posicion.x,
                     y: this.Posicion.y,
-                    radius: 10,
+                    radius: 7,
                     fill: 'red',
                     draggable: false
                 };
@@ -246,6 +246,25 @@
                             Lienzo.Cerrar();
                         }
                     }, 300));
+
+                    this.Grafico.on('dblclick', (e) => {
+                        if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+                            if (this.lstRelacionado.length === 2) {
+                                var linea = this.lstRelacionado.find(r => r.Tipo === enumTipoGrafico.Linea);
+                                if (linea) {
+                                    const x = (linea.PuntoInicial.Posicion.x + linea.PuntoFinal.Posicion.x) / 2;
+                                    const y = (linea.PuntoInicial.Posicion.y + linea.PuntoFinal.Posicion.y) / 2;
+
+                                    linea.Eliminar();
+
+                                    Lienzo.AgregarPunto(x, y);
+
+                                    Lienzo.RelacionarPuntos(linea.PuntoInicial, linea.PuntoActual);
+                                    Lienzo.RelacionarPuntos(linea.PuntoActual, linea.PuntoFinal);
+                                }
+                            }
+                        }
+                    });
                 }
                 else {
                     this.Grafico.setAttrs(cfgGrafico);
