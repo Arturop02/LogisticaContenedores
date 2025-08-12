@@ -48,12 +48,12 @@
 
     <script>
 
-        var Lienso = {
+        var Lienzo = {
             lstPunto: [],
             PuntoActual: null,
             Cerrar: function () {
                 var puntoInicial = this.lstPunto[0];
-                var puntoFinal = this.lstPunto[this.lstPunto.length - 1];
+                var puntoFinal = this.lstPunto[this.lstPunto.length - 2];
 
                 var linea = new Linea(puntoInicial, puntoFinal);
 
@@ -83,8 +83,15 @@
                 if (habilitar) {
                     this.Stage.draggable(true);
                     this.Stage.startDrag();
-                } else
+                    this._contextualMenuHandler = (e) => e.preventDefault();
+                    this.Stage.container().addEventListener('contextmenu', this._contextualMenuHandler);
+                } else {
                     this.Stage.draggable(false);
+                    //if (this._contextualMenuHandler) {
+                        this.Stage.container().removeEventListener('contextmenu', this._contextualMenuHandler);
+                        //this._contextualMenuHandler = null;
+                    //}
+                }
             }
         };
 
@@ -165,7 +172,7 @@
                     draggable: false
                 });
                 this.Grafico.on('mousedown', function () {
-                    //Lienso.PuntoActual = this;
+                    //Lienzo.PuntoActual = this;
                 });
 
                 layer.add(this.Grafico);
@@ -185,7 +192,7 @@
                 height: 800
             });
 
-            Lienso.Stage = stage;
+            Lienzo.Stage = stage;
 
             //Instanciar las capas en el escenario
             layer = new Konva.Layer();
@@ -195,6 +202,8 @@
             let moviendo = false;
             let dibujando = false;
             var dibujandoLinea = false;
+
+            const botonesIgnorados = ['crearPatioBtn', 'guardarBtn', 'selectPatio'];
 
             //Boton que permite la creacion del patio
             $('#crearPatioBtn').on('click', function () {
@@ -231,22 +240,30 @@
             //Evento que permite dibujar si se da clic
             stage.on('mousedown', function (e) {
                 if (!dibujando) return;
+                console.log(e);
+                const targetTag = e.target.getType();
+                const htmlTarget = e.evt.target;
 
-                //Condicion para moverse por el escenario si se da clic derecho
+                if (botonesIgnorados.includes(htmlTarget.id)) return;
+
+                const pos = stage.getPointerPosition();
+                if (pos.x < 0 || pos.y < 0 || pos.x > stage.width() || pos.y > stage.height()) {
+                    console.log('Clic fuera del stage');
+                    return;
+                }
+                
                 if (e.evt.button == 2) {
-                    Lienso.HabilitarArrastrable(true);
+                    Lienzo.HabilitarArrastrable(true);
                     return;
                 }
 
-                //Instrucciones que permiten que el cursor mantenga su posicion absoluta
-                //a pesar que se modifique el tamaño del escenario(stage)
                 const transform = stage.getAbsoluteTransform().copy();
                 transform.invert();
-                const pos = transform.point(stage.getPointerPosition());
+                const posicion = transform.point(stage.getPointerPosition());
 
-                Lienso.AgregarPunto(pos.x, pos.y);
-                if (Lienso.lstPunto.length == 0)
-                    Lienso.AgregarPunto(pos.x, pos.y);
+                Lienzo.AgregarPunto(posicion.x, posicion.y);
+                if (Lienzo.lstPunto.length == 0)
+                    Lienzo.AgregarPunto(posicion.x, posicion.y);
                 dibujandoLinea = true;
             });
 
@@ -257,24 +274,23 @@
                 const pos = transform.point(stage.getPointerPosition());
 
 
-                if (dibujandoLinea && Lienso.PuntoActual != null) {
-                    Lienso.PuntoActual.Posicion.x = pos.x;
-                    Lienso.PuntoActual.Posicion.y = pos.y;
-                    Lienso.PuntoActual.Dibujar();
+                if (dibujandoLinea && Lienzo.PuntoActual != null) {
+                    Lienzo.PuntoActual.Posicion.x = pos.x;
+                    Lienzo.PuntoActual.Posicion.y = pos.y;
+                    Lienzo.PuntoActual.Dibujar();
                 }
             });
 
             //Acciones que se realizan al dejar de hacer un clic sostenido
             stage.on('mouseup', function (e) {
                 if (e.evt.button === 2) {
-                    Lienso.HabilitarArrastrable(false);
+                    Lienzo.HabilitarArrastrable(false);
                 }
             });
 
             //Instrucciones al dar click en el boton guardar
-            $('#guardarBtn').on('click', function () {
-
-                Lienso.Cerrar();
+            $('#guardarBtn').on('click', function (e) {
+                Lienzo.Cerrar();
 
                 //Se guarda el nombre del input con el id nombreInput
                 //const nombre = $('#nombreInput').val();
