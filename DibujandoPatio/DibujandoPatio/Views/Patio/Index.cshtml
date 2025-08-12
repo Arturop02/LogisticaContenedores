@@ -78,6 +78,12 @@
             Estado: null,
             lstPunto: [],
             PuntoActual: null,
+            DamePosicion: function () {
+                const transform = this.Stage.getAbsoluteTransform().copy();
+                transform.invert();
+                const posicion = transform.point(this.Stage.getPointerPosition());
+                return posicion;
+            },
             Cerrar: function () {
                 if (this.PuntoActual != null)
                     this.PuntoActual.Eliminar();
@@ -112,9 +118,10 @@
                     this.RelacionarPuntos(this.PuntoActual, punto);
                 }
                 punto.Dibujar();
-                this.PuntoActual = punto;
 
                 this.AjustarOrden();
+
+                return punto;
             },
             AjustarOrden: function () {
                 this.lstPunto.toReversed().forEach(item => {
@@ -164,7 +171,7 @@
                 var cfgGraficoLinea = {
                     points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
                     stroke: 'blue',
-                    strokeWidth: 2
+                    strokeWidth: 4
                 };
 
                 const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
@@ -188,6 +195,31 @@
 
                     layer.add(this.Grafico);
                     layer.add(this.GraficoTexto);
+
+                    this.Grafico.on('dblclick', (e) => {
+                        if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+                            const pos = Lienzo.DamePosicion();
+                            this.Eliminar();
+                            var punto = Lienzo.AgregarPunto(pos.x, pos.y);
+                            var Orden = 0;
+                            this.lstRelacionado.forEach(item => {
+                                Lienzo.RelacionarPuntos(punto, item);
+                                if (item.Orden < Orden)
+                                    Orden = item.Orden;
+                            });
+                            punto.Orden = Orden + 1;
+
+                            Lienzo.lstPunto.forEach(item => {
+                                if (item.Orden > Orden && item != punto)
+                                    item.Orden++;
+                            });
+
+                            punto.Dibujar();
+                            Lienzo.AjustarOrden();
+                            Lienzo.PuntoActual = punto;
+                            Lienzo.Estado === enumEstadoLienzo.Moviendo;
+                        }
+                    });
                 } else {
                     this.Grafico.setAttrs(cfgGraficoLinea);
                     this.Grafico.getLayer().batchDraw();
@@ -205,6 +237,7 @@
             this.Arrastrable = false;
 
             this.Posicion = { x: null, y: null };
+            this.Orden = Punto.OrdenActual++;
 
             this.Eliminar = function () {
                 this.Grafico.destroy();
@@ -246,23 +279,9 @@
                             Lienzo.Cerrar();
                         }
                     }, 300));
-
                     this.Grafico.on('dblclick', (e) => {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                            if (this.lstRelacionado.length === 2) {
-                                var linea = this.lstRelacionado.find(r => r.Tipo === enumTipoGrafico.Linea);
-                                if (linea) {
-                                    const x = (linea.PuntoInicial.Posicion.x + linea.PuntoFinal.Posicion.x) / 2;
-                                    const y = (linea.PuntoInicial.Posicion.y + linea.PuntoFinal.Posicion.y) / 2;
-
-                                    linea.Eliminar();
-
-                                    Lienzo.AgregarPunto(x, y);
-
-                                    Lienzo.RelacionarPuntos(linea.PuntoInicial, linea.PuntoActual);
-                                    Lienzo.RelacionarPuntos(linea.PuntoActual, linea.PuntoFinal);
-                                }
-                            }
+                            this.Eliminar();
                         }
                     });
                 }
@@ -280,6 +299,8 @@
                 this.Grafico.moveToTop();
             }
         }
+
+        Punto.OrdenActual = 0;
 
         let layer;
         const escala = parseFloat($('#escalaInput').val());
@@ -347,9 +368,9 @@
                             transform.invert();
                             const posicion = transform.point(stage.getPointerPosition());
 
-                            Lienzo.AgregarPunto(posicion.x, posicion.y);
+                            Lienzo.PuntoActual = Lienzo.AgregarPunto(posicion.x, posicion.y);
                             if (Lienzo.lstPunto.length == 0)
-                                Lienzo.AgregarPunto(posicion.x, posicion.y);
+                                Lienzo.PuntoActual =Lienzo.AgregarPunto(posicion.x, posicion.y);
                         }                        
                         break;
                     }
@@ -362,9 +383,7 @@
                 if ([enumEstadoLienzo.Agregando, enumEstadoLienzo.Editando, enumEstadoLienzo.Moviendo].includes(Lienzo.Estado)) {
                     
                     if (Lienzo.PuntoActual != null) {
-                        const transform = stage.getAbsoluteTransform().copy();
-                        transform.invert();
-                        const pos = transform.point(stage.getPointerPosition());
+                        const pos = Lienzo.DamePosicion();
 
                         Lienzo.PuntoActual.Posicion.x = pos.x;
                         Lienzo.PuntoActual.Posicion.y = pos.y;
