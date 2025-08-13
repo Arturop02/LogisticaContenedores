@@ -245,8 +245,10 @@
                 if (Lienzo.PuntoActual == this)
                     Lienzo.PuntoActual = null;
 
+                var temp = [];
+                temp.AddRange(this.lstRelacionado);
 
-                this.lstRelacionado.forEach(function (item) {
+                temp.forEach(function (item) {
                     item.Eliminar();
                 });
 
@@ -281,7 +283,30 @@
                     }, 300));
                     this.Grafico.on('dblclick', (e) => {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+                            
+                            var lstpunto = [];
+                            
+                            this.lstRelacionado.forEach(linea => {
+                                console.log(linea);
+                                linea.lstRelacionado.forEach(punto => {
+                                    if (punto != this)
+                                        lstpunto.push(punto);
+                                });
+                            });
+
+                            var punto1 = lstpunto[0];
+                            var punto2 = lstpunto[1];
+
                             this.Eliminar();
+
+                            Lienzo.RelacionarPuntos(punto1, punto2);
+
+                            punto1.Dibujar();
+
+                            Lienzo.lstPunto.forEach(item => {
+                                if (item.Orden > this.Orden && item != this)
+                                    item.Orden--;
+                            });
                         }
                     });
                 }
