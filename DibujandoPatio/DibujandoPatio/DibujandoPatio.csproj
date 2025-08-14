@@ -190,6 +190,16 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BT\BT.csproj">
+      <Project>{71a426ec-981e-4622-a9c9-e8842c09fff7}</Project>
+      <Name>BT</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RN\RN.csproj">
+      <Project>{4cae4601-251d-4b19-8da3-f2d5b542651c}</Project>
+      <Name>RN</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
