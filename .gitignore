@@ -41,6 +41,8 @@ WebApp/GUIDCompilacion.cs
 **/[Ll]og/
 **/bin/
 **/obj/
+**/[Bb]in/**
+**/[Oo]bj/**
 
 
 # Visual Studio 2015/2017 cache/options directory
