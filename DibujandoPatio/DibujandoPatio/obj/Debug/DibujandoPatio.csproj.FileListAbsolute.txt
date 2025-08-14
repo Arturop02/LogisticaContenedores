@@ -256,3 +256,9 @@ C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoP
 C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\obj\Debug\Dibujand.3603C312.Up2Date
 C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\obj\Debug\DibujandoPatio.dll
 C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\obj\Debug\DibujandoPatio.pdb
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BT.dll
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\RN.dll
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.dll
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BT.pdb
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\RN.pdb
+D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.pdb
