@@ -24,7 +24,9 @@ namespace BD.Patio
                         cmd.Parameters.AgregarConValorNull("@IdPatio", patioBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Nombre", patioBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("@Escala", patioBT.Escala);
-                        cmd.Parameters.AgregarConValorNull("@Accion", char.Parse(accion.ToString()));
+                        cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
+
+
 
                         conex.Open();
                         cmd.ExecuteNonQuery();
@@ -37,7 +39,7 @@ namespace BD.Patio
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception("No se pudo guardar en base de datos por el siguiente error: " + ex);
             }
         }
 
@@ -55,8 +57,11 @@ namespace BD.Patio
                 conn = new SqlConnection(Conexion);
                 SqlCommand comm = new SqlCommand("dbo.sp_Patio_PorOpcion", conn);
                 comm.CommandType = CommandType.StoredProcedure;
-                comm.Parameters.AgregarConValorNull("@Opcion", Opcion);
-                comm.Parameters.AgregarConValorNull("@XML", Query);
+                
+                comm.Parameters.AgregarConValorNull("@Opcion", Opcion.ToString());
+                comm.Parameters.AgregarConValorNull("@XML", parametroXML.ToString());
+
+                
 
                 conn.Open();
                 var result = ListaBT<PatioMapeo>(comm);
@@ -65,7 +70,7 @@ namespace BD.Patio
             }
             catch (Exception ex)
             {
-                throw new Exception("No se pudo obtener la información de Producto", ex);
+                throw new Exception("No se pudo obtener la información del patio", ex);
             }
             finally
             {

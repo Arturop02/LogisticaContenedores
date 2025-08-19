@@ -1,6 +1,7 @@
 ﻿using BD.Patio;
 using BT.Patio;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,6 +50,20 @@ namespace RN.Patio
                 throw;
             }
         }
+
+        public List<VerticeBT> BuscarPorPatio(int id)
+        {
+            try
+            {
+                VerticeBD verticeBD = new VerticeBD(ConstantesRN.BD_CONECTION);
+                return verticeBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.PorPatio, Query: id.ToString());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<VerticeBT> DameTodosAlta()
         {
             try

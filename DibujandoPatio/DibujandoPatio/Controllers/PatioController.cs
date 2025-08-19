@@ -1,13 +1,12 @@
-﻿
+﻿using BT.Patio;
+using RN.Patio;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using static DibujandoPatio.Models.PatioLayout;
 
 namespace DibujandoPatio.Controllers
 {
@@ -16,95 +15,36 @@ namespace DibujandoPatio.Controllers
         private string conexion = ConfigurationManager.ConnectionStrings["mapaConnection"].ConnectionString;
 
         [HttpPost]
-        public JsonResult GuardarPatio(string nombre, decimal escala, List<Vertice> vertices)
+        public JsonResult GuardarPatio(PatioBT patioBT)
         {
-            var dtVertices = new DataTable();
-            dtVertices.Columns.Add("X",  typeof(float));
-            dtVertices.Columns.Add("Y", typeof(float));
-            dtVertices.Columns.Add("Orden", typeof(int));
+            PatioRN patioRN = new PatioRN();
+            patioRN.Agregar(patioBT);
 
-            int orden = 0;
-            foreach (Vertice vertice in vertices) { 
-                dtVertices.Rows.Add(vertice.X, vertice.Y, orden++);
-            }
-
-            using (SqlConnection conex = new SqlConnection(conexion)) { 
-                conex.Open();
-
-                using (SqlCommand cmd = new SqlCommand("sp_dibujar_patio", conex))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    //cmd.Parameters.AddWithValue("@Id", id);
-                    cmd.Parameters.AddWithValue("@Nombre", nombre);
-                    cmd.Parameters.AddWithValue("@Escala", escala);
-
-                    var param = cmd.Parameters.AddWithValue("@Vertices", dtVertices);
-                    param.SqlDbType = SqlDbType.Structured;
-                    param.TypeName = "VerticeTPV";
-
-                    cmd.ExecuteNonQuery();
-                }
-
-                conex.Close();
-                
-            }
-
-            return Json(new {ok = true});
+            return Json(new { ok = true });
         }
-
-        /*public JsonResult obtenerPatio()
+        [HttpGet]
+        public JsonResult ObtenerPatiosPorId(int id)
         {
-            List<Patio> patios = new List<Patio>();
-
-            using (SqlConnection conn = new SqlConnection(conexion))
+            System.Diagnostics.Debug.WriteLine("Id recibido en controller: " + id);
+            PatioRN patioRN = new PatioRN();
+            var patio = patioRN.BuscarPorId(id);
+            System.Diagnostics.Debug.WriteLine("Datos del patio: " + patio);
+            if (patio != null)
             {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand("SELECT * FROM v_obtener_patio", conn)) { 
-                    
-                    using(SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        int? patioActual = null;
-                        Patio patio = null;
-
-                        while (reader.Read())
-                        {
-                            int id = (int)reader["Id"];
-
-                            if(patioActual == null || patioActual != id)
-                            {
-                                patio = new Patio
-                                {
-                                    Nombre = reader["NombrePatio"].ToString(),
-                                    Escala = (decimal)reader["Escala"],
-                                    Vertices = new List<Vertice>()
-                                };
-                                patios.Add(patio);
-                                patioActual = id;
-                            }
-
-                            patio.Vertices.Add(new Vertice
-                            {
-                                X = float.Parse(reader["X"].ToString()),
-                                Y = float.Parse(reader["Y"].ToString())
-                            });
-
-                        }
-                    }
-                    conn.Close();
-                }
-
-                return Json(patios, JsonRequestBehavior.AllowGet);
-
+                // Cargar también los vértices
+                patio.Vertices = new VerticeRN().BuscarPorPatio(patio.Id);
+                return Json(new { ok = true, data = patio }, JsonRequestBehavior.AllowGet);
             }
-        }*/
-
+            return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
+        }
+        
         public JsonResult ListarPatios()
         {
             List<object> patios = new List<object>();
             using (SqlConnection conex = new SqlConnection(conexion))
             {
                 conex.Open();
-                using (SqlCommand cmd = new SqlCommand("SELECT Id, NombrePatio FROM Patio", conex))
+                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Patio", conex))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -113,7 +53,9 @@ namespace DibujandoPatio.Controllers
                             patios.Add(new
                             {
                                 Id = (int)reader["Id"],
-                                Nombre = reader["NombrePatio"].ToString()
+                                Nombre = reader["Nombre"].ToString(),
+                                Escala = (decimal)reader["Escala"],
+                                Activo = (bool)reader["Activo"]
                             });
                         }
                     }
@@ -123,7 +65,15 @@ namespace DibujandoPatio.Controllers
             return Json(patios, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult ObtenerPatioId(int Id)
+        [HttpGet]
+        public JsonResult BuscarPatioPorOpcion(PatioBT patioBT)
+        {
+            PatioRN patioRN = new PatioRN();
+            patioRN.BuscarPorId(patioBT.Id);
+            return Json(new { ok = true });
+        }
+
+        /*public JsonResult ObtenerPatioId(PatioBT patioBT)
         {
             Patio patio = null;
 
@@ -132,7 +82,7 @@ namespace DibujandoPatio.Controllers
                 conex.Open();
                 using (SqlCommand cmd = new SqlCommand("SELECT * FROM v_obtener_patio WHERE Id = @Id", conex))
                 {
-                    cmd.Parameters.AddWithValue("@Id", Id);
+                    cmd.Parameters.AddWithValue("@Id", patioBT.Id);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -142,7 +92,7 @@ namespace DibujandoPatio.Controllers
                             {
                                 patio = new Patio
                                 {
-                                    Nombre = reader["NombrePatio"].ToString(),
+                                    Nombre = reader["Nombre"].ToString(),
                                     Escala = (decimal)reader["Escala"],
                                     Vertices = new List<Vertice>()
                                 };
@@ -158,7 +108,7 @@ namespace DibujandoPatio.Controllers
                 conex.Close();
             }
             return Json(patio, JsonRequestBehavior.AllowGet);
-        }
+        }*/
 
 
         public ActionResult Index()

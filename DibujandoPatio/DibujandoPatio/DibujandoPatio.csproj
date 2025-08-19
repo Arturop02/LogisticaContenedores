@@ -191,6 +191,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BD\BD.csproj">
+      <Project>{C3261802-4AA8-4057-BA94-4FA674A246C1}</Project>
+      <Name>BD</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BT\BT.csproj">
       <Project>{71a426ec-981e-4622-a9c9-e8842c09fff7}</Project>
       <Name>BT</Name>

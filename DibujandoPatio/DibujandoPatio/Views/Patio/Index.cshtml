@@ -64,7 +64,6 @@
                 }
             }
         }
-
     </script>
 
     <script>
@@ -88,6 +87,8 @@
                 const transform = this.Stage.getAbsoluteTransform().copy();
                 transform.invert();
                 const posicion = transform.point(this.Stage.getPointerPosition());
+                posicion.x = posicion.x.toFixed(6) * 1;
+                posicion.y = posicion.y.toFixed(6) * 1;
                 return posicion;
             },
             RestaurarTamano: function () {
@@ -319,29 +320,44 @@
                     }, 300));
                     this.Grafico.on('dblclick', (e) => {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                            
                             var lstpunto = [];
-                            
-                            this.lstRelacionado.forEach(linea => {
-                                console.log(linea);
-                                linea.lstRelacionado.forEach(punto => {
-                                    if (punto != this)
-                                        lstpunto.push(punto);
-                                });
-                            });
+                            bootbox.confirm({
+                                message: '¿Deseas eliminar el punto?',
+                                buttons: {
+                                    confirm: {
+                                        label: 'Eliminar',
+                                        className: 'btn-success'
+                                    },
+                                    cancel: {
+                                        label: 'Cancelar',
+                                        className: 'btn-danger'
+                                    }
+                                },
+                                callback: (result) => {
+                                    if (result) {
+                                        this.lstRelacionado.forEach(linea => {
+                                            console.log(linea);
+                                            linea.lstRelacionado.forEach(punto => {
+                                                if (punto != this)
+                                                    lstpunto.push(punto);
+                                            });
+                                        });
 
-                            var punto1 = lstpunto[0];
-                            var punto2 = lstpunto[1];
+                                        var punto1 = lstpunto[0];
+                                        var punto2 = lstpunto[1];
 
-                            this.Eliminar();
+                                        this.Eliminar();
 
-                            Lienzo.RelacionarPuntos(punto1, punto2);
+                                        Lienzo.RelacionarPuntos(punto1, punto2);
 
-                            punto1.Dibujar();
+                                        punto1.Dibujar();
 
-                            Lienzo.lstPunto.forEach(item => {
-                                if (item.Orden > this.Orden && item != this)
-                                    item.Orden--;
+                                        Lienzo.lstPunto.forEach(item => {
+                                            if (item.Orden > this.Orden && item != this)
+                                                item.Orden--;
+                                        });
+                                    }
+                                }
                             });
                         }
                     });
@@ -466,13 +482,10 @@
                 //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
                 //el array puntos con un for
                 const vertices = Lienzo.lstPunto.map(p => ({
-                    x: p.Posicion.x,
-                    y: p.Posicion.y,
+                    X: p.Posicion.x,
+                    Y: p.Posicion.y,
                     Orden: p.Orden
                 }));
-                //for (let i = 0; i < puntos.length; i += 2) {
-                //    vertices.push({ x: Lienzo.[i].x, y: puntos[i].y, orden: vertices.length });
-                //}
 
                 ////Condicion que envia una alerta si alguno de los campos no se ha completado
                 if (!nombre || !escala || vertices.length === 0) {
@@ -485,9 +498,9 @@
                     url: '/Patio/GuardarPatio',
                     method: 'POST',
                     data: JSON.stringify({
-                        nombre: nombre,
-                        escala: escala,
-                        vertices: vertices
+                        Nombre: nombre,
+                        Escala: escala,
+                        Vertices: vertices
                     }),
                     contentType: 'application/json',
                     success: function (res) {
@@ -507,20 +520,40 @@
 
             //Lista desplegable que muestra los patios ya registrados en DB
             $(`#selectPatio`).on('change', function () {
-                $(`#patioEditar`).prop('disabled', false);
-                $(`#patioEliminar`).prop('disabled', false);
-
-                const id = $(this).val();
-
-                layer.destroyChildren();
-                layer.draw();
-
-                Lienzo.lstPunto = [];
-                Lienzo.PuntoActual = null;
+                let id = $(this).val();
+                console.log("Id " + id + " en el Select Patio");
+                $(`#patioEditar`).prop('disabled', !id);
+                $(`#patioEliminar`).prop('disabled', !id);
 
                 if (!id) return;
                 //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
-                $.getJSON('/Patio/ObtenerPatioId', { id: id }, function (p) {
+                $.getJSON('/Patio/ObtenerPatiosPorId', { id: id }, function (res) {
+                    console.log("Respuesta completa:", res);
+                    if (!res.ok || !res.data) return;
+
+                    var patio = res.data;
+                    console.log("Datos del patio", patio);
+
+                    layer.destroyChildren();
+                    layer.draw();
+
+                    let vertices = patio.Vertices.sort((a, b) => a.Orden - b.Orden);
+                    Lienzo.lstPunto = [];
+                    Lienzo.PuntoActual = null;
+
+                    vertices.forEach(v => {
+                        var p = Lienzo.AgregarPunto(v.X, v.Y);
+                        p.Orden = v.Orden;
+                    });
+
+                    for (let i = 0; i < Lienzo.lstPunto.length; i++) {
+                        let siguiente = (i + 1) % Lienzo.lstPunto.length;
+                        Lienzo.RelacionarPuntos(Lienzo.lstPunto[i], Lienzo.lstPunto[siguiente]);
+                    }
+                    Lienzo.lstPunto.forEach(p => p.Dibujar());
+                    Lienzo.Estado = enumEstadoLienzo.Editando;
+                });
+                /*{ Id: id }, function (p) {
                     if (!p || !p.Vertices) return;
 
                     let verticesOrdenados = p.Vertices.sort((a, b) => a.Orden - b.Orden);
@@ -542,7 +575,7 @@
                     Lienzo.Estado = enumEstadoLienzo.Editando;
 
                         
-                });
+                });*/
             });
         });
 

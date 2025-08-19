@@ -18,10 +18,15 @@ public class ParametroXML
             Agregar(Clave, func_Valor(item));
         }
     }
-
+    
     public string DameXML()
     {
         return sb.ToString();
+    }
+
+    public string DameXMLListas()
+    {
+        return "<Parametros>" + sb.ToString() + "</Parametros>";
     }
 
     public override string ToString()

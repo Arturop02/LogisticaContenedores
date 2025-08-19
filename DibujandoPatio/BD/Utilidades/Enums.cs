@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BD.Utilidades
+﻿namespace BD.Utilidades
 {
     public enum Accion
     {
@@ -19,7 +13,7 @@ namespace BD.Utilidades
         QueryA = 4,
         TodosAB = 5,
         ListaA = 6,
-        Otra1 = 7,
+        PorPatio = 7,
         Otra2 = 8,
         Otra3 = 9,
         Otra4 = 10,

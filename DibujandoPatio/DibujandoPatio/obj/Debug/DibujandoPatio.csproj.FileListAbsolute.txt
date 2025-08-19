@@ -262,3 +262,9 @@ D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.d
 D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BT.pdb
 D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\RN.pdb
 D:\Proyectos\GOLMEX\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.pdb
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BT.dll
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\RN.dll
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.dll
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BT.pdb
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\RN.pdb
+C:\Users\Arturo\Documents\GitHub\LogisticaContenedores\DibujandoPatio\DibujandoPatio\bin\BD.pdb
