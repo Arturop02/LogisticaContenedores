@@ -15,9 +15,6 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     <script src="~/Scripts/bootbox.min.js"></script>
     <script src="~/Scripts/linq-1.2.3.js"></script>
-    
-
-
 
     <style>
         body {
@@ -214,7 +211,6 @@
                     layer.add(this.Grafico);
                     layer.add(this.GraficoTexto);
 
-                    //Preguntar por que en Brave si funciona, pero en Edge no
                     this.Grafico.on('dblclick', (e) => {
                         var thisNuevoPunto = this;
                         bootbox.confirm({
@@ -553,29 +549,6 @@
                     Lienzo.lstPunto.forEach(p => p.Dibujar());
                     Lienzo.Estado = enumEstadoLienzo.Editando;
                 });
-                /*{ Id: id }, function (p) {
-                    if (!p || !p.Vertices) return;
-
-                    let verticesOrdenados = p.Vertices.sort((a, b) => a.Orden - b.Orden);
-                    let puntos = [];
-                    verticesOrdenados.forEach(v => {
-                        let punto = new Punto();
-                        punto.Posicion.x = v.X;
-                        punto.Posicion.y = v.Y;
-                        puntos.push(punto);
-                        Lienzo.lstPunto.push(punto);
-                    });
-
-                    for (let i = 0; i < puntos.length; i++) {
-                        let siguiente = (i + 1) % puntos.length;
-                        Lienzo.RelacionarPuntos(puntos[i], puntos[siguiente]);
-                    }
-
-                    Lienzo.lstPunto.forEach(punto => punto.Dibujar());
-                    Lienzo.Estado = enumEstadoLienzo.Editando;
-
-                        
-                });*/
             });
         });
 

@@ -31,7 +31,6 @@ namespace DibujandoPatio.Controllers
             System.Diagnostics.Debug.WriteLine("Datos del patio: " + patio);
             if (patio != null)
             {
-                // Cargar también los vértices
                 patio.Vertices = new VerticeRN().BuscarPorPatio(patio.Id);
                 return Json(new { ok = true, data = patio }, JsonRequestBehavior.AllowGet);
             }
@@ -72,45 +71,6 @@ namespace DibujandoPatio.Controllers
             patioRN.BuscarPorId(patioBT.Id);
             return Json(new { ok = true });
         }
-
-        /*public JsonResult ObtenerPatioId(PatioBT patioBT)
-        {
-            Patio patio = null;
-
-            using (SqlConnection conex = new SqlConnection(conexion))
-            {
-                conex.Open();
-                using (SqlCommand cmd = new SqlCommand("SELECT * FROM v_obtener_patio WHERE Id = @Id", conex))
-                {
-                    cmd.Parameters.AddWithValue("@Id", patioBT.Id);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            if(patio == null)
-                            {
-                                patio = new Patio
-                                {
-                                    Nombre = reader["Nombre"].ToString(),
-                                    Escala = (decimal)reader["Escala"],
-                                    Vertices = new List<Vertice>()
-                                };
-                            }
-                            patio.Vertices.Add(new Vertice
-                            {
-                                X = float.Parse(reader["X"].ToString()),
-                                Y = float.Parse(reader["Y"].ToString())
-                            });
-                        }
-                    }
-                }
-                conex.Close();
-            }
-            return Json(patio, JsonRequestBehavior.AllowGet);
-        }*/
-
-
         public ActionResult Index()
         {
             return View();
