@@ -52,7 +52,7 @@
 
     <script type="text/javascript">
         function throttle(func, limit) {
-            var inThrottle=false;
+            var inThrottle = false;
             return function (...args) {
                 if (!inThrottle) {
                     inThrottle = true;
@@ -64,6 +64,10 @@
     </script>
 
     <script>
+
+        var cfg = {
+            Prueba:true
+        };
 
         var enumEstadoLienzo = {
             Agregando:'Agregando',
@@ -210,9 +214,10 @@
 
                     layer.add(this.Grafico);
                     layer.add(this.GraficoTexto);
-
+                    var linea = this;
                     this.Grafico.on('dblclick', (e) => {
-                        var thisNuevoPunto = this;
+
+                        const pos = Lienzo.DamePosicion();
                         bootbox.confirm({
                             message: '¿Deseas agregar un nuevo punto?',
                             buttons: {
@@ -228,20 +233,24 @@
                             callback: (result) => {
                                 if (result) {
                                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                                        const pos = Lienzo.DamePosicion();
-                                        thisNuevoPunto.Eliminar();
+                                        var Orden = linea.lstRelacionado.Min(c => c.Orden);
+
+                                        linea.Eliminar();
                                         var punto = Lienzo.AgregarPunto(pos.x, pos.y);
-                                        var Orden = 0;
-                                        thisNuevoPunto.lstRelacionado.forEach(item => {
-                                            Lienzo.RelacionarPuntos(punto, item);
-                                            if (item.Orden < Orden)
-                                                Orden = item.Orden;
+
+                                        linea.lstRelacionado.forEach(item => {
+                                            Lienzo.RelacionarPuntos(item, punto);
                                         });
+
+                                        Orden = linea.lstRelacionado.Min(c => c.Orden);
+                                        if (Orden == 0)
+                                            Orden = linea.lstRelacionado.Max(c => c.Orden);
                                         punto.Orden = Orden + 1;
 
-                                        Lienzo.lstPunto.forEach(item => {
-                                            if (item.Orden > Orden && item != punto)
-                                                item.Orden++;
+                                        Lienzo.lstPunto.Where(c => c.Orden > Orden && c!=punto).forEach(item => {
+                                            item.Orden++;
+
+                                            if (cfg.Prueba) item.Dibujar();
                                         });
 
                                         punto.Dibujar();
@@ -271,6 +280,8 @@
 
             this.Posicion = { x: null, y: null };
             this.Orden = Punto.OrdenActual++;
+            this.GraficoPrueba = null;
+
 
             this.Eliminar = function () {
                 this.Grafico.destroy();
@@ -285,6 +296,9 @@
                     item.Eliminar();
                 });
 
+                if (this.GraficoPrueba != null)
+                    this.GraficoPrueba.destroy();
+
                 return this;
             }
 
@@ -297,6 +311,26 @@
                     fill: 'red',
                     draggable: false
                 };
+
+                if (cfg.Prueba) {
+                    var cfgGraficoTexto = {
+                        x: this.Posicion.x-40,
+                        y: this.Posicion.y-30,
+                        text: `Id: ${this.Id || 'null'} Orden: ${this.Orden}`,
+                        fontSize: 16,
+                        fill: 'black',
+                        padding: 4,
+                        background: 'white'
+                    };
+                    if (this.GraficoPrueba == null) {
+                        this.GraficoPrueba = new Konva.Text(cfgGraficoTexto);
+                        layer.add(this.GraficoPrueba);
+                    } else {
+
+                        this.GraficoPrueba.setAttrs(cfgGraficoTexto);
+                        this.GraficoPrueba.getLayer().batchDraw();
+                    }
+                }
 
                 if (this.Grafico == null)
                 {
@@ -409,7 +443,7 @@
                 const escalaAnterior = stage.scaleX();
                 const cursor = stage.getPointerPosition();
 
-                const escalarPor = 1.01;
+                const escalarPor = 1.25;
                 const direccion = e.evt.deltaY > 0 ? 1 : -1;
                 const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
 
@@ -440,7 +474,7 @@
                             Lienzo.PuntoActual = Lienzo.AgregarPunto(posicion.x, posicion.y);
                             if (Lienzo.lstPunto.length == 0)
                                 Lienzo.PuntoActual =Lienzo.AgregarPunto(posicion.x, posicion.y);
-                        }                        
+                        }
                         break;
                     }
                 }
@@ -448,9 +482,9 @@
 
             //Acciones que se realizan al arrastrar el mouse
             stage.on('mousemove', function (e) {
-                
+
                 if ([enumEstadoLienzo.Agregando, enumEstadoLienzo.Editando, enumEstadoLienzo.Moviendo].includes(Lienzo.Estado)) {
-                    
+
                     if (Lienzo.PuntoActual != null) {
                         const pos = Lienzo.DamePosicion();
 
@@ -517,39 +551,35 @@
             //Lista desplegable que muestra los patios ya registrados en DB
             $(`#selectPatio`).on('change', function () {
                 let id = $(this).val();
-                $('#editarBtn').data('idpatio', id); 
+                $('#editarBtn').data('idpatio', id);
                 $(`#editarBtn`).prop('disabled', !id);
                 $(`#patioEliminar`).prop('disabled', !id);
 
                 if (!id) return;
                 //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
                 $.getJSON('/Patio/ObtenerPatiosPorId', { id: id }, function (res) {
-                    
+
                     if (!res.ok || !res.data) return;
 
                     var patio = res.data;
-                    
+
                     layer.destroyChildren();
                     layer.draw();
-
-                    let vertices = patio.Vertices.filter(v=>v.Activo).sort((a, b) => a.Orden - b.Orden);
                     Lienzo.lstPunto = [];
                     Lienzo.PuntoActual = null;
 
-                    vertices.forEach(v => {
-                        var p = Lienzo.AgregarPunto(v.X, v.Y);
-                        p.Id = v.Id;
-                        p.Orden = v.Orden;
+                    patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
+
+
+                    patio.Vertices.forEach(v => {
+                        Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
+                        Lienzo.PuntoActual.Id = v.Id;
+                        Lienzo.PuntoActual.Dibujar();
                     });
 
-                    for (let i = 0; i < Lienzo.lstPunto.length; i++) {
-                        let siguiente = (i + 1) % Lienzo.lstPunto.length;
-                        Lienzo.RelacionarPuntos(Lienzo.lstPunto[i], Lienzo.lstPunto[siguiente]);
-                    }
-                    Lienzo.lstPunto.forEach(p => {
-                        p.Dibujar();
-                        p.MoverArriba();
-                    });
+                    Lienzo.PuntoActual = null;
+                    Lienzo.Cerrar();
+
                     Lienzo.Estado = enumEstadoLienzo.Editando;
                 });
             });
@@ -586,9 +616,14 @@
                         Vertices: vertices
                     },
                     success: function (res) {
-                        bootbox.alert("Editado con exito");
-                        dibujando = false;
-                        $('#editarBtn').prop('disabled', true);
+                        if (res.ok) {
+                            bootbox.alert("Editado con exito");
+                            dibujando = false;
+                            $('#editarBtn').prop('disabled', true);
+                        } else {
+                            bootbox.alert("Ocurrio un problema");
+                        }
+
                     }
                 });
             });

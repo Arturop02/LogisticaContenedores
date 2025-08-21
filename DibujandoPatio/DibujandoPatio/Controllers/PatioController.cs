@@ -26,39 +26,20 @@ namespace DibujandoPatio.Controllers
         [HttpPost]
         public JsonResult EditarPatio(PatioBT patioBT)
         {
-            PatioRN patioRN = new PatioRN();
-            VerticeRN verticeRN = new VerticeRN();
-
-            var patio = patioRN.Cambio(patioBT);
-
-            if(patioRN != null)
+            try
             {
-                var verticesActuales = verticeRN.BuscarPorPatio(patioBT.Id);
+                PatioRN patioRN = new PatioRN();
+                VerticeRN verticeRN = new VerticeRN();
 
-                foreach (var v in patioBT.Vertices)
-                {
-                    if (v.Id > 0)
-                    {
-                        verticeRN.Cambio(v);
-                    }
-                    else
-                    {
-                        verticeRN.Agregar(v);
-                    }
-                }
+                var patio = patioRN.Cambio(patioBT);
 
-                var idsRecibidos = patioBT.Vertices.Where(x => x.Id > 0).Select(x => x.Id).ToList();
-                foreach (var verticeActual in verticesActuales)
-                {
-                    if (!idsRecibidos.Contains(verticeActual.Id))
-                    {
-                        verticeRN.Borrado(new VerticeBT {Id = verticeActual.Id });
-                    }
-                }
 
                 return Json(new { ok = true });
             }
-            return Json(new { ok = false });
+            catch (Exception)
+            {
+                return Json(new { ok = false });
+            }
         }
 
         [HttpGet]

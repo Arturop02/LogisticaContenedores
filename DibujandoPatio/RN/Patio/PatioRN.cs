@@ -1,5 +1,7 @@
 ﻿using BD.Patio;
+using BD.Utilidades;
 using BT.Patio;
+using BT.Utilidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,12 +53,49 @@ namespace RN.Patio
                     if (patioBT.Vertices != null)
                     {
                         VerticeRN verticeRN = new VerticeRN();
-                        foreach (var item in patioBT.Vertices)
-                        {
-                            item.Patio = patioBT;
-                            verticeRN.Cambio(item);
+                        var verticesActuales = verticeRN.BuscarPorPatio(patioBT.Id);
 
+                        var detalles = patioBT.Vertices
+                            .FullJoin(verticesActuales, (cliente, bd) => cliente?.Id == bd?.Id, (cliente, bd) => new
+                            {
+                                vertice = cliente ?? bd,
+                                Accion = bd == null ? Accion.Alta : (cliente == null ? Accion.Borrar : Accion.Cambio)
+                            }).ToList();
+
+                        foreach (var vertice in detalles)
+                        {
+                            vertice.vertice.Patio = patioBT;
+                            switch (vertice.Accion)
+                            {
+                                case Accion.Alta: verticeRN.Agregar(vertice.vertice); break;
+                                case Accion.Cambio: verticeRN.Cambio(vertice.vertice); break;
+                                case Accion.Borrar: verticeRN.Borrado(vertice.vertice); break;
+                                default:
+                                    throw new NotImplementedException("Accion no configurada");
+                            }
                         }
+
+                        //foreach (var v in patioBT.Vertices)
+                        //{
+                        //    v.Patio = patioBT;
+                        //    if (v.Id > 0)
+                        //    {
+                        //        verticeRN.Cambio(v);
+                        //    }
+                        //    else
+                        //    {
+                        //        verticeRN.Agregar(v);
+                        //    }
+                        //}
+
+                        //var idsRecibidos = patioBT.Vertices.Where(x => x.Id > 0).Select(x => x.Id).ToList();
+                        //foreach (var verticeActual in verticesActuales)
+                        //{
+                        //    if (!idsRecibidos.Contains(verticeActual.Id))
+                        //    {
+                        //        verticeRN.Borrado(new VerticeBT { Id = verticeActual.Id });
+                        //    }
+                        //}
                     }
 
                     ts.Complete();

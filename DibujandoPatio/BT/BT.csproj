@@ -45,6 +45,7 @@
     <Compile Include="Patio\PatioBT.cs" />
     <Compile Include="Patio\VerticeBT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilidades\MetodosExtensionBT.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
