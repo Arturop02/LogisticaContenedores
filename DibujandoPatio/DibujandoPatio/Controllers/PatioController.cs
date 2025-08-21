@@ -22,13 +22,50 @@ namespace DibujandoPatio.Controllers
 
             return Json(new { ok = true });
         }
+
+        [HttpPost]
+        public JsonResult EditarPatio(PatioBT patioBT)
+        {
+            PatioRN patioRN = new PatioRN();
+            VerticeRN verticeRN = new VerticeRN();
+
+            var patio = patioRN.Cambio(patioBT);
+
+            if(patioRN != null)
+            {
+                var verticesActuales = verticeRN.BuscarPorPatio(patioBT.Id);
+
+                foreach (var v in patioBT.Vertices)
+                {
+                    if (v.Id > 0)
+                    {
+                        verticeRN.Cambio(v);
+                    }
+                    else
+                    {
+                        verticeRN.Agregar(v);
+                    }
+                }
+
+                var idsRecibidos = patioBT.Vertices.Where(x => x.Id > 0).Select(x => x.Id).ToList();
+                foreach (var verticeActual in verticesActuales)
+                {
+                    if (!idsRecibidos.Contains(verticeActual.Id))
+                    {
+                        verticeRN.Borrado(new VerticeBT {Id = verticeActual.Id });
+                    }
+                }
+
+                return Json(new { ok = true });
+            }
+            return Json(new { ok = false });
+        }
+
         [HttpGet]
         public JsonResult ObtenerPatiosPorId(int id)
         {
-            System.Diagnostics.Debug.WriteLine("Id recibido en controller: " + id);
             PatioRN patioRN = new PatioRN();
             var patio = patioRN.BuscarPorId(id);
-            System.Diagnostics.Debug.WriteLine("Datos del patio: " + patio);
             if (patio != null)
             {
                 patio.Vertices = new VerticeRN().BuscarPorPatio(patio.Id);
@@ -36,32 +73,15 @@ namespace DibujandoPatio.Controllers
             }
             return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
         }
-        
+
+        [HttpGet]
         public JsonResult ListarPatios()
         {
-            List<object> patios = new List<object>();
-            using (SqlConnection conex = new SqlConnection(conexion))
-            {
-                conex.Open();
-                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Patio", conex))
-                {
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            patios.Add(new
-                            {
-                                Id = (int)reader["Id"],
-                                Nombre = reader["Nombre"].ToString(),
-                                Escala = (decimal)reader["Escala"],
-                                Activo = (bool)reader["Activo"]
-                            });
-                        }
-                    }
-                }
-                conex.Close();
-            }
-            return Json(patios, JsonRequestBehavior.AllowGet);
+            PatioRN patioRN = new PatioRN();
+            var lista = patioRN.DameTodosAlta()
+                .Where(p => p.Activo)
+                .ToList();
+            return Json(lista, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]

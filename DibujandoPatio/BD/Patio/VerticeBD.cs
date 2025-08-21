@@ -18,14 +18,18 @@ namespace BD.Patio
                 using (SqlConnection conex = new SqlConnection(Conexion))
                 {
 
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_Vertice_AC]", conex))
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_Vertice_AC", conex))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         cmd.Parameters.AgregarConValorNull("@Id", verticeBT.Id, output: true);
-                        cmd.Parameters.AgregarConValorNull("@IdPatio", verticeBT.Patio.Id);
-                        cmd.Parameters.AgregarConValorNull("@X", verticeBT.X);
-                        cmd.Parameters.AgregarConValorNull("@Y", verticeBT.Y);
-                        cmd.Parameters.AgregarConValorNull("@Orden", verticeBT.Orden);
+
+                        if (accion != Accion.Borrar) {
+                            cmd.Parameters.AgregarConValorNull("@IdPatio", verticeBT.Patio.Id);
+                            cmd.Parameters.AgregarConValorNull("@X", verticeBT.X);
+                            cmd.Parameters.AgregarConValorNull("@Y", verticeBT.Y);
+                            cmd.Parameters.AgregarConValorNull("@Orden", verticeBT.Orden);
+                        }
+                        
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
 
                         conex.Open();

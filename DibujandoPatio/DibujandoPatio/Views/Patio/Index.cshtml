@@ -45,7 +45,7 @@
         <option value="">Selecciona un patio</option>
     </select>
     <button onclick="Lienzo.RestaurarTamano()">Tamaño Original</button>
-    <button id="patioEditar" onclick="" disabled>Editar patio</button>
+    <button id="editarBtn" onclick="" disabled>Editar patio</button>
     <button id="patioEliminar" onclick="" disabled>Eliminar patio</button>
 
     <div id="container"></div>
@@ -517,28 +517,28 @@
             //Lista desplegable que muestra los patios ya registrados en DB
             $(`#selectPatio`).on('change', function () {
                 let id = $(this).val();
-                console.log("Id " + id + " en el Select Patio");
-                $(`#patioEditar`).prop('disabled', !id);
+                $('#editarBtn').data('idpatio', id); 
+                $(`#editarBtn`).prop('disabled', !id);
                 $(`#patioEliminar`).prop('disabled', !id);
 
                 if (!id) return;
                 //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
                 $.getJSON('/Patio/ObtenerPatiosPorId', { id: id }, function (res) {
-                    console.log("Respuesta completa:", res);
+                    
                     if (!res.ok || !res.data) return;
 
                     var patio = res.data;
-                    console.log("Datos del patio", patio);
-
+                    
                     layer.destroyChildren();
                     layer.draw();
 
-                    let vertices = patio.Vertices.sort((a, b) => a.Orden - b.Orden);
+                    let vertices = patio.Vertices.filter(v=>v.Activo).sort((a, b) => a.Orden - b.Orden);
                     Lienzo.lstPunto = [];
                     Lienzo.PuntoActual = null;
 
                     vertices.forEach(v => {
                         var p = Lienzo.AgregarPunto(v.X, v.Y);
+                        p.Id = v.Id;
                         p.Orden = v.Orden;
                     });
 
@@ -546,8 +546,50 @@
                         let siguiente = (i + 1) % Lienzo.lstPunto.length;
                         Lienzo.RelacionarPuntos(Lienzo.lstPunto[i], Lienzo.lstPunto[siguiente]);
                     }
-                    Lienzo.lstPunto.forEach(p => p.Dibujar());
+                    Lienzo.lstPunto.forEach(p => {
+                        p.Dibujar();
+                        p.MoverArriba();
+                    });
                     Lienzo.Estado = enumEstadoLienzo.Editando;
+                });
+            });
+
+            $('#editarBtn').on('click', function (e) {
+                let id = $(this).data('idpatio');
+                //Se guarda el nombre del input con el id nombreInput
+                const nombre = $('#nombreInput').val();
+
+                //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
+                //el array puntos con un for
+                const vertices = Lienzo.lstPunto.map(p => ({
+                    Id: p.Id,
+                    X: p.Posicion.x,
+                    Y: p.Posicion.y,
+                    Orden: p.Orden,
+                    Activo: p.Activo
+                }));
+
+                ////Condicion que envia una alerta si alguno de los campos no se ha completado
+                if (!nombre || !escala || vertices.length === 0) {
+                    bootbox.alert("Por favor, completa todos los campos y/o dibuja el patio antes de guardar.");
+                    return;
+                }
+
+                ////Metodo POST usando jquery y ajax para comunicar con la BD
+                $.ajax({
+                    url: '@Url.Action("EditarPatio", "Patio")',
+                    method: 'POST',
+                    data: {
+                        Id: id,
+                        Nombre: nombre,
+                        Escala: escala,
+                        Vertices: vertices
+                    },
+                    success: function (res) {
+                        bootbox.alert("Editado con exito");
+                        dibujando = false;
+                        $('#editarBtn').prop('disabled', true);
+                    }
                 });
             });
         });

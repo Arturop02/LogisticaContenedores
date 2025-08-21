@@ -3,7 +3,8 @@
     public enum Accion
     {
         Alta = 'A',
-        Cambio = 'C'
+        Cambio = 'C',
+        Borrar = 'B'
     }
     public enum BuscarOpcion
     {

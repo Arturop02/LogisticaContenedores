@@ -18,7 +18,7 @@ namespace BD.Patio
                 using (SqlConnection conex = new SqlConnection(Conexion))
                 {
 
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_Patio_AC]", conex))
+                    using (SqlCommand cmd = new SqlCommand("dbo.sp_Patio_AC", conex))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         cmd.Parameters.AgregarConValorNull("@IdPatio", patioBT.Id, output: true);

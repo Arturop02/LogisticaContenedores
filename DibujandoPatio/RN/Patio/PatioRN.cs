@@ -53,7 +53,9 @@ namespace RN.Patio
                         VerticeRN verticeRN = new VerticeRN();
                         foreach (var item in patioBT.Vertices)
                         {
-                            verticeRN.Agregar(item);
+                            item.Patio = patioBT;
+                            verticeRN.Cambio(item);
+
                         }
                     }
 

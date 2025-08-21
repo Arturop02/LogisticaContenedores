@@ -36,6 +36,19 @@ namespace RN.Patio
                 throw;
             }
         }
+        public VerticeBT Borrado(VerticeBT VerticeBT)
+        {
+            try
+            {
+                VerticeBD verticeBD = new VerticeBD(ConstantesRN.BD_CONECTION);
+                return verticeBD.AltaCambio(VerticeBT, BD.Utilidades.Accion.Borrar);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
 
         public VerticeBT BuscarPorId(int id)
         {
