@@ -1,10 +1,8 @@
 ﻿using BT.Patio;
 using RN.Patio;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -50,10 +48,14 @@ namespace DibujandoPatio.Controllers
             if (patio != null)
             {
                 patio.Vertices = new VerticeRN().BuscarPorPatio(patio.Id);
+                patio.Islas = new IslaRN().BuscarPorPatio(patio.Id);
                 return Json(new { ok = true, data = patio }, JsonRequestBehavior.AllowGet);
             }
             return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
         }
+
+        //[HttpGet]
+        //public JsonResult ObtenerPatios
 
         [HttpGet]
         public JsonResult ListarPatios()

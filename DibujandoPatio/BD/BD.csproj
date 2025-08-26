@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="BaseBD.cs" />
     <Compile Include="IMapeo.cs" />
+    <Compile Include="Patio\IslaBD.cs" />
+    <Compile Include="Patio\Mapeo\IslaMapeo.cs" />
     <Compile Include="Patio\Mapeo\VerticeMapeo.cs" />
     <Compile Include="Patio\Mapeo\PatioMapeo.cs" />
     <Compile Include="Patio\VerticeBD.cs" />

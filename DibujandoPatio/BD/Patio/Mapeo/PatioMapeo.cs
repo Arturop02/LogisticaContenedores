@@ -8,12 +8,6 @@ namespace BD.Patio.Mapeo
     {
         public PatioBT Mapear(IDataRecord record)
         {
-            /*Console.WriteLine("Columnas disponibles: ");
-            for(int i = 0; i < record.FieldCount; i++)
-            {
-                Console.WriteLine(record.GetName(i));
-            }*/
-
             PatioBT patioBT = new PatioBT();
             patioBT.Id = (int)record["Id"];
             patioBT.Nombre = record["Nombre"].ToString();

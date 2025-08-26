@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BT.Patio;
+using System.Collections.Generic;
 
 namespace BT.Patio
 {
@@ -7,5 +8,7 @@ namespace BT.Patio
         public string Nombre { get; set; }
         public decimal Escala { get; set; }
         public List<VerticeBT> Vertices { get; set; }
+        public List<IslaBT> Islas { get; set; }
+
     }
 }

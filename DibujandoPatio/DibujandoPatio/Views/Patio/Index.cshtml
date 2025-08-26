@@ -1,4 +1,4 @@
-﻿
+﻿<!--
 @{
     ViewBag.Title = "Dibujando Patio";
 }
@@ -45,8 +45,6 @@
         <option value="">Selecciona un patio</option>
     </select>
     <button onclick="Lienzo.RestaurarTamano()">Tamaño Original</button>
-    <button id="editarBtn" onclick="" disabled>Editar patio</button>
-    <button id="patioEliminar" onclick="" disabled>Eliminar patio</button>
 
     <div id="container"></div>
 
@@ -96,12 +94,6 @@
                 this.Stage.scale({ x: 1, y: 1 });
                 this.Stage.position({ x: 0, y: 0 });
                 this.Stage.batchDraw();
-            },
-            EditarPatio: function () {
-
-            },
-            EliminarPatio: function () {
-
             },
             Cerrar: function () {
                 if (this.PuntoActual != null)
@@ -282,7 +274,6 @@
             this.Orden = Punto.OrdenActual++;
             this.GraficoPrueba = null;
 
-
             this.Eliminar = function () {
                 this.Grafico.destroy();
                 Lienzo.lstPunto.RemoveAll(c => c == this);
@@ -326,7 +317,6 @@
                         this.GraficoPrueba = new Konva.Text(cfgGraficoTexto);
                         layer.add(this.GraficoPrueba);
                     } else {
-
                         this.GraficoPrueba.setAttrs(cfgGraficoTexto);
                         this.GraficoPrueba.getLayer().batchDraw();
                     }
@@ -502,45 +492,6 @@
                 }
             });
 
-            //Instrucciones al dar click en el boton guardar
-            $('#guardarBtn').on('click', function (e) {
-                Lienzo.Cerrar();
-
-                //Se guarda el nombre del input con el id nombreInput
-                const nombre = $('#nombreInput').val();
-
-                //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
-                //el array puntos con un for
-                const vertices = Lienzo.lstPunto.map(p => ({
-                    X: p.Posicion.x,
-                    Y: p.Posicion.y,
-                    Orden: p.Orden
-                }));
-
-                ////Condicion que envia una alerta si alguno de los campos no se ha completado
-                if (!nombre || !escala || vertices.length === 0) {
-                    bootbox.alert("Por favor, completa todos los campos y/o dibuja el patio antes de guardar.");
-                    return;
-                }
-
-                ////Metodo POST usando jquery y ajax para comunicar con la BD
-                $.ajax({
-                    url: '/Patio/GuardarPatio',
-                    method: 'POST',
-                    data: JSON.stringify({
-                        Nombre: nombre,
-                        Escala: escala,
-                        Vertices: vertices
-                    }),
-                    contentType: 'application/json',
-                    success: function (res) {
-                        bootbox.alert("Guardado correctamente");
-                        dibujando = false;
-                        $('#guardarBtn').prop('disabled', true);
-                    }
-                });
-            });
-
             //Metodo get que obtiene desde un JSON los datos desde la BD
             $.getJSON('/Patio/ListarPatios', function (data) {
                 data.forEach(p => {
@@ -551,13 +502,16 @@
             //Lista desplegable que muestra los patios ya registrados en DB
             $(`#selectPatio`).on('change', function () {
                 let id = $(this).val();
-                $('#editarBtn').data('idpatio', id);
-                $(`#editarBtn`).prop('disabled', !id);
-                $(`#patioEliminar`).prop('disabled', !id);
+                let nombre = $('#selectPatio option:selected').text();
+                $('#guardarBtn').data('idpatio', id);
+                $(`#guardarBtn`).data('nombre', nombre);
+                $('#guardarBtn').prop('disabled', !id);
+
+                $('#nombreInput').val(nombre);
 
                 if (!id) return;
                 //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
-                $.getJSON('/Patio/ObtenerPatiosPorId', { id: id }, function (res) {
+                $.getJSON('/Patio/ObtenerPatiosPorId', { id: id, nombre: nombre }, function (res) {
 
                     if (!res.ok || !res.data) return;
 
@@ -584,52 +538,99 @@
                 });
             });
 
-            $('#editarBtn').on('click', function (e) {
-                let id = $(this).data('idpatio');
-                //Se guarda el nombre del input con el id nombreInput
-                const nombre = $('#nombreInput').val();
+            //Instrucciones al dar click en el boton guardar
+$('#guardarBtn').on('click', function (e) {
+    Lienzo.Cerrar();
 
-                //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
-                //el array puntos con un for
-                const vertices = Lienzo.lstPunto.map(p => ({
-                    Id: p.Id,
-                    X: p.Posicion.x,
-                    Y: p.Posicion.y,
-                    Orden: p.Orden,
-                    Activo: p.Activo
-                }));
+    //Se guarda el nombre del input con el id nombreInput
+    const id = $(this).data('idpatio');
+    const nombre = $('#nombreInput').val();
 
-                ////Condicion que envia una alerta si alguno de los campos no se ha completado
-                if (!nombre || !escala || vertices.length === 0) {
-                    bootbox.alert("Por favor, completa todos los campos y/o dibuja el patio antes de guardar.");
-                    return;
-                }
+    //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
+    //el array puntos con un for
+    const vertices = Lienzo.lstPunto.map(p => ({
+        Id: p.Id,
+        X: p.Posicion.x,
+        Y: p.Posicion.y,
+        Orden: p.Orden,
+        Activo: p.Activo
+    }));
 
-                ////Metodo POST usando jquery y ajax para comunicar con la BD
-                $.ajax({
-                    url: '@Url.Action("EditarPatio", "Patio")',
-                    method: 'POST',
-                    data: {
-                        Id: id,
-                        Nombre: nombre,
-                        Escala: escala,
-                        Vertices: vertices
-                    },
-                    success: function (res) {
-                        if (res.ok) {
-                            bootbox.alert("Editado con exito");
-                            dibujando = false;
-                            $('#editarBtn').prop('disabled', true);
-                        } else {
-                            bootbox.alert("Ocurrio un problema");
-                        }
+    ////Condicion que envia una alerta si alguno de los campos no se ha completado
+    if (!nombre || !escala || vertices.length === 0) {
+        bootbox.alert("Por favor, completa todos los campos y/o dibuja el patio antes de guardar.");
+        return;
+    }
 
-                    }
-                });
-            });
+    let url, payload;
+
+    if (id) {
+        url = '@Url.Action("EditarPatio", "Patio")';
+        payload = {
+            Id: id,
+            Nombre: nombre,
+            Escala: escala,
+            Vertices: vertices
+        }
+    } else {
+        url = '/Patio/GuardarPatio';
+        payload = JSON.stringify({
+            Nombre: nombre,
+            Escala: escala,
+            Vertices: vertices
+        });
+    }
+
+    ////Metodo POST usando jquery y ajax para comunicar con la BD
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: payload,
+        contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8':'application/json',
+        success: function (res) {
+            if (res.ok) {
+                bootbox.alert(id ? "Editado con exito" : "Guardado correctamente");
+                dibujando = false;
+                $('#guardarBtn').prop('disabled', true);
+            } else {
+                bootbox.alert("Ha ocurriod un problema")
+            }
+        }
+    });
+});
         });
 
     </script>
 </body>
-</html>
+</html>-->
 
+@model DibujandoPatio.Models.PatioLayout
+@{
+    ViewBag.Title = "Dibujando Patio";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
+<br />
+<br />
+
+<label for="escalaInput">Escala:</label>
+<input type="number" id="escalaInput" value="0.5" step="0.1" min="0.1" />
+<br />
+<br />
+
+<button id="crearPatioBtn" class="btn btn-primary">Iniciar Dibujo</button>
+<button id="guardarBtn" class="btn btn-primary" disabled>Guardar</button>
+<button id="btnRedirigir" class="btn btn-primary">Agregar Islas</button>
+
+@Html.Partial("_CanvasPatio", Model)
+
+
+@section scripts{
+    <script src="~/Scripts/Patio/Patio.js"></script>
+    <script>
+        $(document).ready(function () {
+            inicializarPatio();
+        });
+    </script>
+}

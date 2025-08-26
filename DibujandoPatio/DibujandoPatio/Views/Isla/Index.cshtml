@@ -1,0 +1,23 @@
+﻿@using BT.Patio
+
+@model List<BT.Patio.IslaBT>
+@{
+    ViewBag.Title = "Islas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="contenedorKonva"></div>
+<button id="crearIsla" class="btn btn-primary">Agregar Isla</button>
+<button id="guardarIsla" class="btn btn-success d-none">Guardar Isla</button>
+
+@Html.Partial("_CanvasPatio", Model)
+
+@section scripts{
+    <script src="~/Scripts/Patio/Patio.js"></script>
+    <script>
+        $(document).ready(function () {
+            inicializarPatio();
+        });
+    </script>
+    <script src="~/Scripts/Isla/Isla.js"></script>
+}
