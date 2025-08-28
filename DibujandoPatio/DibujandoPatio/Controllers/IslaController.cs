@@ -1,6 +1,7 @@
 ﻿using BT.Patio;
 using RN.Patio;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
@@ -43,8 +44,13 @@ namespace DibujandoPatio.Controllers
             return Json(new { ok = true, data = isla}, JsonRequestBehavior.AllowGet);
         }
         
-        public ActionResult Index()
+        public ActionResult Index(int? id)
         {
+            PatioRN patioRN = new PatioRN();
+            var patio = patioRN.DameTodosAlta();
+            ViewBag.Patios = patio;
+
+            ViewBag.IdPatioSeleccionado = id;
             return View();
         }
     }

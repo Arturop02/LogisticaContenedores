@@ -54,9 +54,6 @@ namespace DibujandoPatio.Controllers
             return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
         }
 
-        //[HttpGet]
-        //public JsonResult ObtenerPatios
-
         [HttpGet]
         public JsonResult ListarPatios()
         {
@@ -76,6 +73,11 @@ namespace DibujandoPatio.Controllers
         }
         public ActionResult Index()
         {
+            PatioRN patioRN = new PatioRN();
+            var patio = patioRN.DameTodosAlta();
+            ViewBag.Patios = patio;
+
+            ViewBag.IdPatioSeleccionado = TempData["IdPatioSeleccionado"] ?? 0;
             return View();
         }
     }

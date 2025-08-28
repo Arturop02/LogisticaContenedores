@@ -1,24 +1,21 @@
 ﻿var islaTemporal = null;
 var datosIsla = {};
-var stage, layer, Lienzo;
+//var stage, layer;
 
 $(document).on('LienzoReady',function () {
-    //Lienzo.Modo = enumModoLienzo.Isla;
-    //Lienzo.Estado = enumEstadoLienzo.Agregando;
+    Lienzo.Modo = enumModoLienzo.Isla;
+    Lienzo.Estado = enumEstadoLienzo.Agregando;
+    //Lienzo.Escala;
+    Lienzo.BloquearPatio(true);
 
-    stage = Lienzo.Stage;
-    layer = stage.getLayers()[0];
+    var stage = Lienzo.Stage;
+    var layer = stage.getLayers()[0];
 
-    Lienzo.Modo = 'Isla';
-    Lienzo.lstPunto.forEach(p => {
-        if (p.Grafico) {
-            p.Grafico.off('mousedown');
-            p.Grafico.off('dblclick');
-            p.Grafico.draggable(false);
-            p.Grafico.listening(false); // no recibe eventos
-        }
-    });
-    Lienzo.Estado = 'Agregando';
+    
+    if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
+        
+        $(`#selectPatio`).val(idPatioSeleccionado).change();
+    }
 
     $(`#crearIsla`).on(`click`, function () {
         bootbox.dialog({
@@ -181,13 +178,3 @@ $(document).on('LienzoReady',function () {
         });
     });
 });
-
-//document.addEventListener("DOMContentLoaded", fucntion(){
-//    stage = new Konva.Stage({
-//        container: "contenedorKonva",
-//        width: 800,
-//        height: 600
-//    });
-
-//    layer = new Konva.layer
-//})

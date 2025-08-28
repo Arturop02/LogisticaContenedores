@@ -1,6 +1,22 @@
 ﻿var stage;
 var layer;
 var Lienzo;
+var enumModoLienzo = {
+    Patio: 'Patio',
+    Isla: 'Isla',
+    Contenedor: 'Contenedor',
+}
+
+var enumEstadoLienzo = {
+    Agregando: 'Agregando',
+    Moviendo: 'Moviendo',
+    Editando: 'Editando',
+};
+
+var enumBotton = {
+    ClickIzquierdo: 0,
+    ClickDerecho: 2
+}
 
 function inicializarPatio() {
 
@@ -15,29 +31,9 @@ function inicializarPatio() {
         }
     }
 
-    var cfg = {
-        Prueba: true
-    };
-
-    var enumModoLienzo = {
-        Patio: 'Patio',
-        Isla: 'Isla',
-        Contenedor: 'Contenedor',
-    }
-
-    var enumEstadoLienzo = {
-        Agregando: 'Agregando',
-        Moviendo: 'Moviendo',
-        Editando: 'Editando',
-    };
-
-    var enumBotton = {
-        ClickIzquierdo: 0,
-        ClickDerecho: 2
-    }
-
     Lienzo = {
-        Modo: null,
+        Modo: enumModoLienzo.Patio,
+        Escala: parseFloat($('#escalaInput').val()),
         Estado: null,
         lstPunto: [],
         PuntoActual: null,
@@ -112,6 +108,14 @@ function inicializarPatio() {
                 //this._contextualMenuHandler = null;
                 //}
             }
+        },
+        BloquearPatio: function (bloquear) {
+            this.lstPunto.forEach(p => {
+                if (p.Grafico) {
+                    p.Grafico.draggable(!bloquear);
+                    p.Grafico.listening(!bloquear);
+                }
+            });
         }
     };
 
@@ -138,7 +142,7 @@ function inicializarPatio() {
         }
 
         this.Dibujar = function () {
-
+            
             var cfgGraficoLinea = {
                 points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
                 stroke: 'blue',
@@ -148,7 +152,7 @@ function inicializarPatio() {
             const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
             const dy = this.PuntoFinal.Posicion.y - this.PuntoInicial.Posicion.y;
             const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
-            const distanciaMetros = distanciaPixeles * escala;
+            const distanciaMetros = distanciaPixeles * Lienzo.Escala;
 
             var cfgGraficoTexto = {
                 x: (this.PuntoInicial.Posicion.x + this.PuntoFinal.Posicion.x) / 2,
@@ -201,8 +205,6 @@ function inicializarPatio() {
 
                                     Lienzo.lstPunto.Where(c => c.Orden > Orden && c != punto).forEach(item => {
                                         item.Orden++;
-
-                                        if (cfg.Prueba) item.Dibujar();
                                     });
 
                                     punto.Dibujar();
@@ -263,8 +265,8 @@ function inicializarPatio() {
                 this.Grafico = new Konva.Circle(cfgGrafico);
                 layer.add(this.Grafico);
 
-                this.Grafico.on('mousedown', throttle((e) => {
-                    if (Lienzo.Modo !== enumModoLienzo.Patio) return;
+                this.Grafico.on('mousedown' || 'touchstart', throttle((e) => {
+                    //if (Lienzo.Modo !== enumModoLienzo.Patio) return;
                     if (Lienzo.Modo === enumModoLienzo.Patio) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                             Lienzo.Estado = enumEstadoLienzo.Moviendo;
@@ -278,7 +280,7 @@ function inicializarPatio() {
                     }
                 }, 300));
                 this.Grafico.on('dblclick', (e) => {
-                    if (Lienzo.Modo !== enumModoLienzo.Patio) return;
+                    //if (Lienzo.Modo !== enumModoLienzo.Patio) return;
                     if (Lienzo.Modo === enumModoLienzo.Patio) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                             var lstpunto = [];
@@ -341,7 +343,7 @@ function inicializarPatio() {
 
     Punto.OrdenActual = 0;
 
-    const escala = parseFloat($('#escalaInput').val());
+//    const escala = parseFloat($('#escalaInput').val());
 
     stage = new Konva.Stage({
         container: 'container',
@@ -354,11 +356,6 @@ function inicializarPatio() {
     //Instanciar las capas en el escenario
     layer = new Konva.Layer();
     stage.add(layer);
-
-    //Variables booleanas
-    let moviendo = false;
-    let dibujando = false;
-    var dibujandoLinea = false;
 
     //Boton que permite la creacion del patio
     $('#crearPatioBtn').on('click', function () {
@@ -411,7 +408,16 @@ function inicializarPatio() {
                 }
             }
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-
+            switch (e.evt.button) {
+                case enumBotton.ClickDerecho: {
+                    Lienzo.HabilitarArrastrable(true);
+                    break;
+                }
+                case enumBotton.ClickIzquierdo: {
+                    return;
+                    break;
+                }
+            }
         } else if (Lienzo.Modo === enumModoLienzo.Contenedor) {
 
         }
@@ -431,7 +437,7 @@ function inicializarPatio() {
                 }
             }
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-
+            return;
         } else if (Lienzo.Modo === enumModoLienzo.Contenedor) {
 
         }
@@ -445,22 +451,28 @@ function inicializarPatio() {
                 Lienzo.HabilitarArrastrable(false);
             }
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-
+            if (e.evt.button === 2) {
+                Lienzo.HabilitarArrastrable(false);
+            }
         } else if (Lienzo.Modo === enumModoLienzo.Contenedor) {
 
         }
     });
 
-    $.getJSON('/Patio/ListarPatios', function (data) {
-        data.forEach(p => {
-            $('#selectPatio').append(`<option value="${p.Id}">${p.Nombre}</option>`);
-        });
-    });
-
-    //Lista desplegable que muestra los patios ya registrados en DB
     $(`#selectPatio`).on('change', function () {
         let id = $(this).val();
-        let nombre = $('#selectPatio option:selected').text();
+        let nombre = $(this).find("option:selected").text(); //$('#selectPatio option:selected').text();
+
+        //if (id) {
+        //    if (Lienzo.Modo === enumModoLienzo.Isla) {
+        //        window.location.href = `/Isla/Index?id=${id}`;
+        //    }
+        //}
+
+
+        let escala = parseFloat($(this).find('option:selected').data('escala'));
+
+        Lienzo.Escala = escala;
 
         $('#guardarBtn').data('idpatio', id);
         $(`#guardarBtn`).data('nombre', nombre);
@@ -471,29 +483,55 @@ function inicializarPatio() {
         if (!id) return;
         //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
         $.getJSON('/Patio/ObtenerPatiosPorId', { id: id, nombre: nombre }, function (res) {
-
             if (!res.ok || !res.data) return;
+            console.log(Lienzo);
 
-            var patio = res.data;
 
-            layer.destroyChildren();
-            layer.draw();
-            Lienzo.lstPunto = [];
-            Lienzo.PuntoActual = null;
-            
-            patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
+            if (Lienzo.Modo === enumModoLienzo.Patio) {
+                
+                var patio = res.data;
+                
+                layer.destroyChildren();
+                layer.draw();
+                Lienzo.lstPunto = [];
+                Lienzo.PuntoActual = null;
 
-            patio.Vertices.forEach(v => {
-                Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
-                Lienzo.PuntoActual.Id = v.Id;
-                Lienzo.PuntoActual.Dibujar();
-            });
+                patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
 
-            Lienzo.PuntoActual = null;
-            Lienzo.Cerrar();
+                patio.Vertices.forEach(v => {
+                    Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
+                    Lienzo.PuntoActual.Id = v.Id;
+                    Lienzo.PuntoActual.Dibujar();
+                });
 
-            Lienzo.Modo = enumModoLienzo.Patio;
-            Lienzo.Estado = enumEstadoLienzo.Editando;
+                Lienzo.PuntoActual = null;
+                Lienzo.Cerrar();
+
+                Lienzo.Modo = enumModoLienzo.Patio;
+                Lienzo.Estado = enumEstadoLienzo.Editando;
+                Lienzo.BloquearPatio(false);
+            } else if (Lienzo.Modo === enumModoLienzo.Isla) {
+                var patio = res.data;
+
+                layer.destroyChildren();
+                layer.draw();
+                Lienzo.lstPunto = [];
+                Lienzo.PuntoActual = null;
+
+                patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
+
+                patio.Vertices.forEach(v => {
+                    Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
+                    Lienzo.PuntoActual.Id = v.Id;
+                    Lienzo.PuntoActual.Dibujar();
+                });
+
+                Lienzo.PuntoActual = null;
+                Lienzo.Cerrar();
+                Lienzo.Modo = enumModoLienzo.Isla;
+                Lienzo.BloquearPatio(true);
+            }
+
         });
     });
 
@@ -528,7 +566,7 @@ function inicializarPatio() {
             payload = {
                 Id: id,
                 Nombre: nombre,
-                Escala: escala,
+                Escala: parseFloat($('#escalaInput').val()),
                 Vertices: vertices
             }
         } else {
@@ -568,5 +606,4 @@ function inicializarPatio() {
     });
 
     $(document).trigger('LienzoReady');
-
 }

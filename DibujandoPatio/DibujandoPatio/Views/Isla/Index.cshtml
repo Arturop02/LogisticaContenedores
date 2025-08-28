@@ -14,10 +14,16 @@
 
 @section scripts{
     <script src="~/Scripts/Patio/Patio.js"></script>
+
+    <script src="~/Scripts/Isla/Isla.js"></script>
+    
+    <script>
+        var idPatioSeleccionado = '@ViewBag.IdPatioSeleccionado';
+    </script>
+
     <script>
         $(document).ready(function () {
             inicializarPatio();
         });
     </script>
-    <script src="~/Scripts/Isla/Isla.js"></script>
 }
