@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace BT.Patio
 {
-    public class CatalogoOrientacionBT : BaseBT
+    public class CatalogoOrientacionBT : BaseCatalogosBT
     {
-        public string Orientation { get; set; }
+        public string Orientacion { get; set; }
+        public int Angulo { get; set; }
     }
 }

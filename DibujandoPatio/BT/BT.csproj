@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseBT.cs" />
+    <Compile Include="BaseCatalogosBT.cs" />
     <Compile Include="Patio\CatalogoOrientacionBT.cs" />
     <Compile Include="Patio\CatalogoTiposBT.cs" />
     <Compile Include="Patio\IslaBT.cs" />

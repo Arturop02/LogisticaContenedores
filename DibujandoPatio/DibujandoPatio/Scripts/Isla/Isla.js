@@ -1,17 +1,14 @@
 ﻿var islaTemporal = null;
 var datosIsla = {};
-//var stage, layer;
 
 $(document).on('LienzoReady',function () {
     Lienzo.Modo = enumModoLienzo.Isla;
     Lienzo.Estado = enumEstadoLienzo.Agregando;
-    //Lienzo.Escala;
     Lienzo.BloquearPatio(true);
 
     var stage = Lienzo.Stage;
     var layer = stage.getLayers()[0];
 
-    
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
         
         $(`#selectPatio`).val(idPatioSeleccionado).change();
@@ -27,20 +24,14 @@ $(document).on('LienzoReady',function () {
                     </div>
                     <div class="form-group">
                         <label>Orientacion</label>
-                        <select class="form-control" id="orientacionIsla">
-                            <option value="1">Horizontal</option>
-                            <option value="2">Vertical</option>
-                            <option value="3">Diagonal Derecha</option>
-                            <option value="4">Diagonal Izquierda</option>
+                        <select name="orientacion" class="form-control" id="orientacionIsla">
+                            <option value="">Selecciona la orientacion</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Tipo de carga</label>
                         <select class="form-control" id="tipoIsla">
-                            <option value="1">Vacio</option>
-                            <option value="2">Refrigerado</option>
-                            <option value="3">Isotanque</option>
-                            <option value="4">Peligroso</option>
+                            <option value="">Selecciona el tipo de carga</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -49,6 +40,9 @@ $(document).on('LienzoReady',function () {
                     </div>
                 </form>`
             ,
+            onShow: function () {
+                cargarSelects();
+            },
             buttons: {
                 cancelar: {
                     label: "Cancelar",
@@ -72,26 +66,49 @@ $(document).on('LienzoReady',function () {
                             return false;
                         }
 
+                        var orientacionSeleccionada = $(`#orientacionIsla option:selected`);
+                        var angulo = orientacionSeleccionada.data('angulo') || 0;
+
                         islaTemporal = new Konva.Rect({
                             x: 50,
                             y: 50,
                             width: 100,
                             height: 50,
                             stroke: 'blue',
+                            fill: 'lightblue',
                             strokeWidth: 2,
                             draggable: true,
+                            rotation: angulo,
                             name: 'isla'
+                        });
+
+                        islaTemporal.on('transformend', function () {
+                            let rotacion = islaTemporal.rotation() % 360;
+                            if (rotacion < 0) rotacion += 360;
+
+                            let opciones = $(`#orientacionIsla option`);
+                            let orientacionId = null;
+                            let diferenciaMin = 999;
+
+                            opciones.each(function () {
+                                let angulo = $(this).data('angulo');
+                                let diferencia = Math.abs(rotacion - angulo);
+                                if (diferencia < diferenciaMin) {
+                                    diferenciaMin = diferencia;
+                                    orientacionId = $(this).val();
+                                }
+                            });
+
+                            if (orientacionId) {
+                                $(`#orientacionIsla`).val(orientacionId);
+                            }
                         });
 
                         var tr = new Konva.Transformer({
                             nodes: [islaTemporal],
                             enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-                            boundBoxFunc: (oldBox, newBox) => {
-                                if (newBox.width < 50 || newBox.height < 30) {
-                                    return oldBox;
-                                }
-                                return newBox;
-                            }
+                            rotateEnabled: true,
+                            resizeEnabled: true
                         });
 
                         layer.add(islaTemporal);
@@ -106,43 +123,31 @@ $(document).on('LienzoReady',function () {
                 }
             }
         });
-        /*var isla = new Konva.Rect({
-            x: 150,
-            y: 150,
-            width: 100,
-            height: 50,
-            stroke: 'blue',
-            strokeWidth: 2,
-            draggable: true,
-            name: 'isla'
-        });
-        layer.add(isla);
-        layer.draw();
-
-        $(`#guardarIsla`).off('click').on('click', function () {
-            var data = {
-                x: isla.x(),
-                y: isla.y(),
-                Ancho: isla.width(),
-                Alto: isla.height(),
-                PatioId: $(`#guardarBtn`).data('idpatio')
-            };
-
-            $.ajax({
-                url: '/Isla/GuardarIsla',
-                method: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert("Isla guardada con exito");
-                    } else {
-                        bootbox.alert("Error al guardar isla");
-                    }
-                }
-            });
-        });*/
     });
+
+    function cargarSelects() {
+
+        $.getJSON('/Catalogo/ObtenerOrientacion', function (data) {
+            var select = $(`#orientacionIsla`);
+            data.forEach(
+                o => select.append(`<option value="${o.Id}" data-angulo="${o.Angulo}">${o.Orientacion}</option>`)
+            );
+        });
+
+        $.getJSON('/Catalogo/ObtenerTipos', function (data) {
+            var select = $(`#tipoIsla`);
+            data.forEach(t => select.append(`<option value="${t.Id}">${t.Tipo}</option>`));
+        });
+    }
+
+    $(`#orientacionIsla`).on('change', function () {
+        if (!islaTemporal) return;
+
+        var angulo = $(this).find(':selected').data('angulo');
+        islaTemporal.rotation(angulo);
+        layer.draw();
+    });
+
     $(`#guardarIsla`).on('click', function () {
         if (!islaTemporal) {
             bootbox.alert("No hay isla para guardar");
@@ -150,7 +155,7 @@ $(document).on('LienzoReady',function () {
         }
         var data = {
             Nombre: datosIsla.Nombre,
-            Orientacion: datosIsla.Orientacion,
+            Orientacion: $(`#orientacionIsla`).val(),
             TipoCarga: datosIsla.TipoCarga,
             NumeroBahias: datosIsla.NumeroBahias,
             x: islaTemporal.x(),
@@ -169,6 +174,7 @@ $(document).on('LienzoReady',function () {
                     bootbox.alert("Isla guardada con exito");
                     islaTemporal.destroy();
                     islaTemporal = null;
+                    layer.find('Transformer').destroy();
                     $(`#guardarIsla`).addClass('d-none');
                     layer.draw();
                 } else {

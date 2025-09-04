@@ -463,13 +463,6 @@ function inicializarPatio() {
         let id = $(this).val();
         let nombre = $(this).find("option:selected").text(); //$('#selectPatio option:selected').text();
 
-        //if (id) {
-        //    if (Lienzo.Modo === enumModoLienzo.Isla) {
-        //        window.location.href = `/Isla/Index?id=${id}`;
-        //    }
-        //}
-
-
         let escala = parseFloat($(this).find('option:selected').data('escala'));
 
         Lienzo.Escala = escala;
@@ -484,7 +477,6 @@ function inicializarPatio() {
         //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
         $.getJSON('/Patio/ObtenerPatiosPorId', { id: id, nombre: nombre }, function (res) {
             if (!res.ok || !res.data) return;
-            console.log(Lienzo);
 
 
             if (Lienzo.Modo === enumModoLienzo.Patio) {
@@ -542,6 +534,7 @@ function inicializarPatio() {
         //Se guarda el nombre del input con el id nombreInput
         const id = $(this).data('idpatio');
         const nombre = $('#nombreInput').val();
+        const escala = parseFloat($('#escalaInput').val());
 
         //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
         //el array puntos con un for

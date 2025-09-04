@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BT.Patio
+namespace BT
 {
-    public class CatalogoTiposBT : BaseCatalogosBT
+    public class BaseCatalogosBT
     {
-        public string Tipo { get; set; }
+        public int Id { get; set; }
     }
 }

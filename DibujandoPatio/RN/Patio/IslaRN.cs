@@ -17,7 +17,6 @@ namespace RN.Patio
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -31,7 +30,6 @@ namespace RN.Patio
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
