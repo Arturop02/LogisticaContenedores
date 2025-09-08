@@ -31,9 +31,14 @@ function inicializarPatio() {
         }
     }
 
+    function DameEscala() {
+        const v = parseFloat($('#escalaInput').val());
+        return (isNaN(v) || v <= 0) ? 0.5 : v;
+    }
+
     Lienzo = {
         Modo: enumModoLienzo.Patio,
-        Escala: parseFloat($('#escalaInput').val()),
+        Escala: DameEscala(),
         Estado: null,
         lstPunto: [],
         PuntoActual: null,
@@ -172,6 +177,9 @@ function inicializarPatio() {
                 layer.add(this.GraficoTexto);
                 var linea = this;
                 this.Grafico.on('dblclick', (e) => {
+                    if (Lienzo.Modo !== enumModoLienzo.Patio || Lienzo.Estado !== enumEstadoLienzo.Editando) {
+                        return;
+                    }
 
                     const pos = Lienzo.DamePosicion();
                     bootbox.confirm({
@@ -188,30 +196,28 @@ function inicializarPatio() {
                         },
                         callback: (result) => {
                             if (result) {
-                                if (Lienzo.Estado === enumEstadoLienzo.Editando && Lienzo.Modo === enumModoLienzo.Patio) {
-                                    var Orden = linea.lstRelacionado.Min(c => c.Orden);
+                                var Orden = linea.lstRelacionado.Min(c => c.Orden);
 
-                                    linea.Eliminar();
-                                    var punto = Lienzo.AgregarPunto(pos.x, pos.y);
+                                linea.Eliminar();
+                                var punto = Lienzo.AgregarPunto(pos.x, pos.y);
 
-                                    linea.lstRelacionado.forEach(item => {
-                                        Lienzo.RelacionarPuntos(item, punto);
-                                    });
+                                linea.lstRelacionado.forEach(item => {
+                                    Lienzo.RelacionarPuntos(item, punto);
+                                });
 
-                                    Orden = linea.lstRelacionado.Min(c => c.Orden);
-                                    if (Orden == 0)
-                                        Orden = linea.lstRelacionado.Max(c => c.Orden);
-                                    punto.Orden = Orden + 1;
+                                Orden = linea.lstRelacionado.Min(c => c.Orden);
+                                if (Orden == 0)
+                                    Orden = linea.lstRelacionado.Max(c => c.Orden);
+                                punto.Orden = Orden + 1;
 
-                                    Lienzo.lstPunto.Where(c => c.Orden > Orden && c != punto).forEach(item => {
-                                        item.Orden++;
-                                    });
+                                Lienzo.lstPunto.Where(c => c.Orden > Orden && c != punto).forEach(item => {
+                                    item.Orden++;
+                                });
 
-                                    punto.Dibujar();
-                                    Lienzo.AjustarOrden();
-                                    Lienzo.PuntoActual = punto;
-                                    Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                                }
+                                punto.Dibujar();
+                                Lienzo.AjustarOrden();
+                                Lienzo.PuntoActual = punto;
+                                Lienzo.Estado = enumEstadoLienzo.Moviendo;
                             }
                         }
                     });
@@ -280,7 +286,7 @@ function inicializarPatio() {
                     }
                 }, 300));
                 this.Grafico.on('dblclick', (e) => {
-                    //if (Lienzo.Modo !== enumModoLienzo.Patio) return;
+                    if (Lienzo.Modo === enumModoLienzo.Isla) return;
                     if (Lienzo.Modo === enumModoLienzo.Patio) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                             var lstpunto = [];
@@ -299,7 +305,6 @@ function inicializarPatio() {
                                 callback: (result) => {
                                     if (result) {
                                         this.lstRelacionado.forEach(linea => {
-                                            console.log(linea);
                                             linea.lstRelacionado.forEach(punto => {
                                                 if (punto != this)
                                                     lstpunto.push(punto);
@@ -363,6 +368,17 @@ function inicializarPatio() {
         layer.destroyChildren();
         layer.draw();
         $('#guardarBtn').prop('disabled', false);
+    });
+
+    $('#escalaInput').on('input change', function () {
+        let nuevaEscala = DameEscala();
+        Lienzo.Escala = nuevaEscala;
+
+        Lienzo.lstPunto.forEach(p => {
+            p.lstRelacionado.forEach(linea => linea.Dibujar());
+        });
+
+        layer.batchDraw();
     });
 
     //Evento que permite el zoom al girar la rueda del raton
@@ -439,7 +455,7 @@ function inicializarPatio() {
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
             return;
         } else if (Lienzo.Modo === enumModoLienzo.Contenedor) {
-
+            return;
         }
         
     });
@@ -461,11 +477,12 @@ function inicializarPatio() {
 
     $(`#selectPatio`).on('change', function () {
         let id = $(this).val();
-        let nombre = $(this).find("option:selected").text(); //$('#selectPatio option:selected').text();
+        let nombre = $(this).find("option:selected").text(); 
 
         let escala = parseFloat($(this).find('option:selected').data('escala'));
 
         Lienzo.Escala = escala;
+        $('#escalaInput').val(escala);
 
         $('#guardarBtn').data('idpatio', id);
         $(`#guardarBtn`).data('nombre', nombre);

@@ -46,9 +46,15 @@
     <Compile Include="Patio\CatalogosOrientacionBD.cs" />
     <Compile Include="Patio\CatalogoTiposBD.cs" />
     <Compile Include="Patio\IslaBD.cs" />
+    <Compile Include="Patio\Mapeo\BahiaMapeo.cs" />
     <Compile Include="Patio\Mapeo\CatalogoOrientacionMapeo.cs" />
+    <Compile Include="Patio\Mapeo\CatalogoTamanoMapeo.cs" />
     <Compile Include="Patio\Mapeo\CatalogoTiposMapeo.cs" />
+    <Compile Include="Patio\Mapeo\CatalogoUbicacionMapeo.cs" />
+    <Compile Include="Patio\Mapeo\FilaMapeo.cs" />
     <Compile Include="Patio\Mapeo\IslaMapeo.cs" />
+    <Compile Include="Patio\Mapeo\NivelMapeo.cs" />
+    <Compile Include="Patio\Mapeo\UbicacionMapeo.cs" />
     <Compile Include="Patio\Mapeo\VerticeMapeo.cs" />
     <Compile Include="Patio\Mapeo\PatioMapeo.cs" />
     <Compile Include="Patio\VerticeBD.cs" />

@@ -8,6 +8,7 @@ $(document).on('LienzoReady',function () {
 
     var stage = Lienzo.Stage;
     var layer = stage.getLayers()[0];
+    var escala = Lienzo.Escala;
 
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
         
@@ -36,7 +37,7 @@ $(document).on('LienzoReady',function () {
                     </div>
                     <div class="form-group">
                         <label>Numero de Bahias</label>
-                        <input type="number" class="form-control" id="bahiasIsla" required />
+                        <input type="number" class="form-control" id="bahiasIsla" min="1" step="1" value="1" required />
                     </div>
                 </form>`
             ,
@@ -183,4 +184,26 @@ $(document).on('LienzoReady',function () {
             }
         });
     });
+
+
+    function TamanoIsla(numeroBahias, orientacion, width, height, escala) {
+        const anchoBahia = 50 * escala;
+        const altoBahia = 80 * escala;
+
+        let ancho = 0;
+        let alto = 0;
+
+        if (orientacion) {
+            ancho = numeroBahias * anchoBahia;
+            alto = altoBahia;
+        } else {
+            ancho = anchoBahia;
+            alto = numeroBahias * altoBahia;
+        }
+
+        if (ancho > width * 0.8) ancho = width * 0.8;
+        if (alto > height * 0.8) alto = height * 0.8;
+
+        return { ancho, alto };
+    }
 });
