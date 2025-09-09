@@ -1,5 +1,7 @@
 ﻿var islaTemporal = null;
 var datosIsla = {};
+var TextoSuperior = null;
+var TextoDerecha = null;
 
 $(document).on('LienzoReady',function () {
     Lienzo.Modo = enumModoLienzo.Isla;
@@ -70,20 +72,45 @@ $(document).on('LienzoReady',function () {
                         var orientacionSeleccionada = $(`#orientacionIsla option:selected`);
                         var angulo = orientacionSeleccionada.data('angulo') || 0;
 
+                        const tamano = TamanoIsla(
+                            datosIsla.NumeroBahias,
+                            angulo,
+                            stage.width(),
+                            stage.height(),
+                            escala
+                        );
+
+                        console.log("NumeroBahias:", datosIsla.NumeroBahias);
+                        console.log("Ángulo:", angulo);
+                        console.log("Tamaño calculado:", tamano.ancho, tamano.alto);
+
                         islaTemporal = new Konva.Rect({
                             x: 50,
                             y: 50,
-                            width: 100,
-                            height: 50,
+                            width: tamano.ancho,
+                            height: tamano.alto,
                             stroke: 'blue',
                             fill: 'lightblue',
                             strokeWidth: 2,
                             draggable: true,
-                            rotation: angulo,
                             name: 'isla'
                         });
 
+                        if (angulo !== 90 && angulo !== 0) {
+                            islaTemporal.rotation(angulo);
+                            islaTemporal.offsetX(tamano.ancho / 2);
+                            islaTemporal.offsetY(tamano.alto / 2);
+                        }
+
+
+                        console.log("Rect creado:");
+                        console.log("width:", islaTemporal.width());
+                        console.log("height:", islaTemporal.height());
+                        console.log("scaleX:", islaTemporal.scaleX());
+                        console.log("scaleY:", islaTemporal.scaleY());
+
                         islaTemporal.on('transformend', function () {
+                            DameTamano(islaTemporal, layer);
                             let rotacion = islaTemporal.rotation() % 360;
                             if (rotacion < 0) rotacion += 360;
 
@@ -105,11 +132,26 @@ $(document).on('LienzoReady',function () {
                             }
                         });
 
+
+                        islaTemporal.on('dragend', function () {
+                            DameTamano(islaTemporal, layer);
+                            layer.batchDraw();
+                        });
+
                         var tr = new Konva.Transformer({
                             nodes: [islaTemporal],
                             enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
                             rotateEnabled: true,
-                            resizeEnabled: true
+                            resizeEnabled: true,
+                            boundBoxFunc: function (oldBox, newBox) {
+                                if (newBox.x < 0) newBox.x = 0;
+                                if (newBox.y < 0) newBox.y = 0;
+
+                                if (newBox.width < 10) newBox.width = 10;
+                                if (newBox.height < 10) newBox.height = 10;
+
+                                return newBox;
+                            }
                         });
 
                         layer.add(islaTemporal);
@@ -186,19 +228,32 @@ $(document).on('LienzoReady',function () {
     });
 
 
-    function TamanoIsla(numeroBahias, orientacion, width, height, escala) {
-        const anchoBahia = 50 * escala;
-        const altoBahia = 80 * escala;
+    function TamanoIsla(numeroBahias, angulo, width, height, escala) {
+        const anchoBahia = (width * 0.1) * escala;
+        const altoBahia = (height * 0.15) * escala;
 
         let ancho = 0;
         let alto = 0;
 
-        if (orientacion) {
-            ancho = numeroBahias * anchoBahia;
-            alto = altoBahia;
-        } else {
-            ancho = anchoBahia;
-            alto = numeroBahias * altoBahia;
+        let rotacion = angulo % 360;
+        if (rotacion < 0) rotacion += 360;
+
+
+        switch (rotacion) {
+            case 0:
+            case 180:
+                ancho = numeroBahias * anchoBahia;
+                alto = altoBahia;
+                break;
+            case 90:
+            case 270:
+                ancho = anchoBahia;
+                alto = numeroBahias * altoBahia;
+                break;
+            default:
+                ancho = anchoBahia;
+                alto = numeroBahias * altoBahia;
+                break;
         }
 
         if (ancho > width * 0.8) ancho = width * 0.8;
@@ -206,4 +261,57 @@ $(document).on('LienzoReady',function () {
 
         return { ancho, alto };
     }
+
+    function DameTamano(isla, layer) {
+        if (!isla) return;
+
+        const escala = Lienzo.Escala;
+
+        const anchoMetros = Math.max(0, (isla.width() * isla.scaleX() / escala).toFixed(2));
+        const altoMetros = Math.max(0, (isla.height() * isla.scaleY() / escala).toFixed(2));
+
+        const X = Math.max(0, isla.x() - isla.offsetX());
+        const Y = Math.max(0, isla.y() - isla.offsetY());
+
+        const ancho = isla.width() * isla.scaleX();
+        const alto = isla.height() * isla.scaleY();
+
+        if (!isla.TextoSuperior) {
+            isla.TextoSuperior = new Konva.Text({
+                x: X + ancho / 2,
+                y: Y - 20,
+                text: `${anchoMetros} m`,
+                fontSize: 12,
+                fill: 'black',
+                padding: 4
+            });
+            isla.TextoSuperior.offsetX(isla.TextoSuperior.width() / 2);
+            layer.add(isla.TextoSuperior);
+        }
+
+        if (!isla.TextoDerecha) {
+            isla.TextoDerecha = new Konva.Text({
+                x: X + ancho + 5,
+                y: Y + alto / 2,
+                text: `${altoMetros} m`,
+                fontSize: 12,
+                fill: 'black',
+                padding: 4
+            });
+            isla.TextoDerecha.offsetX(isla.TextoDerecha.height() / 2);
+            isla.TextoDerecha.rotation(90);
+            layer.add(isla.TextoDerecha);
+        }
+
+        isla.TextoSuperior.x(X + ancho / 2);
+        isla.TextoSuperior.y(Y - 20);
+        isla.TextoSuperior.text(`${anchoMetros} m`);
+
+        isla.TextoDerecha.x(X + ancho + 5);
+        isla.TextoDerecha.y(Y + alto / 2);
+        isla.TextoDerecha.text(`${altoMetros} m`);
+
+        layer.batchDraw();
+    }
+
 });
