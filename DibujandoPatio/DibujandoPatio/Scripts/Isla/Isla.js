@@ -10,7 +10,7 @@ $(document).on('LienzoReady',function () {
 
     var stage = Lienzo.Stage;
     var layer = stage.getLayers()[0];
-    var escala = Lienzo.Escala;
+    
 
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
         
@@ -80,34 +80,48 @@ $(document).on('LienzoReady',function () {
                             escala
                         );
 
-                        console.log("NumeroBahias:", datosIsla.NumeroBahias);
-                        console.log("Ángulo:", angulo);
-                        console.log("Tamaño calculado:", tamano.ancho, tamano.alto);
-
-                        islaTemporal = new Konva.Rect({
+                        var grupoIslas = new Konva.Group({
                             x: 50,
                             y: 50,
+                            draggable: true
+                        });
+
+                        islaTemporal = new Konva.Rect({
+                            x: 0,
+                            y: 0,
                             width: tamano.ancho,
                             height: tamano.alto,
                             stroke: 'blue',
                             fill: 'lightblue',
                             strokeWidth: 2,
-                            draggable: true,
                             name: 'isla'
                         });
+
+                        TextoSuperior = new Konva.Text({
+                            x: islaTemporal.ancho/2,//.width() / 2,
+                            y: -20,
+                            text: '',
+                            fontSize: 12,
+                            fill: 'black',
+                            
+                        });
+                        TextoSuperior.offsetX(TextoSuperior.width() / 2);
+
+                        TextoDerecha = new Konva.Text({
+                            x: islaTemporal.ancho + 5,//islaTemporal.width() + 5,
+                            y: islaTemporal.alto/2,//islaTemporal.height() / 2,
+                            text: '',
+                            fontSize: 12,
+                            fill: 'black',
+                            
+                        });
+                        TextoDerecha.offsetY(TextoDerecha.height() / 2);
 
                         if (angulo !== 90 && angulo !== 0) {
                             islaTemporal.rotation(angulo);
                             islaTemporal.offsetX(tamano.ancho / 2);
                             islaTemporal.offsetY(tamano.alto / 2);
                         }
-
-
-                        console.log("Rect creado:");
-                        console.log("width:", islaTemporal.width());
-                        console.log("height:", islaTemporal.height());
-                        console.log("scaleX:", islaTemporal.scaleX());
-                        console.log("scaleY:", islaTemporal.scaleY());
 
                         islaTemporal.on('transformend', function () {
                             DameTamano(islaTemporal, layer);
@@ -132,15 +146,23 @@ $(document).on('LienzoReady',function () {
                             }
                         });
 
-
-                        islaTemporal.on('dragend', function () {
+                        islaTemporal.on('dragmove transform', function () {
                             DameTamano(islaTemporal, layer);
                             layer.batchDraw();
                         });
 
                         var tr = new Konva.Transformer({
                             nodes: [islaTemporal],
-                            enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+                            enabledAnchors: [
+                                'top-left',
+                                'top-center',
+                                'top-right',
+                                'bottom-left',
+                                'bottom-right',
+                                'bottom-center',
+                                'middle-left',
+                                'middle-right'
+                            ],
                             rotateEnabled: true,
                             resizeEnabled: true,
                             boundBoxFunc: function (oldBox, newBox) {
@@ -154,8 +176,20 @@ $(document).on('LienzoReady',function () {
                             }
                         });
 
-                        layer.add(islaTemporal);
                         layer.add(tr);
+                        actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                        tr.on('transform dragmove', () => {
+                            actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                            layer.batchDraw();
+                        });
+
+                        DameTamano(islaTemporal, layer);
+                        grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
+
+
+                        layer.add(grupoIslas);
+                        layer.batchDraw();
+
                         layer.draw();
 
                         $(`#guardarIsla`).removeClass('d-none');
@@ -227,7 +261,7 @@ $(document).on('LienzoReady',function () {
         });
     });
 
-
+    const escala = Lienzo.Escala;
     function TamanoIsla(numeroBahias, angulo, width, height, escala) {
         const anchoBahia = (width * 0.1) * escala;
         const altoBahia = (height * 0.15) * escala;
@@ -262,56 +296,146 @@ $(document).on('LienzoReady',function () {
         return { ancho, alto };
     }
 
+    //function rotarPunto(px, py, cx, cy, angulo) {
+    //    const rad = angulo * (Math.PI / 180);
+    //    const cos = Math.cos(rad);
+    //    const sin = Math.sin(rad);
+    //    return {
+    //        x: cos * (px - cx) - sin * (py - cy) + cx,
+    //        y: sin * (px - cx) + cos * (py - cy) + cy,
+    //    };
+    //}
+
     function DameTamano(isla, layer) {
         if (!isla) return;
 
-        const escala = Lienzo.Escala;
+        //const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
+        //const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
 
-        const anchoMetros = Math.max(0, (isla.width() * isla.scaleX() / escala).toFixed(2));
-        const altoMetros = Math.max(0, (isla.height() * isla.scaleY() / escala).toFixed(2));
+        //const cx = isla.x();        
+        //const cy = isla.y();        
 
-        const X = Math.max(0, isla.x() - isla.offsetX());
-        const Y = Math.max(0, isla.y() - isla.offsetY());
+        //const w = isla.width() * isla.scaleX();
+        //const h = isla.height() * isla.scaleY();
+        //const angulo = isla.rotation();
 
-        const ancho = isla.width() * isla.scaleX();
-        const alto = isla.height() * isla.scaleY();
+        //const top = rotarPunto(cx, cy - h / 2 - 20, cx, cy, angulo);
+        //const right = rotarPunto(cx + w / 2 + 20, cy, cx, cy, angulo);
 
-        if (!isla.TextoSuperior) {
-            isla.TextoSuperior = new Konva.Text({
-                x: X + ancho / 2,
-                y: Y - 20,
-                text: `${anchoMetros} m`,
-                fontSize: 12,
-                fill: 'black',
-                padding: 4
-            });
-            isla.TextoSuperior.offsetX(isla.TextoSuperior.width() / 2);
-            layer.add(isla.TextoSuperior);
-        }
+        //if (!isla, TextoSuperior) {
+        //    isla.TextoSuperior = new Konva.Text({
+        //        text: `${anchoMetros} m`,
+        //        fontSize: 12,
+        //        fill: 'black'
+        //    });
+        //    layer.add(isla.TextoSuperior);
+        //} else {
+        //    isla.TextoSuperior.position(top);
+        //    isla.TextoSuperior.rotation(angulo);
+        //}
 
-        if (!isla.TextoDerecha) {
-            isla.TextoDerecha = new Konva.Text({
-                x: X + ancho + 5,
-                y: Y + alto / 2,
-                text: `${altoMetros} m`,
-                fontSize: 12,
-                fill: 'black',
-                padding: 4
-            });
-            isla.TextoDerecha.offsetX(isla.TextoDerecha.height() / 2);
-            isla.TextoDerecha.rotation(90);
-            layer.add(isla.TextoDerecha);
-        }
+        //if (!isla.TextoDerecha) {
+        //    isla.TextoDerecha = new Konva.Text({
+        //        text: `${altoMetros} m`,
+        //        fontSize: 12,
+        //        fill: 'black'
+        //    });
+        //    layer.add(isla.TextoDerecha);
+        //}
+        //isla.TextoDerecha.position(right);
+        //isla.TextoDerecha.rotation(angulo);
+    //}
 
-        isla.TextoSuperior.x(X + ancho / 2);
-        isla.TextoSuperior.y(Y - 20);
-        isla.TextoSuperior.text(`${anchoMetros} m`);
+        const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
+        const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
 
-        isla.TextoDerecha.x(X + ancho + 5);
-        isla.TextoDerecha.y(Y + alto / 2);
-        isla.TextoDerecha.text(`${altoMetros} m`);
+        TextoSuperior.text(`${anchoMetros} m`);
+        TextoDerecha.text(`${altoMetros} m`);
 
-        layer.batchDraw();
+        //const ancho = isla.width() * isla.scaleX();
+        //const alto = isla.height() * isla.scaleY();
+
+        actualizarTexto(isla, TextoSuperior, TextoDerecha);
+
+        //const X = isla.x();
+        //const Y = isla.y();
+        //const angulo = isla.rotation();
+
+        //const top = rotarPunto(X, Y - alto / 2, X, Y, angulo);
+        //const right = rotarPunto(X + ancho / 2 + 20, Y, X, Y, angulo);
+        //TextoSuperior.position(top);
+        //TextoDerecha.position(right);
+
+        //TextoSuperior.rotation(0);
+        //TextoDerecha.rotation(0);
+
+        //const X = Math.max(0, isla.x() - isla.offsetX());
+        //const Y = Math.max(0, isla.y() - isla.offsetY());
+
+        //if (!isla.TextoSuperior) {
+        //    isla.TextoSuperior = new Konva.Text({
+        //        x: topX,
+        //        y: topY,
+        //        text: `${anchoMetros} m`,
+        //        fontSize: 12,
+        //        fill: 'black',
+        //        padding: 4,
+        //        rotation: isla.angulo
+        //    });
+        //    //isla.TextoSuperior.offsetX();
+        //    layer.add(isla.TextoSuperior);
+        //} else {
+        //    isla.TextoSuperior.position({ x: topX, y: topY });
+        //    isla.TextoSuperior.text(`${anchoMetros} m`);
+        //}
+
+        ////const rightX = X + Math.cos(angulo) * (ancho + 5) - Math.sin(angulo) * (alto / 2);
+        ////const rightY = Y + Math.sin(angulo) * (ancho + 5) - Math.cos(angulo) * (alto / 2);
+
+        //const rightX = box.x + box.width + 5;
+        //const rightY = box.y + box.height / 2;
+
+
+        //if (!isla.TextoDerecha) {
+        //    isla.TextoDerecha = new Konva.Text({
+        //        x: rightX,
+        //        y: rightY,
+        //        text: `${altoMetros} m`,
+        //        fontSize: 12,
+        //        fill: 'black',
+        //        padding: 4
+        //    });
+        //    layer.add(isla.TextoDerecha);
+        //} else {
+        //    isla.TextoDerecha.position({ x: rightX, y: rightY });
+        //    isla.TextoDerecha.text(`${altoMetros}`);
+        //}
+        
+        ////isla.TextoSuperior.x(X + ancho / 2);
+        ////isla.TextoSuperior.y(Y - 20);
+        ////isla.TextoSuperior.text(`${anchoMetros} m`);
+
+        ////isla.TextoDerecha.x(X + ancho + 5);
+        ////isla.TextoDerecha.y(Y + alto / 2);
+        ////isla.TextoDerecha.text(`${altoMetros} m`);
+        
+        //layer.batchDraw();
     }
 
 });
+
+function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
+    const bbox = nodo.getClientRect({ relativeTo: nodo.getParent() });
+    TextoSuperior.x(bbox.x + bbox.width / 2);
+    TextoSuperior.y(bbox.y - 20);
+    TextoSuperior.offsetX(TextoSuperior.width() / 2);
+    TextoSuperior.offsetY(0);
+
+    TextoDerecha.x(bbox.x + bbox.width + 5);
+    TextoDerecha.y(bbox.y + bbox.height / 2);
+    TextoDerecha.offsetY(TextoDerecha.height() / 2);
+
+    TextoSuperior.rotation(nodo.angulo);
+    TextoDerecha.rotation(nodo.angulo);
+
+}

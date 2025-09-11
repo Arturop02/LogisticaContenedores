@@ -348,8 +348,6 @@ function inicializarPatio() {
 
     Punto.OrdenActual = 0;
 
-//    const escala = parseFloat($('#escalaInput').val());
-
     stage = new Konva.Stage({
         container: 'container',
         width: 1200,
