@@ -14,8 +14,8 @@ $(document).on('LienzoReady',function () {
     
 
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
-        
-        $(`#selectPatio`).val(idPatioSeleccionado).change();
+
+        $(`#patioTabs .nav-link[data-id="${idPatioSeleccionado}"]`).tab("show");//.data(idPatioSeleccionado).change();
     }
 
     $(`#crearIsla`).on(`click`, function () {

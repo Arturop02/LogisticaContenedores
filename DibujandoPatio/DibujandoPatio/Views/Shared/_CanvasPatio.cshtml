@@ -1,23 +1,6 @@
-﻿@using BT.Patio
-
-@model List<BT.Patio.PatioBT>
-
+﻿
 
 <h2>Patios GOLMEX</h2>
 
-<select id="selectPatio">
-    <option value="">Selecciona un patio</option>
 
-    @foreach (var p in ViewBag.Patios as List<PatioBT>)
-     {
-        <option value="@p.Id" data-escala="@p.Escala"
-                @(ViewBag.IdPatioSeleccionado != null && (int)ViewBag.IdPatioSeleccionado == p.Id ? "selected" : "")>
-            @p.Nombre
-        </option>
-     }
-</select>
-
-<button onclick="Lienzo.RestaurarTamano()" class="btn btn-primary">Tamaño Original</button>
-
-<div id="container" style="width:1200px; height:800px; border:1px solid black; margin-top:10px;"></div>
 

@@ -348,10 +348,18 @@ function inicializarPatio() {
 
     Punto.OrdenActual = 0;
 
+    var container = document.getElementById('container');
+
     stage = new Konva.Stage({
         container: 'container',
-        width: 1200,
-        height: 800
+        width: container.offsetWidth,
+        height: container.offsetHeight
+    });
+
+    window.addEventListener('resize', function () {
+        stage.width(container.offsetWidth);
+        stage.height(container.offsetHeight);
+        stage.draw();
     });
 
     Lienzo.Stage = stage;
@@ -473,76 +481,46 @@ function inicializarPatio() {
         }
     });
 
-    $(`#selectPatio`).on('change', function () {
-        let id = $(this).val();
-        let nombre = $(this).find("option:selected").text(); 
+    $(`#patioTabs`).on('click', '.nav-link', function () {
+        $(`#patioTabs .nav-link`).removeClass('active');
+        $(this).addClass('active');
 
-        let escala = parseFloat($(this).find('option:selected').data('escala'));
+        let id = $(this).data('id');
+        let nombre = $(this).text();
+        let escala = parseFloat($(this).data('escala'));
 
         Lienzo.Escala = escala;
         $('#escalaInput').val(escala);
-
-        $('#guardarBtn').data('idpatio', id);
-        $(`#guardarBtn`).data('nombre', nombre);
-        $('#guardarBtn').prop('disabled', !id);
-        
         $('#nombreInput').val(nombre);
-        
+        $('#guardarBtn').data('idpatio', id).prop('disabled', !id);
+
         if (!id) return;
-        //Metodo que obtiene los vertices de la figura y el orden mediante un JSON
+
         $.getJSON('/Patio/ObtenerPatiosPorId', { id: id, nombre: nombre }, function (res) {
             if (!res.ok || !res.data) return;
 
+            layer.destroyChildren();
+            layer.draw();
+            Lienzo.lstPunto = [];
+            Lienzo.PuntoActual = null;
 
-            if (Lienzo.Modo === enumModoLienzo.Patio) {
-                
-                var patio = res.data;
-                
-                layer.destroyChildren();
-                layer.draw();
-                Lienzo.lstPunto = [];
-                Lienzo.PuntoActual = null;
+            var patio = res.data;
+            patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
+            patio.Vertices.forEach(v => {
+                Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
+                Lienzo.PuntoActual.Id = v.Id;
+                Lienzo.PuntoActual.Dibujar();
+            });
 
-                patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
-
-                patio.Vertices.forEach(v => {
-                    Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
-                    Lienzo.PuntoActual.Id = v.Id;
-                    Lienzo.PuntoActual.Dibujar();
-                });
-
-                Lienzo.PuntoActual = null;
-                Lienzo.Cerrar();
-
-                Lienzo.Modo = enumModoLienzo.Patio;
-                Lienzo.Estado = enumEstadoLienzo.Editando;
-                Lienzo.BloquearPatio(false);
-            } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-                var patio = res.data;
-
-                layer.destroyChildren();
-                layer.draw();
-                Lienzo.lstPunto = [];
-                Lienzo.PuntoActual = null;
-
-                patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
-
-                patio.Vertices.forEach(v => {
-                    Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
-                    Lienzo.PuntoActual.Id = v.Id;
-                    Lienzo.PuntoActual.Dibujar();
-                });
-
-                Lienzo.PuntoActual = null;
-                Lienzo.Cerrar();
-                Lienzo.Modo = enumModoLienzo.Isla;
-                Lienzo.BloquearPatio(true);
-            }
+            Lienzo.PuntoActual = null;
+            Lienzo.Cerrar();
+            Lienzo.Modo = enumModoLienzo.Patio;
+            Lienzo.Estado = enumEstadoLienzo.Editando;
+            Lienzo.BloquearPatio(false);
 
         });
     });
 
-    //Instrucciones al dar click en el boton guardar
     $('#guardarBtn').on('click', function (e) {
         Lienzo.Cerrar();
 
@@ -605,7 +583,7 @@ function inicializarPatio() {
     });
 
     $(`#btnRedirigir`).on('click', function () {
-        let valor = $(`#selectPatio`).val();
+        let valor = $(`#patioTabs .nav-link.active`).data('id');
         if (!valor) {
             bootbox.alert("Seleccione un patio");
             return;
