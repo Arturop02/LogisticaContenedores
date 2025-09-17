@@ -31,12 +31,30 @@ namespace DibujandoPatio.Controllers
 
                 var patio = patioRN.Cambio(patioBT);
 
-
                 return Json(new { ok = true });
             }
             catch (Exception)
             {
                 return Json(new { ok = false });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BorrarPatio(int id)
+        {
+            try
+            {
+                PatioRN patioRN = new PatioRN();
+                PatioBT patioBT = new PatioBT { Id = id};
+                //VerticeRN verticeRN = new VerticeRN();
+                //var patio = patioRN.Borrar(patioBT);
+                patioRN.Borrar(patioBT);
+
+                return Json(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, error= ex.Message});
             }
         }
 

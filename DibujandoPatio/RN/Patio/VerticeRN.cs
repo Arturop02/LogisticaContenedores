@@ -45,7 +45,6 @@ namespace RN.Patio
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

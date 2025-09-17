@@ -2,7 +2,7 @@
 var datosIsla = {};
 var TextoSuperior = null;
 var TextoDerecha = null;
-var tr = null;
+//var tr = null;
 
 $(document).on('LienzoReady',function () {
     Lienzo.Modo = enumModoLienzo.Isla;
@@ -14,8 +14,7 @@ $(document).on('LienzoReady',function () {
     
 
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
-
-        $(`#patioTabs .nav-link[data-id="${idPatioSeleccionado}"]`).tab("show");//.data(idPatioSeleccionado).change();
+        $(`#patioTabs .nav-link[data-id="${idPatioSeleccionado}"]`).tab("show");
     }
 
     $(`#crearIsla`).on(`click`, function () {
@@ -147,9 +146,6 @@ $(document).on('LienzoReady',function () {
                             if (orientacionId) {
                                 $(`#orientacionIsla`).val(orientacionId);
                             }
-
-                            //ajustarTamanos(islaTemporal, escala);
-                            //actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
                         });
 
                         var tr = new Konva.Transformer({

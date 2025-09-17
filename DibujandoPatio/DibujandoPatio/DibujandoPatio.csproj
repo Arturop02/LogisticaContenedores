@@ -187,7 +187,6 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Patio\Index.cshtml" />
-    <Content Include="Views\Shared\_CanvasPatio.cshtml" />
     <Content Include="Views\Isla\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

@@ -32,8 +32,7 @@ function inicializarPatio() {
     }
 
     function DameEscala() {
-        const v = parseFloat($('#escalaInput').val());
-        return (isNaN(v) || v <= 0) ? 0.5 : v;
+        const escala = 0.2
     }
 
     Lienzo = {
@@ -376,17 +375,6 @@ function inicializarPatio() {
         $('#guardarBtn').prop('disabled', false);
     });
 
-    $('#escalaInput').on('input change', function () {
-        let nuevaEscala = DameEscala();
-        Lienzo.Escala = nuevaEscala;
-
-        Lienzo.lstPunto.forEach(p => {
-            p.lstRelacionado.forEach(linea => linea.Dibujar());
-        });
-
-        layer.batchDraw();
-    });
-
     //Evento que permite el zoom al girar la rueda del raton
     stage.on('wheel', (e) => {
         e.evt.preventDefault();
@@ -493,6 +481,7 @@ function inicializarPatio() {
         $('#escalaInput').val(escala);
         $('#nombreInput').val(nombre);
         $('#guardarBtn').data('idpatio', id).prop('disabled', !id);
+        $('#eliminarPatioBtn').data('idpatio', id).prop('disabled', !id);
 
         if (!id) return;
 
@@ -527,7 +516,7 @@ function inicializarPatio() {
         //Se guarda el nombre del input con el id nombreInput
         const id = $(this).data('idpatio');
         const nombre = $('#nombreInput').val();
-        const escala = parseFloat($('#escalaInput').val());
+        const escala = Lienzo.Escala //parseFloat($('#escalaInput').val());
 
         //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
         //el array puntos con un for
@@ -548,11 +537,11 @@ function inicializarPatio() {
         let url, payload;
 
         if (id) {
-            url = '@Url.Action("EditarPatio", "Patio")';
+            url = '/Patio/EditarPatio';
             payload = {
                 Id: id,
                 Nombre: nombre,
-                Escala: parseFloat($('#escalaInput').val()),
+                Escala: escala,//parseFloat($('#escalaInput').val()),
                 Vertices: vertices
             }
         } else {
@@ -579,6 +568,46 @@ function inicializarPatio() {
                     bootbox.alert("Ha ocurriod un problema")
                 }
             }
+        });
+    });
+
+    $(`#eliminarPatioBtn`).on('click', function (e) {
+        const id = $(this).data('idpatio');
+
+        if (!id) {
+            bootbox.alert("No has seleccionado un patio para eliminar");
+            return;
+        }
+
+        let url = '/Patio/BorrarPatio'
+
+        bootbox.confirm("Estas seguro que deseas eliminar el patio?", function (result) {
+            if (!result) return;
+
+            $.ajax({
+                url: url,
+                //url: '/Patio/BorrarPatio',
+                method: 'POST',
+                data: {id: id},
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.ok) {
+                        bootbox.alert("Eliminado correctamente");
+                        layer.destroyChildren();
+                        layer.draw();
+                        Lienzo.lstPunto = [];
+                        Lienzo.PuntoActual = null;
+
+                        $('#nombreInput').val('');
+//                        $('#escalaInput').val(0.5);
+                        $('#guardarBtn').data('idpatio', '');
+                        $('#guardarBtn').prop('disabled', true);
+                        $('#eliminarBtn').prop('disabled', true);
+                    } else {
+                        bootbox.alert("Ocurrio un error al eliminar");
+                    }
+                }
+            });
         });
     });
 
