@@ -32,7 +32,8 @@ function inicializarPatio() {
     }
 
     function DameEscala() {
-        const escala = 0.2
+        const escala = 0.2;
+        return escala;
     }
 
     Lienzo = {
