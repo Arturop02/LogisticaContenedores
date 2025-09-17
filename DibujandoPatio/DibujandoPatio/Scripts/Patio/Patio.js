@@ -368,13 +368,13 @@ function inicializarPatio() {
     layer = new Konva.Layer();
     stage.add(layer);
 
-    //Boton que permite la creacion del patio
-    $('#crearPatioBtn').on('click', function () {
-        Lienzo.Estado = enumEstadoLienzo.Agregando;
-        layer.destroyChildren();
-        layer.draw();
-        $('#guardarBtn').prop('disabled', false);
-    });
+    ////Boton que permite la creacion del patio
+    //$('#crearPatioBtn').on('click', function () {
+    //    Lienzo.Estado = enumEstadoLienzo.Agregando;
+    //    layer.destroyChildren();
+    //    layer.draw();
+    //    $('#guardarBtn').prop('disabled', false);
+    //});
 
     //Evento que permite el zoom al girar la rueda del raton
     stage.on('wheel', (e) => {
@@ -470,23 +470,20 @@ function inicializarPatio() {
         }
     });
 
-    $(`#patioTabs`).on('click', '.nav-link', function () {
-        $(`#patioTabs .nav-link`).removeClass('active');
+    $(`#lstAreas`).on('click', 'label.btn', function () {
+        $(`#lstAreas .btn`).removeClass('active');
         $(this).addClass('active');
 
-        let id = $(this).data('id');
-        let nombre = $(this).text();
-        let escala = parseFloat($(this).data('escala'));
+        let id = $(this).find('input[name="area"]').data('id');
 
-        Lienzo.Escala = escala;
-        $('#escalaInput').val(escala);
-        $('#nombreInput').val(nombre);
+        //const escala = Lienzo.Escala;
+        
         $('#guardarBtn').data('idpatio', id).prop('disabled', !id);
-        $('#eliminarPatioBtn').data('idpatio', id).prop('disabled', !id);
-
+        $('#btnRedirigir').data('idpatio', id).prop('disabled', !id);
+        
         if (!id) return;
 
-        $.getJSON('/Patio/ObtenerPatiosPorId', { id: id, nombre: nombre }, function (res) {
+        $.getJSON('/Patio/ObtenerPatiosPorId', { id: id}, function (res) {
             if (!res.ok || !res.data) return;
 
             layer.destroyChildren();
@@ -507,7 +504,6 @@ function inicializarPatio() {
             Lienzo.Modo = enumModoLienzo.Patio;
             Lienzo.Estado = enumEstadoLienzo.Editando;
             Lienzo.BloquearPatio(false);
-
         });
     });
 
@@ -517,7 +513,7 @@ function inicializarPatio() {
         //Se guarda el nombre del input con el id nombreInput
         const id = $(this).data('idpatio');
         const nombre = $('#nombreInput').val();
-        const escala = Lienzo.Escala //parseFloat($('#escalaInput').val());
+        const escala = Lienzo.Escala;
 
         //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
         //el array puntos con un for
@@ -572,48 +568,8 @@ function inicializarPatio() {
         });
     });
 
-    $(`#eliminarPatioBtn`).on('click', function (e) {
-        const id = $(this).data('idpatio');
-
-        if (!id) {
-            bootbox.alert("No has seleccionado un patio para eliminar");
-            return;
-        }
-
-        let url = '/Patio/BorrarPatio'
-
-        bootbox.confirm("Estas seguro que deseas eliminar el patio?", function (result) {
-            if (!result) return;
-
-            $.ajax({
-                url: url,
-                //url: '/Patio/BorrarPatio',
-                method: 'POST',
-                data: {id: id},
-                contentType: 'application/json',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert("Eliminado correctamente");
-                        layer.destroyChildren();
-                        layer.draw();
-                        Lienzo.lstPunto = [];
-                        Lienzo.PuntoActual = null;
-
-                        $('#nombreInput').val('');
-//                        $('#escalaInput').val(0.5);
-                        $('#guardarBtn').data('idpatio', '');
-                        $('#guardarBtn').prop('disabled', true);
-                        $('#eliminarBtn').prop('disabled', true);
-                    } else {
-                        bootbox.alert("Ocurrio un error al eliminar");
-                    }
-                }
-            });
-        });
-    });
-
     $(`#btnRedirigir`).on('click', function () {
-        let valor = $(`#patioTabs .nav-link.active`).data('id');
+        let valor = $(`#lstAreas input[name = "area"]:checked`).data('id');
         if (!valor) {
             bootbox.alert("Seleccione un patio");
             return;

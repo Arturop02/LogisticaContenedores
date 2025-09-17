@@ -60,17 +60,23 @@
             }
 
     </div>
-    <button id="guardarBtn" class="btn btn-success pull-right" disabled>Guardar</button>
+    <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
+    <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 
 @section scripts{
+    <script src="~/Scripts/Patio/Patio.js"></script>
     <script>
         $(document).ready(function () {
             inicializarPatio();
+            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
+            if (inputSeleccionado.length) {
+                // Tomar el label padre y disparar el clic para cargar el patio
+                inputSeleccionado.closest('label').trigger('click');
+            }
         });
     </script>
-    <script src="~/Scripts/Patio/Patio.js"></script>
 }
