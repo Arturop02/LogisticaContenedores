@@ -13,9 +13,10 @@ $(document).on('LienzoReady',function () {
     
 
     if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
+        Lienzo.Modo = enumModoLienzo.Isla;
         let $radio = $(`#lstAreas input[data-id="${idPatioSeleccionado}"]`);
         $radio.prop("checked", true);
-        $radio.closest("label").trigger('click');//addClass("Active").siblings().removeClass("active");
+        $radio.closest("label").trigger('click');
         $('#crearIsla').data('idpatio', idPatioSeleccionado).prop('disabled', !idPatioSeleccionado);
     }
 

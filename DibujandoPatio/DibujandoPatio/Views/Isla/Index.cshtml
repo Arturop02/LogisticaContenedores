@@ -7,10 +7,6 @@
     var patios = ViewBag.Patios as List<PatioBT>;
 }
 
-@*<div id="contenedorKonva" class="mb-3">
-    
-    <button id="guardarIsla" class="btn btn-success d-none">Guardar Isla</button>
-</div>*@
 <style type="text/css">
     #lstAreas > label.active {
         color: #fff;
@@ -91,9 +87,10 @@
     </div>*@
 
 @section scripts{
-    <script src="~/Scripts/Patio/Patio.js"></script>
-
+    
     <script src="~/Scripts/Isla/Isla.js"></script>
+
+    <script src="~/Scripts/Patio/Patio.js"></script>
 
     <script>
         var idPatioSeleccionado = '@ViewBag.IdPatioSeleccionado';
@@ -104,4 +101,5 @@
             inicializarPatio();
         });
     </script>
+
 }

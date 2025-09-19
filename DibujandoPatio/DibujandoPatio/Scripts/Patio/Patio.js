@@ -1,6 +1,8 @@
 ﻿var stage;
 var layer;
 var Lienzo;
+var Historial = [];
+var indiceHistorial = -1;
 var enumModoLienzo = {
     Patio: 'Patio',
     Isla: 'Isla',
@@ -121,7 +123,7 @@ function inicializarPatio() {
                     p.Grafico.listening(!bloquear);
                 }
             });
-        }
+        },
     };
 
     var enumTipoGrafico = {
@@ -176,7 +178,7 @@ function inicializarPatio() {
                 layer.add(this.Grafico);
                 layer.add(this.GraficoTexto);
                 var linea = this;
-                this.Grafico.on('dblclick', (e) => {
+                this.Grafico.on('pointerdblclick', (e) => {
                     if (Lienzo.Modo !== enumModoLienzo.Patio || Lienzo.Estado !== enumEstadoLienzo.Editando) {
                         return;
                     }
@@ -271,8 +273,8 @@ function inicializarPatio() {
                 this.Grafico = new Konva.Circle(cfgGrafico);
                 layer.add(this.Grafico);
 
-                this.Grafico.on('mousedown' || 'touchstart', throttle((e) => {
-                    //if (Lienzo.Modo !== enumModoLienzo.Patio) return;
+                this.Grafico.on('pointerdown', throttle((e) => {
+                    
                     if (Lienzo.Modo === enumModoLienzo.Patio) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                             Lienzo.Estado = enumEstadoLienzo.Moviendo;
@@ -285,7 +287,7 @@ function inicializarPatio() {
                         }
                     }
                 }, 300));
-                this.Grafico.on('dblclick', (e) => {
+                this.Grafico.on('pointerdblclick', (e) => {
                     if (Lienzo.Modo === enumModoLienzo.Isla) return;
                     if (Lienzo.Modo === enumModoLienzo.Patio) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
@@ -368,14 +370,6 @@ function inicializarPatio() {
     layer = new Konva.Layer();
     stage.add(layer);
 
-    ////Boton que permite la creacion del patio
-    //$('#crearPatioBtn').on('click', function () {
-    //    Lienzo.Estado = enumEstadoLienzo.Agregando;
-    //    layer.destroyChildren();
-    //    layer.draw();
-    //    $('#guardarBtn').prop('disabled', false);
-    //});
-
     //Evento que permite el zoom al girar la rueda del raton
     stage.on('wheel', (e) => {
         e.evt.preventDefault();
@@ -400,9 +394,24 @@ function inicializarPatio() {
     });
 
     //Evento que permite dibujar si se da clic
-    stage.on('mousedown', function (e) {
+    stage.on('pointerdown touchstart', function (e) {
+        const boton = e.evt.button;
+        let esTouch = e.type.startsWith("touch");
+
+        if (!esTouch) {
+            if (e.evt.crtlKey) {
+                Lienzo.HabilitarArrastrable(true);
+                return;
+            }
+        }
+
+        if (esTouch && e.evt.touches.length === 2) {
+            Lienzo.HabilitarArrastrable(true);
+            return;
+        }
+
         if (Lienzo.Modo === enumModoLienzo.Patio) {
-            switch (e.evt.button) {
+            switch (boton) {
                 case enumBotton.ClickDerecho: {
                     Lienzo.HabilitarArrastrable(true);
                     break;
@@ -419,7 +428,7 @@ function inicializarPatio() {
                 }
             }
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-            switch (e.evt.button) {
+            switch (boton) {
                 case enumBotton.ClickDerecho: {
                     Lienzo.HabilitarArrastrable(true);
                     break;
@@ -434,8 +443,8 @@ function inicializarPatio() {
         }
     });
 
-    //Acciones que se realizan al arrastrar el mouse
-    stage.on('mousemove', function (e) {
+    //Acciones que se realizan al arrastrar el mousez
+    stage.on('pointermove', function (e) {
         if (Lienzo.Modo === enumModoLienzo.Patio) {
             if ([enumEstadoLienzo.Agregando, enumEstadoLienzo.Editando, enumEstadoLienzo.Moviendo].includes(Lienzo.Estado)) {
 
@@ -456,17 +465,25 @@ function inicializarPatio() {
     });
 
     //Acciones que se realizan al dejar de hacer un clic sostenido
-    stage.on('mouseup', function (e) {
+    stage.on('pointerup touchend', function (e) {
+
+        let esTouch = e.type.startsWith("touch");
+        const boton = e.evt.button;
+
         if (Lienzo.Modo === enumModoLienzo.Patio) {
-            if (e.evt.button === 2) {
+            if (boton === 2) {
                 Lienzo.HabilitarArrastrable(false);
             }
         } else if (Lienzo.Modo === enumModoLienzo.Isla) {
-            if (e.evt.button === 2) {
+            if (boton === 2) {
                 Lienzo.HabilitarArrastrable(false);
             }
         } else if (Lienzo.Modo === enumModoLienzo.Contenedor) {
 
+        }
+
+        if (esTouch && e.evt.touches.length < 2) {
+            Lienzo.HabilitarArrastrable(false);
         }
     });
 
@@ -476,8 +493,6 @@ function inicializarPatio() {
 
         let id = $(this).find('input[name="area"]').data('id');
 
-        //const escala = Lienzo.Escala;
-        
         $('#guardarBtn').data('idpatio', id).prop('disabled', !id);
         $('#btnRedirigir').data('idpatio', id).prop('disabled', !id);
         
@@ -538,7 +553,7 @@ function inicializarPatio() {
             payload = {
                 Id: id,
                 Nombre: nombre,
-                Escala: escala,//parseFloat($('#escalaInput').val()),
+                Escala: escala,
                 Vertices: vertices
             }
         } else {
