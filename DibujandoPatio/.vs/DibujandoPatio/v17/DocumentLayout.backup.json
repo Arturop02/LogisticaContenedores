@@ -1,38 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\",
+  "WorkspaceRootPath": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\scripts\\patio\\patio.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\scripts\\patio\\patio.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|d:\\proyectos\\golmex\\logisticacontenedores\\dibujandopatio\\dibujandopatio\\app_start\\routeconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\app_start\\routeconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\views\\patio\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\views\\patio\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|d:\\proyectos\\golmex\\logisticacontenedores\\dibujandopatio\\dibujandopatio\\controllers\\areacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\controllers\\areacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\views\\isla\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\views\\isla\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\controllers\\islacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\controllers\\islacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|c:\\users\\arturo\\documents\\github\\logisticacontenedores\\dibujandopatio\\dibujandopatio\\scripts\\isla\\isla.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\scripts\\isla\\isla.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\controllers\\patiocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\controllers\\patiocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\controllers\\patiocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4CAE4601-251D-4B19-8DA3-F2D5B542651C}|RN\\RN.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\rn\\patio\\patiorn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CAE4601-251D-4B19-8DA3-F2D5B542651C}|RN\\RN.csproj|solutionrelative:rn\\patio\\patiorn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C3261802-4AA8-4057-BA94-4FA674A246C1}|BD\\BD.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\bd\\patio\\patiobd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C3261802-4AA8-4057-BA94-4FA674A246C1}|BD\\BD.csproj|solutionrelative:bd\\patio\\patiobd.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,16 +22,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 5,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
@@ -61,105 +33,71 @@
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "PatioController.cs",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\PatioController.cs",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Controllers\\PatioController.cs",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\PatioController.cs",
-              "RelativeToolTip": "DibujandoPatio\\Controllers\\PatioController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T14:59:31.417Z",
-              "IsPinned": true
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "PatioBD.cs",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\BD\\Patio\\PatioBD.cs",
-              "RelativeDocumentMoniker": "BD\\Patio\\PatioBD.cs",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\BD\\Patio\\PatioBD.cs",
-              "RelativeToolTip": "BD\\Patio\\PatioBD.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAuwCsAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T22:07:17.783Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "PatioRN.cs",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\RN\\Patio\\PatioRN.cs",
-              "RelativeDocumentMoniker": "RN\\Patio\\PatioRN.cs",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\RN\\Patio\\PatioRN.cs",
-              "RelativeToolTip": "RN\\Patio\\PatioRN.cs",
-              "ViewState": "AgIAAEAAAAAAAAAAAAAewE0AAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T20:32:06.979Z"
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Patio.js",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Patio\\Patio.js",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Scripts\\Patio\\Patio.js",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Patio\\Patio.js",
-              "RelativeToolTip": "DibujandoPatio\\Scripts\\Patio\\Patio.js",
-              "ViewState": "AgIAADsAAAAAAAAAAAAYwIQAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-09-04T19:07:23.605Z",
+              "Title": "RouteConfig.cs",
+              "DocumentMoniker": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\App_Start\\RouteConfig.cs",
+              "RelativeDocumentMoniker": "DibujandoPatio\\App_Start\\RouteConfig.cs",
+              "ToolTip": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\App_Start\\RouteConfig.cs",
+              "RelativeToolTip": "DibujandoPatio\\App_Start\\RouteConfig.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-19T17:30:47.209Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Views\\Patio\\Index.cshtml",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Views\\Patio\\Index.cshtml",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Views\\Patio\\Index.cshtml",
-              "RelativeToolTip": "DibujandoPatio\\Views\\Patio\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEEAAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-25T22:31:25.322Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "IslaController.cs",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\IslaController.cs",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Controllers\\IslaController.cs",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\IslaController.cs",
-              "RelativeToolTip": "DibujandoPatio\\Controllers\\IslaController.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAowA4AAAAIAAAAAAAAAA==",
+              "Title": "AreaController.cs",
+              "DocumentMoniker": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\AreaController.cs",
+              "RelativeDocumentMoniker": "DibujandoPatio\\Controllers\\AreaController.cs",
+              "ToolTip": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\AreaController.cs",
+              "RelativeToolTip": "DibujandoPatio\\Controllers\\AreaController.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABUAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-22T21:50:07.596Z",
+              "WhenOpened": "2025-09-19T17:16:52.793Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Isla.js",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "RelativeToolTip": "DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-09-15T19:40:22.698Z",
-              "EditorCaption": ""
-            },
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "1e0003f0-75b1-45c9-81fc-f81684dbba86",
+        "Display": 1,
+        "X": 37,
+        "Y": 479,
+        "Width": 1213,
+        "Height": 639,
+        "WindowState": 2
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Views\\Isla\\Index.cshtml",
-              "RelativeDocumentMoniker": "DibujandoPatio\\Views\\Isla\\Index.cshtml",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Views\\Isla\\Index.cshtml",
-              "RelativeToolTip": "DibujandoPatio\\Views\\Isla\\Index.cshtml",
-              "ViewState": "AgIAACUAAAAAAAAAAAAIwCkAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-25T18:58:21.046Z",
+              "Title": "PatioController.cs",
+              "DocumentMoniker": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\PatioController.cs",
+              "RelativeDocumentMoniker": "DibujandoPatio\\Controllers\\PatioController.cs",
+              "ToolTip": "D:\\Proyectos\\GOLMEX\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Controllers\\PatioController.cs",
+              "RelativeToolTip": "DibujandoPatio\\Controllers\\PatioController.cs",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAIwF8AAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-21T14:59:31.417Z",
               "EditorCaption": ""
             }
           ]

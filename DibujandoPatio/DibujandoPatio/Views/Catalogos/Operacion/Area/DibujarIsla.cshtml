@@ -1,17 +1,11 @@
 ﻿@using BT.Patio
-@model List<BT.Patio.PatioBT>
-@*@model DibujandoPatio.Models.PatioLayout*@
+
+@model List<BT.Patio.IslaBT>
 @{
-    ViewBag.Title = "Dibujando Patio";
+    ViewBag.Title = "Islas";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var patios = ViewBag.Patios as List<PatioBT>;
 }
-
-
-
-<div class="mb-3 hidden">
-    <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
-</div>
 
 <style type="text/css">
     #lstAreas > label.active {
@@ -61,31 +55,51 @@
 
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
-    <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
-    <button id="deshacerBtn" class="btn btn-danger">Deshacer</button>
-    <button id="deshacerTodoBtn" class="btn btn-danger">Deshacer Todo</button>
+    <button id="crearIsla" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
+
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
+@*<ul class="nav nav-tabs" id="patioTabs" role="tablist">
+        @for (int i = 0; i < patios.Count; i++)
+        {
+            var p = patios[i];
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn btn-primary"
+                        type="button"
+                        role="tab"
+                        aria-selected="@(i==0 ? "true" : "false")"
+                        data-id="@p.Id"
+                        data-escala="@p.Escala">
+                    @p.Nombre
+                </button>
+            </li>
+        }
+    </ul>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-lg-12 col-md-10 mx-auto">
+                <div id="container" style="width: 100%; height: 80vh; box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
+            </div>
+        </div>
+    </div>*@
 
 @section scripts{
+    
+    <script src="~/Scripts/Isla/Isla.js"></script>
+
     <script src="~/Scripts/Patio/Patio.js"></script>
+
     <script>
-        var objSer = {
-            Url: {
-                Isla: {
-                    Index: '@Url.Action("Index", "Isla", new { id = "__id__" })',
-                }
-            }
-        };
+        var idPatioSeleccionado = '@ViewBag.IdPatioSeleccionado';
+    </script>
+
+    <script>
         $(document).ready(function () {
             inicializarPatio();
-            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
-            if (inputSeleccionado.length) {
-                // Tomar el label padre y disparar el clic para cargar el patio
-                inputSeleccionado.closest('label').trigger('click');
-            }
         });
     </script>
+
 }

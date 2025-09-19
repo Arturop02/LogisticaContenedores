@@ -589,7 +589,7 @@ function inicializarPatio() {
             bootbox.alert("Seleccione un patio");
             return;
         }
-        window.location.href = `/Isla/Index?id=${valor}`;
+        window.location.href = objSer.Url.Isla.Index.replace('__id__', valor);
     });
 
     $(document).trigger('LienzoReady');

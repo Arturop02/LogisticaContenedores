@@ -121,6 +121,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\CatalogoController.cs" />
+    <Compile Include="Controllers\AreaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IslaController.cs" />
     <Compile Include="Controllers\PatioController.cs" />
@@ -188,10 +189,11 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Patio\Index.cshtml" />
     <Content Include="Views\Isla\Index.cshtml" />
+    <Content Include="Views\Catalogos\Operacion\Area\DibujarLimite.cshtml" />
+    <Content Include="Views\Catalogos\Operacion\Area\DibujarIsla.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Catalogo\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -228,9 +230,9 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>64549</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44369/</IISUrl>
+          <IISUrl>https://localhost:44369</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
-          <IISAppRootUrl>https://localhost:44369/</IISAppRootUrl>
+          <IISAppRootUrl>https://localhost:44369</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
