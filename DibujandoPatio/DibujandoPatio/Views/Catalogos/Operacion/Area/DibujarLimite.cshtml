@@ -1,13 +1,10 @@
 ﻿@using BT.Patio
 @model List<BT.Patio.PatioBT>
-@*@model DibujandoPatio.Models.PatioLayout*@
 @{
     ViewBag.Title = "Dibujando Patio";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var patios = ViewBag.Patios as List<PatioBT>;
 }
-
-
 
 <div class="mb-3 hidden">
     <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
@@ -52,7 +49,7 @@
                        name="area"
                        id="Area_@(p.Id)"
                        data-id="@p.Id"
-                       data-escala="@p.Escala"
+                       @*data-escala="@p.Escala"*@
                        autocomplete="off"
                        @(i == 0 ? "checked" : "")> @p.Nombre
                 </label>
@@ -62,15 +59,12 @@
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
     <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
-    <button id="deshacerBtn" class="btn btn-danger">Deshacer</button>
-    <button id="deshacerTodoBtn" class="btn btn-danger">Deshacer Todo</button>
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
-
 @section scripts{
-    <script src="~/Scripts/Patio/Patio.js"></script>
+    <script src="~/Scripts/Area/Area.js"></script>
     <script>
         var objSer = {
             Url: {
@@ -80,7 +74,7 @@
             }
         };
         $(document).ready(function () {
-            inicializarPatio();
+            inicializarArea();
             var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
             if (inputSeleccionado.length) {
                 // Tomar el label padre y disparar el clic para cargar el patio

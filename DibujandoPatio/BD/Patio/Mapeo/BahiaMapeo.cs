@@ -16,7 +16,7 @@ namespace BD.Patio.Mapeo
             bahiaBT.Id = (int)record["Id"];
             bahiaBT.Clave = record["Clave"].ToString();
             bahiaBT.NumeroFilas = (int)record["NumeroFilas"];
-            bahiaBT.Activo = (bool)record["Activo"];
+            //bahiaBT.Activo = (bool)record["Activo"];
 
             return bahiaBT;
         }

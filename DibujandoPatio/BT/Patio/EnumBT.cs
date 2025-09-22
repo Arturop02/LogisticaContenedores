@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace BT.Patio
 {
-    public class NivelBT : BaseBT
+    public class EnumBT
     {
-        public FilaBT Fila { get; set; }
-        public string Nivel { get; set; }
-
+        public int Id { get; set; }
+        public string Descripcion { get; set; }
     }
 }

@@ -18,12 +18,11 @@ namespace BD.Patio
                 using (SqlConnection conex = new SqlConnection(Conexion))
                 {
 
-                    using (SqlCommand cmd = new SqlCommand("dbo.sp_Patio_AC", conex))
+                    using (SqlCommand cmd = new SqlCommand("opera.o_cat_Patio_AC", conex))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@IdPatio", patioBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@ide_Patio", patioBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Nombre", patioBT.Nombre);
-                        cmd.Parameters.AgregarConValorNull("@Escala", patioBT.Escala);
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
 
 
@@ -32,7 +31,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        patioBT.Id = cmd.Parameters.ValorODefecto<int>("@IdPatio");
+                        patioBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_Patio");
                     }
                 }
                 return patioBT;
@@ -55,7 +54,7 @@ namespace BD.Patio
                     parametroXML.Agregar("Buscar", Query);
 
                 conn = new SqlConnection(Conexion);
-                SqlCommand comm = new SqlCommand("dbo.sp_Patio_PorOpcion", conn);
+                SqlCommand comm = new SqlCommand("opera.o_cat_Patio_PorOpcion", conn);
                 comm.CommandType = CommandType.StoredProcedure;
                 
                 comm.Parameters.AgregarConValorNull("@Opcion", Opcion.ToString());

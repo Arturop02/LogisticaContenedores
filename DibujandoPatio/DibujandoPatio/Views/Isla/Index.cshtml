@@ -46,7 +46,7 @@
                        name="area"
                        id="Area_@(p.Id)"
                        data-id="@p.Id"
-                       data-escala="@p.Escala"
+                       @*data-escala="@p.Escala"*@
                        autocomplete="off"
                        @(i == 0 ? "checked" : "")> @p.Nombre
                 </label>
@@ -90,7 +90,7 @@
     
     <script src="~/Scripts/Isla/Isla.js"></script>
 
-    <script src="~/Scripts/Patio/Patio.js"></script>
+    <script src="~/Scripts/Area/Area.js"></script>
 
     <script>
         var idPatioSeleccionado = '@ViewBag.IdPatioSeleccionado';
@@ -98,7 +98,7 @@
 
     <script>
         $(document).ready(function () {
-            inicializarPatio();
+            inicializarArea();
         });
     </script>
 

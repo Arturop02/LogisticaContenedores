@@ -23,18 +23,17 @@ namespace BD.Patio
                 using (SqlConnection conex = new SqlConnection(Conexion))
                 {
 
-                    using (SqlCommand cmd = new SqlCommand("dbo.sp_Isla_AC", conex))
+                    using (SqlCommand cmd = new SqlCommand("opera.o_cat_Isla_AC", conex))
                     {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@Id", islaBT.Id, output: true);
-                        cmd.Parameters.AgregarConValorNull("@IdPatio", islaBT.Patio?.Id);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AgregarConValorNull("@ide_isla", islaBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@ide_Area", islaBT.Area?.Id);
                         cmd.Parameters.AgregarConValorNull("@Nombre", islaBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("Orientacion", islaBT.Orientacion);
                         cmd.Parameters.AgregarConValorNull("@X", islaBT.X);
                         cmd.Parameters.AgregarConValorNull("@Y", islaBT.Y);
                         cmd.Parameters.AgregarConValorNull("Ancho", islaBT.Ancho);
                         cmd.Parameters.AgregarConValorNull("Alto", islaBT.Alto);
-                        cmd.Parameters.AgregarConValorNull("@NumeroBahias", islaBT.NumeroBahias);
                         cmd.Parameters.AgregarConValorNull("@Observaciones", islaBT.Observaciones);
 
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
@@ -43,7 +42,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        islaBT.Id = cmd.Parameters.ValorODefecto<int>("@Id");
+                        islaBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_isla");
                     }
                 }
                 return islaBT;

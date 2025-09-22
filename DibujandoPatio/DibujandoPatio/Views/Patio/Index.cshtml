@@ -52,7 +52,7 @@
                        name="area"
                        id="Area_@(p.Id)"
                        data-id="@p.Id"
-                       data-escala="@p.Escala"
+                       @*data-escala="@p.Escala"*@
                        autocomplete="off"
                        @(i == 0 ? "checked" : "")> @p.Nombre
                 </label>
@@ -70,7 +70,7 @@
 
 
 @section scripts{
-    <script src="~/Scripts/Patio/Patio.js"></script>
+    <script src="~/Scripts/Area/Area.js"></script>
     <script>
         var objSer = {
             Url: {
@@ -80,7 +80,7 @@
             }
         };
         $(document).ready(function () {
-            inicializarPatio();
+            inicializarArea();
             var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
             if (inputSeleccionado.length) {
                 // Tomar el label padre y disparar el clic para cargar el patio

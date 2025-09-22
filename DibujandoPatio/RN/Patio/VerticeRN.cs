@@ -63,12 +63,12 @@ namespace RN.Patio
             }
         }
 
-        public List<VerticeBT> BuscarPorPatio(int id)
+        public List<VerticeBT> BuscarPorArea(int id)
         {
             try
             {
                 VerticeBD verticeBD = new VerticeBD(ConstantesRN.BD_CONECTION);
-                return verticeBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.PorPatio, Query: id.ToString());
+                return verticeBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.PorArea, Query: id.ToString());
             }
             catch (Exception)
             {

@@ -28,27 +28,8 @@ $(document).on('LienzoReady',function () {
                         <label>Nombre de la Isla</label>
                         <input type="text" class="form-control" id="nombreIsla" required />
                     </div>
-                    <div class="form-group">
-                        <label>Orientacion</label>
-                        <select name="orientacion" class="form-control" id="orientacionIsla">
-                            <option value="">Selecciona la orientacion</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo de carga</label>
-                        <select class="form-control" id="tipoIsla">
-                            <option value="">Selecciona el tipo de carga</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Numero de Bahias</label>
-                        <input type="number" class="form-control" id="bahiasIsla" min="1" step="1" value="1" required />
-                    </div>
                 </form>`
             ,
-            onShow: function () {
-                cargarSelects();
-            },
             buttons: {
                 cancelar: {
                     label: "Cancelar",
@@ -62,22 +43,14 @@ $(document).on('LienzoReady',function () {
                     className: "btn-primary",
                     callback: function () {
                         datosIsla = {
-                            Nombre: $(`#nombreIsla`).val(),
-                            Orientacion: $(`#orientacionIsla`).val(),
-                            TipoCarga: $(`#tipoIsla`).val(),
-                            NumeroBahias: $(`#bahiasIsla`).val()
+                            Nombre: $(`#nombreIsla`).val()
                         };
-                        if (!datosIsla.Nombre || !datosIsla.Orientacion || !datosIsla.TipoCarga || !datosIsla.NumeroBahias) {
-                            bootbox.alert("Por favor complete todos los campos");
+                        if (!datosIsla.Nombre) {
+                            bootbox.alert("Por favor nombra la isla");
                             return false;
                         }
 
-                        var orientacionSeleccionada = $(`#orientacionIsla option:selected`);
-                        var angulo = orientacionSeleccionada.data('angulo') || 0;
-
                         const tamano = TamanoIsla(
-                            datosIsla.NumeroBahias,
-                            angulo,
                             escala
                         );
 
@@ -116,23 +89,16 @@ $(document).on('LienzoReady',function () {
                             fill: 'black',
                             
                         });
-
                         TextoDerecha.offsetY(TextoDerecha.height() / 2);
 
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
                         layer.add(grupoIslas);
 
-                        if (angulo !== 90 && angulo !== 0) {
-                            islaTemporal.rotation(angulo);
-                            islaTemporal.offsetX(tamano.ancho / 2);
-                            islaTemporal.offsetY(tamano.alto / 2);
-                        }
-
                         islaTemporal.on('transform', function () {
                             DameTamano(islaTemporal, layer);
-                            //actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-                            //ajustarTamanos(islaTemporal, escala);
-                            //layer.batchDraw();
+                            actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                            ajustarTamanos(islaTemporal, escala);
+                            layer.batchDraw();
                         });
 
                         islaTemporal.on('transformend', function () {
@@ -140,22 +106,7 @@ $(document).on('LienzoReady',function () {
                             let rotacion = islaTemporal.rotation() % 360;
                             if (rotacion < 0) rotacion += 360;
 
-                            let opciones = $(`#orientacionIsla option`);
-                            let orientacionId = null;
-                            let diferenciaMin = 999;
-
-                            opciones.each(function () {
-                                let angulo = $(this).data('angulo');
-                                let diferencia = Math.abs(rotacion - angulo);
-                                if (diferencia < diferenciaMin) {
-                                    diferenciaMin = diferencia;
-                                    orientacionId = $(this).val();
-                                }
-                            });
-
-                            if (orientacionId) {
-                                $(`#orientacionIsla`).val(orientacionId);
-                            }
+                            datosIsla.Orientacion = rotacion;
                         });
 
                         var tr = new Konva.Transformer({
@@ -200,26 +151,10 @@ $(document).on('LienzoReady',function () {
         });
     });
 
-    function cargarSelects() {
-
-        $.getJSON('/Catalogo/ObtenerOrientacion', function (data) {
-            var select = $(`#orientacionIsla`);
-            data.forEach(
-                o => select.append(`<option value="${o.Id}" data-angulo="${o.Angulo}">${o.Orientacion}</option>`)
-            );
-        });
-
-        $.getJSON('/Catalogo/ObtenerTipos', function (data) {
-            var select = $(`#tipoIsla`);
-            data.forEach(t => select.append(`<option value="${t.Id}">${t.Tipo}</option>`));
-        });
-    }
-
     $(`#orientacionIsla`).on('change', function () {
         if (!islaTemporal) return;
 
-        var angulo = $(this).find(':selected').data('angulo');
-        islaTemporal.rotation(angulo);
+        islaTemporal.rotation();
         layer.draw();
     });
 
@@ -228,11 +163,13 @@ $(document).on('LienzoReady',function () {
             bootbox.alert("No hay isla para guardar");
             return;
         }
+
+        let rotacion = islaTemporal.rotation() % 360;
+        if (rotacion < 0) rotacion += 360;
+
         var data = {
             Nombre: datosIsla.Nombre,
-            Orientacion: $(`#orientacionIsla`).val(),
-            TipoCarga: datosIsla.TipoCarga,
-            NumeroBahias: datosIsla.NumeroBahias,
+            Orientacion: rotacion,
             x: islaTemporal.x(),
             y: islaTemporal.y(),
             Ancho: islaTemporal.width() * islaTemporal.scaleX(),
@@ -260,33 +197,32 @@ $(document).on('LienzoReady',function () {
     });
 
     const escala = Lienzo.Escala;
-    function TamanoIsla(numeroBahias, angulo, escala) {
+    function TamanoIsla(escala) {
         const anchoBahia = 6 / escala;
         const altoBahia = 2 / escala;
 
-        let ancho = 0;
-        let alto = 0;
+        let ancho = 2 * anchoBahia;
+        let alto = altoBahia;
 
-        let rotacion = angulo % 360;
-        if (rotacion < 0) rotacion += 360;
+        //let rotacion = angulo % 360;
+        //if (rotacion < 0) rotacion += 360;
 
-
-        switch (rotacion) {
-            case 0:
-            case 180:
-                ancho = numeroBahias * anchoBahia;
-                alto = altoBahia;
-                break;
-            case 90:
-            case 270:
-                ancho = anchoBahia;
-                alto = numeroBahias * altoBahia;
-                break;
-            default:
-                ancho = anchoBahia;
-                alto = numeroBahias * altoBahia;
-                break;
-        }
+        //switch (rotacion) {
+        //    case 0:
+        //    case 180:
+        //        ancho = numeroBahias * anchoBahia;
+        //        alto = altoBahia;
+        //        break;
+        //    case 90:
+        //    case 270:
+        //        ancho = anchoBahia;
+        //        alto = numeroBahias * altoBahia;
+        //        break;
+        //    default:
+        //        ancho = anchoBahia;
+        //        alto = numeroBahias * altoBahia;
+        //        break;
+        //}
 
         return { ancho, alto };
     }
@@ -301,7 +237,6 @@ $(document).on('LienzoReady',function () {
         TextoDerecha.text(`${altoMetros} m`);
 
         actualizarTexto(isla, TextoSuperior, TextoDerecha);
-
     }
 });
 

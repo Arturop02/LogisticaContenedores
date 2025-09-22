@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BT
+namespace BT.Patio
 {
-    public class BaseBT
+    public class DetalleEnuBT
     {
         public int Id { get; set; }
-        public char Est_cve { get; set; }
+        public string Descripcion { get; set; }
+        public string Valor { get; set; }
     }
 }

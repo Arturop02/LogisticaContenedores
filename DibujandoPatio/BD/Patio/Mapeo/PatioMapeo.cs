@@ -11,11 +11,7 @@ namespace BD.Patio.Mapeo
             PatioBT patioBT = new PatioBT();
             patioBT.Id = (int)record["Id"];
             patioBT.Nombre = record["Nombre"].ToString();
-            patioBT.Escala = (decimal)record["Escala"];
-            if (record.GetOrdinal("Activo") >= 0 && !record.IsDBNull(record.GetOrdinal("Activo")))
-                patioBT.Activo = (bool)record["Activo"];
-            else
-                patioBT.Activo = true;
+            patioBT.Est_cve = record["Est_cve"].ToString().Trim()[0];
             return patioBT;
         }
     }

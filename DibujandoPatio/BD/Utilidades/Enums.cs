@@ -14,7 +14,7 @@
         QueryA = 4,
         TodosAB = 5,
         ListaA = 6,
-        PorPatio = 7,
+        PorArea = 7,
         Otra2 = 8,
         Otra3 = 9,
         Otra4 = 10,

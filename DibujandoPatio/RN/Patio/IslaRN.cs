@@ -1,4 +1,5 @@
 ﻿using BD.Patio;
+using BD.Utilidades;
 using BT.Patio;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.AltaCambio(islaBT, BD.Utilidades.Accion.Alta);
+                return islaBD.AltaCambio(islaBT, Accion.Alta);
             }
             catch (Exception)
             {
@@ -26,7 +27,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.AltaCambio(islaBT, BD.Utilidades.Accion.Cambio);
+                return islaBD.AltaCambio(islaBT, Accion.Cambio);
             }
             catch (Exception)
             {
@@ -38,7 +39,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.AltaCambio(islaBT, BD.Utilidades.Accion.Borrar);
+                return islaBD.AltaCambio(islaBT, Accion.Borrar);
             }
             catch (Exception)
             {
@@ -52,7 +53,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
+                return islaBD.BuscaPorOpcion(BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
             }
             catch (Exception)
             {
@@ -61,12 +62,12 @@ namespace RN.Patio
             }
         }
 
-        public List<IslaBT> BuscarPorPatio(int id)
+        public List<IslaBT> BuscarPorArea(int id)
         {
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.PorPatio, Query: id.ToString());
+                return islaBD.BuscaPorOpcion(BuscarOpcion.PorArea, Query: id.ToString());
             }
             catch (Exception)
             {
@@ -79,7 +80,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.TodosA);
+                return islaBD.BuscaPorOpcion(BuscarOpcion.TodosA);
             }
             catch (Exception)
             {
@@ -93,11 +94,10 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.TodosAB);
+                return islaBD.BuscaPorOpcion(BuscarOpcion.TodosAB);
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -107,7 +107,7 @@ namespace RN.Patio
             try
             {
                 IslaBD islaBD = new IslaBD(ConstantesRN.BD_CONECTION);
-                return islaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.QueryA, Query: Query);
+                return islaBD.BuscaPorOpcion(BuscarOpcion.QueryA, Query: Query);
             }
             catch (Exception)
             {

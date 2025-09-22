@@ -13,7 +13,7 @@ namespace BD.Patio.Mapeo
             obj.X = (decimal)record["X"];
             obj.Y = (decimal)record["Y"];
             obj.Orden = (int)record["Orden"];
-            obj.Activo = (bool)record["Activo"];
+            obj.Est_cve = record["Est_cve"].ToString().Trim()[0];
             return obj;
         }
     }
