@@ -9,7 +9,7 @@ namespace BD.Patio.Mapeo
         public VerticeBT Mapear(IDataRecord record)
         {
             VerticeBT obj = new VerticeBT();
-            obj.Id = (int)record["Id"];
+            obj.Id = (int)record["ide_Vertice_Are"];
             obj.X = (decimal)record["X"];
             obj.Y = (decimal)record["Y"];
             obj.Orden = (int)record["Orden"];

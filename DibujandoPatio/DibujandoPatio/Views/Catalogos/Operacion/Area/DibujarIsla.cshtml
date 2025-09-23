@@ -4,7 +4,7 @@
 @{
     ViewBag.Title = "Islas";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var patios = ViewBag.Patios as List<PatioBT>;
+    var areas = ViewBag.Areas as List<BT.AreaBT>;
 }
 
 <style type="text/css">
@@ -39,16 +39,16 @@
             int i = 0;
         }
 
-        @foreach (var p in patios)
+        @foreach (var a in areas)
         {
             <label class="btn btn-primary @(i==0 ? "active" : "")">
                 <input type="radio"
                        name="area"
-                       id="Area_@(p.Id)"
-                       data-id="@p.Id"
+                       id="Area_@(a.Id)"
+                       data-id="@a.Id"
                        @*data-escala="@p.Escala"*@
                        autocomplete="off"
-                       @(i == 0 ? "checked" : "")> @p.Nombre
+                       @(i == 0 ? "checked" : "")> @a.Nombre
                 </label>
                 i++;
             }
@@ -68,7 +68,7 @@
     <script src="~/Scripts/Area/Area.js"></script>
 
     <script>
-        var idPatioSeleccionado = '@ViewBag.IdPatioSeleccionado';
+        var idPatioSeleccionado = '@ViewBag.IdAreaSeleccionada';
     </script>
 
     <script>

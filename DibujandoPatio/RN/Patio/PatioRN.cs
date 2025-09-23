@@ -18,7 +18,7 @@ namespace RN.Patio
                 using (TransactionScope ts = new TransactionScope())
                 {
                     PatioBD patioBD = new PatioBD(ConstantesRN.BD_CONECTION);
-                    patioBT = patioBD.AltaCambio(patioBT, BD.Utilidades.Accion.Alta);
+                    patioBT = patioBD.AltaCambio(patioBT, Accion.Alta);
 
                     //if (patioBT.Vertices != null)
                     //{
@@ -48,7 +48,7 @@ namespace RN.Patio
                 using (TransactionScope ts = new TransactionScope())
                 {
                     PatioBD patioBD = new PatioBD(ConstantesRN.BD_CONECTION);
-                    patioBT = patioBD.AltaCambio(patioBT, BD.Utilidades.Accion.Cambio);
+                    patioBT = patioBD.AltaCambio(patioBT, Accion.Cambio);
 
                     //if (patioBT.Vertices != null)
                     //{
@@ -136,7 +136,7 @@ namespace RN.Patio
             try
             {
                 PatioBD patioBD = new PatioBD(ConstantesRN.BD_CONECTION);
-                return patioBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
+                return patioBD.BuscaPorOpcion(BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
             }
             catch (Exception)
             {

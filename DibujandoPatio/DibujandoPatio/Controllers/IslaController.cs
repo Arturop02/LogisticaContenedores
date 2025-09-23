@@ -43,11 +43,11 @@ namespace DibujandoPatio.Controllers
         
         public ActionResult Index(int? id)
         {
-            PatioRN patioRN = new PatioRN();
-            var patio = patioRN.DameTodosAlta();
-            ViewBag.Patios = patio;
+            AreaRN areaRN = new AreaRN();
+            var area = areaRN.DameTodosAlta();
+            ViewBag.Areas = area;
 
-            ViewBag.IdPatioSeleccionado = id;
+            ViewBag.IdAreaSeleccionada = id;
             return View();
         }
     }

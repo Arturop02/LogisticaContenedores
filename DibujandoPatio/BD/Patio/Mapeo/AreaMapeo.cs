@@ -13,7 +13,7 @@ namespace BD.Patio.Mapeo
         public AreaBT Mapear(System.Data.IDataRecord record)
         {
             AreaBT areaBT = new AreaBT();
-            areaBT.Id = (int)record["Id"];
+            areaBT.Id = (int)record["ide_Area"];
             areaBT.Nombre = record["Nombre"].ToString();
             //areaBT.Patio = new PatioBT();
             //areaBT.Patio.Id = (int)record["PatioId"];

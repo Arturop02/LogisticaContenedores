@@ -58,29 +58,26 @@ namespace DibujandoPatio.Controllers
             }
         }
 
-        //[HttpGet]
-        //public JsonResult ObtenerPatiosPorId(int id)
-        //{
-        //    PatioRN patioRN = new PatioRN();
-        //    var patio = patioRN.BuscarPorId(id);
-        //    if (patio != null)
-        //    {
-        //        patio.Vertices = new VerticeRN().BuscarPorPatio(patio.Id);
-        //        patio.Islas = new IslaRN().BuscarPorPatio(patio.Id);
-        //        return Json(new { ok = true, data = patio }, JsonRequestBehavior.AllowGet);
-        //    }
-        //    return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
-        //}
+        [HttpGet]
+        public JsonResult ObtenerPatiosPorId(int id)
+        {
+            PatioRN patioRN = new PatioRN();
+            var patio = patioRN.BuscarPorId(id);
+            if (patio != null)
+            {
+                return Json(new { ok = true, data = patio }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { ok = false, message = "No se encontró el patio con Id " + id }, JsonRequestBehavior.AllowGet);
+        }
 
-        //[HttpGet]
-        //public JsonResult ListarPatios()
-        //{
-        //    PatioRN patioRN = new PatioRN();
-        //    var lista = patioRN.DameTodosAlta()
-        //        .Where(p => p.Activo)
-        //        .ToList();
-        //    return Json(lista, JsonRequestBehavior.AllowGet);
-        //}
+        [HttpGet]
+        public JsonResult ListarPatios()
+        {
+            PatioRN patioRN = new PatioRN();
+            var lista = patioRN.DameTodosAlta()
+                .ToList();
+            return Json(lista, JsonRequestBehavior.AllowGet);
+        }
 
         [HttpGet]
         public JsonResult BuscarPatioPorOpcion(PatioBT patioBT)

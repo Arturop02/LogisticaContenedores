@@ -1,14 +1,23 @@
 ﻿@using BT.Patio
-@model List<BT.Patio.PatioBT>
+@model List<BT.AreaBT>
 @{
     ViewBag.Title = "Dibujando Patio";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var areas = ViewBag.Areas as List<BT.AreaBT>;
     var patios = ViewBag.Patios as List<PatioBT>;
 }
 
 <div class="mb-3 hidden">
     <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
 </div>
+<!--<div class="mb-3">
+    <select id="selectPatio">
+        <option value="">Selecciona el patio</option>
+    </select>
+    <input type="text" id="nombreInput" placeholder="Ingresa el nombre del nuevo patio"/>-->
+    @*<button id="agregarPatioBtn">Nuevo Patio</button>*@
+    <!--<input type="text" id="nombreArea" placeholder="Ingresa el nombre del area nueva" />
+</div>-->
 
 <style type="text/css">
     #lstAreas > label.active {
@@ -42,24 +51,24 @@
             int i = 0;
         }
 
-        @foreach (var p in patios)
+        @foreach (var a in areas)
         {
             <label class="btn btn-primary @(i==0 ? "active" : "")">
                 <input type="radio"
                        name="area"
-                       id="Area_@(p.Id)"
-                       data-id="@p.Id"
-                       @*data-escala="@p.Escala"*@
+                       id="Area_@(a.Id)"
+                       data-id="@a.Id"
                        autocomplete="off"
-                       @(i == 0 ? "checked" : "")> @p.Nombre
-                </label>
-                i++;
-            }
+                       @(i == 0 ? "checked" : "")> @a.Nombre
+            </label>
+            i++;
+         }
 
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
     <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
+    <button id="btnDibujar" class="btn btn-success"><i class="glyphicon glyphicon-plus" aria-hidden="true"></i></button>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 

@@ -9,7 +9,7 @@ namespace BD.Patio.Mapeo
         public PatioBT Mapear(IDataRecord record)
         {
             PatioBT patioBT = new PatioBT();
-            patioBT.Id = (int)record["Id"];
+            patioBT.Id = (int)record["ide_Patio"];
             patioBT.Nombre = record["Nombre"].ToString();
             patioBT.Est_cve = record["Est_cve"].ToString().Trim()[0];
             return patioBT;

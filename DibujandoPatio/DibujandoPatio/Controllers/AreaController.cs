@@ -76,22 +76,22 @@ namespace DibujandoPatio.Controllers
         [HttpGet]
         public ActionResult DibujarLimite(int? Id)
         {
-            PatioRN patioRN = new PatioRN();
-            var patio = patioRN.DameTodosAlta();
-            ViewBag.Patios = patio;
+            AreaRN areaRN = new AreaRN();
+            var area = areaRN.DameTodosAlta();
+            ViewBag.Areas = area;
 
-            ViewBag.IdPatioSeleccionado = Id;
+            ViewBag.IdAreaSeleccionada = Id;
             return View(RutaBase + "DibujarLimite.cshtml");
         }
 
         [HttpGet]
         public ActionResult DibujarIsla(int? Id)
         {
-            PatioRN patioRN = new PatioRN();
-            var patio = patioRN.DameTodosAlta();
-            ViewBag.Patios = patio;
+            AreaRN areaRN = new AreaRN();
+            var area = areaRN.DameTodosAlta();
+            ViewBag.Areas = area;
 
-            ViewBag.IdPatioSeleccionado = Id;
+            ViewBag.IdAreaSeleccionada = Id;
             return View(RutaBase + "DibujarIsla.cshtml");
         }
 

@@ -1,8 +1,7 @@
 ﻿var stage;
 var layer;
 var Lienzo;
-var Historial = [];
-var indiceHistorial = -1;
+
 var enumModoLienzo = {
     Area: 'Area',
     Isla: 'Isla',
@@ -351,6 +350,7 @@ function inicializarArea() {
     Punto.OrdenActual = 0;
 
     var container = document.getElementById('container');
+    var listarPatios = [];
 
     stage = new Konva.Stage({
         container: 'container',
@@ -487,6 +487,10 @@ function inicializarArea() {
         }
     });
 
+    $.getJSON('/Patio/ListarPatios', function (res) {
+        listarPatios = res.map(p => `<option value="${p.Id}">${p.Nombre}</option>`).join('');
+    });
+
     $(`#lstAreas`).on('click', 'label.btn', function () {
         $(`#lstAreas .btn`).removeClass('active');
         $(this).addClass('active');
@@ -522,13 +526,24 @@ function inicializarArea() {
         });
     });
 
-    $('#guardarBtn').on('click', function (e) {
-        Lienzo.Cerrar();
+    $(`#btnDibujar`).on('click', function () {
+        layer.destroyChildren();
+        layer.draw();
+        Lienzo.lstPunto = [];
+        Lienzo.PuntoActual = null;
 
-        //Se guarda el nombre del input con el id nombreInput
-        const id = $(this).data('idpatio');
-        const nombre = $('#nombreInput').val();
-        const escala = Lienzo.Escala;
+        Punto.OrdenActual = 0;
+
+        Lienzo.Modo = enumModoLienzo.Area;
+        Lienzo.Estado = enumEstadoLienzo.Agregando;
+
+        $('#guardarBtn').removeData('idpatio').prop('disabled', false);
+    });
+
+    $('#guardarBtn').on('click', function (e) {
+        let id = $(this).data('idpatio');
+        //let nombre = S(this).data()
+        Lienzo.Cerrar();
 
         //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
         //el array puntos con un for
@@ -540,45 +555,123 @@ function inicializarArea() {
             Activo: p.Activo
         }));
 
-        ////Condicion que envia una alerta si alguno de los campos no se ha completado
-        if (!nombre || !escala || vertices.length === 0) {
-            bootbox.alert("Por favor, completa todos los campos y/o dibuja el patio antes de guardar.");
-            return;
-        }
-
         let url, payload;
 
         if (id) {
             url = '/Area/EditarArea';
             payload = {
                 Id: id,
-                Nombre: nombre,
+                //Nombre: nombre,
                 Vertices: vertices
             }
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: payload,
+                contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
+                success: function (res) {
+                    if (res.ok) {
+                        bootbox.alert("Editado correctamente");
+                        dibujando = false;
+                        $('#guardarBtn').prop('disabled', true);
+                    } else {
+                        bootbox.alert("Ha ocurrido un problema");
+                    }
+                }
+            });
+
         } else {
-            url = '/Area/GuardarArea';
-            payload = JSON.stringify({
-                Nombre: nombre,
-                Vertices: vertices
+
+            let formulario = `
+                <div class="mb-3">
+                    <label for="selectPatio">Selecciona el patio:</label>
+                    <select id="selectPatio" class="form-control">
+                        <option value="">-- Selecciona --</option>
+                        ${listarPatios}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="nombreInput">Nuevo Patio (opcional):</label>
+                    <input type="text" id="nombreInput" class="form-control" placeholder="Ingresa el nombre del nuevo patio"/>
+                </div>
+                <div class="mb-3">
+                    <label for="nombreArea">Área:</label>
+                    <input type="text" id="nombreArea" class="form-control" placeholder="Ingresa el nombre del área nueva"/>
+                </div>
+            `;
+
+            bootbox.dialog({
+                title: 'Confirmar Guardado',
+                message: formulario,
+                buttons: {
+                    cancel: {
+                        label: 'Cancelar',
+                        className: 'btn-danger'
+                    },
+                    confirm: {
+                        label: 'Guardar',
+                        className: 'btn-success',
+                        callback: function () {
+                            const idPatio = $('#selectPatio').val();
+                            const nombrePatio = $('#nombreInput').val().trim();
+                            const nombreArea = $('#nombreArea').val().trim();
+
+                            if (!idPatio && !nombrePatio) {
+                                bootbox.alert("Por favor, selecciona un patio existente o ingresa el nombre de un nuevo patio.");
+                                return false;
+                            }
+
+                            if (!nombreArea) {
+                                bootbox.alert("Por favor, ingresa el nombre del área.");
+                                return false;
+                            }
+
+                            url = '/Area/GuardarArea';
+                            payload = JSON.stringify({
+                                Id: idPatio,
+                                Nombre: nombrePatio,
+                                NombreArea: nombreArea,
+                                Vertices: vertices
+                            });
+
+                            $.ajax({
+                                url: url,
+                                method: 'POST',
+                                data: payload,
+                                contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
+                                success: function (res) {
+                                    if (res.ok) {
+                                        bootbox.alert("Guardado correctamente");
+                                        dibujando = false;
+                                        $('#guardarBtn').prop('disabled', true);
+                                    } else {
+                                        bootbox.alert("Ha ocurrido un problema");
+                                    }
+                                }
+                            });
+
+                        }
+                    },
+                },
             });
         }
-
         ////Metodo POST usando jquery y ajax para comunicar con la BD
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: payload,
-            contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
-            success: function (res) {
-                if (res.ok) {
-                    bootbox.alert(id ? "Editado con exito" : "Guardado correctamente");
-                    dibujando = false;
-                    $('#guardarBtn').prop('disabled', true);
-                } else {
-                    bootbox.alert("Ha ocurriod un problema")
-                }
-            }
-        });
+        //$.ajax({
+        //    url: url,
+        //    method: 'POST',
+        //    data: payload,
+        //    contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
+        //    success: function (res) {
+        //        if (res.ok) {
+        //            bootbox.alert(id ? "Editado con exito" : "Guardado correctamente");
+        //            dibujando = false;
+        //            $('#guardarBtn').prop('disabled', true);
+        //        } else {
+        //            bootbox.alert("Ha ocurriod un problema")
+        //        }
+        //    }
+        //});
     });
 
     $(`#btnRedirigir`).on('click', function () {
