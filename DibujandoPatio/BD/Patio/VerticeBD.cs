@@ -21,9 +21,9 @@ namespace BD.Patio
                     using (SqlCommand cmd = new SqlCommand("opera.o_dca_Vertice_Are_AC", conex))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@ide_Vertice_Are", verticeBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@Id", verticeBT.Id, output: true);
 
-                        cmd.Parameters.AgregarConValorNull("@ide_Area", verticeBT.Area.Id);
+                        cmd.Parameters.AgregarConValorNull("@IdArea", verticeBT.Area?.Id);
                         cmd.Parameters.AgregarConValorNull("@X", verticeBT.X);
                         cmd.Parameters.AgregarConValorNull("@Y", verticeBT.Y);
                         cmd.Parameters.AgregarConValorNull("@Orden", verticeBT.Orden);
@@ -34,7 +34,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        verticeBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_Vertice_Are");
+                        verticeBT.Id = cmd.Parameters.ValorODefecto<int>("@Id");
                     }
                 }
                 return verticeBT;

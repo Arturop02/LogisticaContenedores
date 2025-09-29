@@ -21,13 +21,15 @@ namespace RN.Patio
                 using(TransactionScope ts = new TransactionScope())
                 {
                     AreaBD areaBD = new AreaBD(ConstantesRN.BD_CONECTION);
-                    areaBT =  areaBD.AltaCambio(areaBT, BD.Utilidades.Accion.Alta);
+                    areaBT =  areaBD.AltaCambio(areaBT, Accion.Alta);
 
                     if(areaBT.Vertices != null)
                     {
                         VerticeRN verticeRN = new VerticeRN();
                         foreach(var item in areaBT.Vertices)
                         {
+                            item.Area = areaBT;
+                            item.Area.Id = areaBT.Id;
                             verticeRN.Agregar(item);
                         }
                     }
@@ -66,7 +68,10 @@ namespace RN.Patio
 
                         foreach (var vertice in detalles)
                         {
-                            vertice.vertice.Area = areaBT;
+                            if(vertice.vertice.Area == null) vertice.vertice.Area = new AreaBT();
+                            vertice.vertice.Area.Id = areaBT.Id;
+
+                            //vertice.vertice.Area = areaBT;
                             switch (vertice.Accion)
                             {
                                 case Accion.Alta: verticeRN.Agregar(vertice.vertice); break;

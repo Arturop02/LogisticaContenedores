@@ -55,7 +55,7 @@
 
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
-    <button id="crearIsla" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
+    <button id="crearIsla" class="btn btn-warning"><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
 
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 </div>
@@ -63,9 +63,9 @@
 
 @section scripts{
     
-    <script src="~/Scripts/Isla/Isla.js"></script>
-
     <script src="~/Scripts/Area/Area.js"></script>
+    
+    <script src="~/Scripts/Isla/Isla.js"></script>
 
     <script>
         var idPatioSeleccionado = '@ViewBag.IdAreaSeleccionada';
@@ -73,7 +73,9 @@
 
     <script>
         $(document).ready(function () {
+            //$(document).trigger('LienzoReady');
             inicializarArea();
+            
         });
     </script>
 

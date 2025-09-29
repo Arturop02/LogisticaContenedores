@@ -178,7 +178,7 @@ function inicializarArea() {
                 layer.add(this.GraficoTexto);
                 var linea = this;
                 this.Grafico.on('pointerdblclick', (e) => {
-                    if (Lienzo.Modo !== enumModoLienzo.Patio || Lienzo.Estado !== enumEstadoLienzo.Editando) {
+                    if (Lienzo.Modo !== enumModoLienzo.Area || Lienzo.Estado !== enumEstadoLienzo.Editando) {
                         return;
                     }
 
@@ -491,28 +491,41 @@ function inicializarArea() {
         listarPatios = res.map(p => `<option value="${p.Id}">${p.Nombre}</option>`).join('');
     });
 
-    $(`#lstAreas`).on('click', 'label.btn', function () {
+    
+
+    $(`#lstAreas`).on('click','label.btn', function () {
         $(`#lstAreas .btn`).removeClass('active');
         $(this).addClass('active');
 
-        let id = $(this).find('input[name="area"]').data('id');
+        let input = $(this).find('input[name="area"]');
+        let id = input.data('id');
+        let nombre = input.data('nombre');
+        //let patio = $(this).find('input[name="area"]').data('patio');
 
-        $('#guardarBtn').data('idpatio', id).prop('disabled', !id);
+        $('#guardarBtn').data('idpatio', id)
+            .data('nombre', nombre)
+            .prop('disabled', !id);
+
         $('#btnRedirigir').data('idpatio', id).prop('disabled', !id);
 
         if (!id) return;
 
+        layer.destroyChildren();
+        layer.draw();
+        Lienzo.lstPunto = [];
+        Lienzo.PuntoActual = null;
+
         $.getJSON('/Area/ObtenerAreaPorId', { id: id }, function (res) {
             if (!res.ok || !res.data) return;
 
-            layer.destroyChildren();
-            layer.draw();
-            Lienzo.lstPunto = [];
-            Lienzo.PuntoActual = null;
+            //layer.destroyChildren();
+            //layer.draw();
+            //Lienzo.lstPunto = [];
+            //Lienzo.PuntoActual = null;
 
-            var patio = res.data;
-            patio.Vertices = patio.Vertices.OrderBy(c => c.Orden).ToArray();
-            patio.Vertices.forEach(v => {
+            var area = res.data;
+            area.Vertices = area.Vertices.OrderBy(c => c.Orden).ToArray();
+            area.Vertices.forEach(v => {
                 Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
                 Lienzo.PuntoActual.Id = v.Id;
                 Lienzo.PuntoActual.Dibujar();
@@ -522,7 +535,7 @@ function inicializarArea() {
             Lienzo.Cerrar();
             Lienzo.Modo = enumModoLienzo.Area;
             Lienzo.Estado = enumEstadoLienzo.Editando;
-            Lienzo.BloquearPatio(false);
+            Lienzo.BloquearArea(false);
         });
     });
 
@@ -541,10 +554,10 @@ function inicializarArea() {
     });
 
     $('#guardarBtn').on('click', function (e) {
-        let id = $(this).data('idpatio');
-        //let nombre = S(this).data()
         Lienzo.Cerrar();
-
+        let id = $(this).data('idpatio');
+        let nombre = $(this).data('nombre');
+       
         //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
         //el array puntos con un for
         const vertices = Lienzo.lstPunto.map(p => ({
@@ -561,16 +574,17 @@ function inicializarArea() {
             url = '/Area/EditarArea';
             payload = {
                 Id: id,
-                //Nombre: nombre,
+                Nombre: nombre,
                 Vertices: vertices
             }
 
             $.ajax({
                 url: url,
                 method: 'POST',
-                data: payload,
-                contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
+                data: JSON.stringify(payload),
+                contentType: 'application/json; charset=utf-8',
                 success: function (res) {
+                    console.log("respuesta del server", res);
                     if (res.ok) {
                         bootbox.alert("Editado correctamente");
                         dibujando = false;
@@ -592,10 +606,6 @@ function inicializarArea() {
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="nombreInput">Nuevo Patio (opcional):</label>
-                    <input type="text" id="nombreInput" class="form-control" placeholder="Ingresa el nombre del nuevo patio"/>
-                </div>
-                <div class="mb-3">
                     <label for="nombreArea">Área:</label>
                     <input type="text" id="nombreArea" class="form-control" placeholder="Ingresa el nombre del área nueva"/>
                 </div>
@@ -614,10 +624,9 @@ function inicializarArea() {
                         className: 'btn-success',
                         callback: function () {
                             const idPatio = $('#selectPatio').val();
-                            const nombrePatio = $('#nombreInput').val().trim();
                             const nombreArea = $('#nombreArea').val().trim();
 
-                            if (!idPatio && !nombrePatio) {
+                            if (!idPatio) {
                                 bootbox.alert("Por favor, selecciona un patio existente o ingresa el nombre de un nuevo patio.");
                                 return false;
                             }
@@ -628,18 +637,17 @@ function inicializarArea() {
                             }
 
                             url = '/Area/GuardarArea';
-                            payload = JSON.stringify({
-                                Id: idPatio,
-                                Nombre: nombrePatio,
-                                NombreArea: nombreArea,
+                            payload = {
+                                Nombre: nombreArea,
+                                Patio: { Id: idPatio },
                                 Vertices: vertices
-                            });
+                            }
 
                             $.ajax({
                                 url: url,
                                 method: 'POST',
-                                data: payload,
-                                contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
+                                data: JSON.stringify(payload),
+                                contentType: 'application/json; charset=UTF-8',
                                 success: function (res) {
                                     if (res.ok) {
                                         bootbox.alert("Guardado correctamente");
@@ -675,11 +683,11 @@ function inicializarArea() {
     });
 
     $(`#btnRedirigir`).on('click', function () {
-        let valor = $(`#lstAreas input[name = "area"]:checked`).data('id');
-        if (!valor) {
-            bootbox.alert("Seleccione un patio");
-            return;
-        }
+        let valor = $(`#lstAreas input[name = "area"]`).data('id');
+        //if (!valor) {
+        //    bootbox.alert("Seleccione un patio");
+        //    return;
+        //}
         window.location.href = objSer.Url.Isla.Index.replace('__id__', valor);
     });
 

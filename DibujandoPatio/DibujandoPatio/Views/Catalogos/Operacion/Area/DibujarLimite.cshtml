@@ -10,14 +10,6 @@
 <div class="mb-3 hidden">
     <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
 </div>
-<!--<div class="mb-3">
-    <select id="selectPatio">
-        <option value="">Selecciona el patio</option>
-    </select>
-    <input type="text" id="nombreInput" placeholder="Ingresa el nombre del nuevo patio"/>-->
-    @*<button id="agregarPatioBtn">Nuevo Patio</button>*@
-    <!--<input type="text" id="nombreArea" placeholder="Ingresa el nombre del area nueva" />
-</div>-->
 
 <style type="text/css">
     #lstAreas > label.active {
@@ -53,16 +45,19 @@
 
         @foreach (var a in areas)
         {
-            <label class="btn btn-primary @(i==0 ? "active" : "")">
+            var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
+            var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
+            <label class="btn btn-primary @activo">
                 <input type="radio"
                        name="area"
                        id="Area_@(a.Id)"
                        data-id="@a.Id"
+                       data-nombre="@a.Nombre"
                        autocomplete="off"
-                       @(i == 0 ? "checked" : "")> @a.Nombre
-            </label>
-            i++;
-         }
+                       @checkedAtrr> @a.Nombre
+                </label>
+                i++;
+            }
 
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
@@ -78,15 +73,18 @@
         var objSer = {
             Url: {
                 Isla: {
-                    Index: '@Url.Action("Index", "Isla", new { id = "__id__" })',
+                    Index: '@Url.Action("Index", "Isla", new { id = ""})',
+                },
+                Area: {
+                    ObtenerAreaPorId: '@Url.Action("Index", "Area", new { id = "" })',
                 }
             }
         };
         $(document).ready(function () {
             inicializarArea();
-            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
+            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');;
+
             if (inputSeleccionado.length) {
-                // Tomar el label padre y disparar el clic para cargar el patio
                 inputSeleccionado.closest('label').trigger('click');
             }
         });

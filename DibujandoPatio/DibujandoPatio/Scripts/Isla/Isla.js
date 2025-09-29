@@ -6,19 +6,19 @@ var TextoDerecha = null;
 $(document).on('LienzoReady',function () {
     Lienzo.Modo = enumModoLienzo.Isla;
     Lienzo.Estado = enumEstadoLienzo.Agregando;
-    Lienzo.BloquearPatio(true);
+    Lienzo.BloquearArea(true);
 
     var stage = Lienzo.Stage;
     var layer = stage.getLayers()[0];
     
 
-    if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
-        Lienzo.Modo = enumModoLienzo.Isla;
-        let $radio = $(`#lstAreas input[data-id="${idPatioSeleccionado}"]`);
-        $radio.prop("checked", true);
-        $radio.closest("label").trigger('click');
-        $('#crearIsla').data('idpatio', idPatioSeleccionado).prop('disabled', !idPatioSeleccionado);
-    }
+    //if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
+    //    Lienzo.Modo = enumModoLienzo.Isla;
+    //    let $radio = $(`#lstAreas input[data-id="${idPatioSeleccionado}"]`);
+    //    //$radio.prop("checked", true);
+    //    $radio.closest("label").trigger('click');
+    //    $('#crearIsla').data('idpatio', idPatioSeleccionado).prop('disabled', !idPatioSeleccionado);
+    //}
 
     $(`#crearIsla`).on(`click`, function () {
         bootbox.dialog({
@@ -112,13 +112,13 @@ $(document).on('LienzoReady',function () {
                         var tr = new Konva.Transformer({
                             nodes: [islaTemporal],
                             enabledAnchors: [
-                                'top-left',
+//                                'top-left',
                                 'top-center',
                                 'top-right',
-                                'bottom-left',
+                                //'bottom-left',
                                 'bottom-right',
                                 'bottom-center',
-                                'middle-left',
+                                //'middle-left',
                                 'middle-right'
                             ],
                             rotateEnabled: true,

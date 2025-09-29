@@ -25,10 +25,10 @@ namespace BD.Patio
                     using (SqlCommand cmd = new SqlCommand("opera.o_cat_Area_AC", conex))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@ide_Area", areaBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@Id", areaBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Nombre", areaBT.Nombre);
-                        cmd.Parameters.AgregarConValorNull("@ide_Patio", areaBT.Patio?.Id);
-                        cmd.Parameters.AgregarConValorNull("@est_cve", areaBT.Est_cve);
+                        cmd.Parameters.AgregarConValorNull("@IdPatio", areaBT.Patio?.Id);
+                        //cmd.Parameters.AgregarConValorNull("@est_cve", areaBT.Est_cve);
 
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
 
@@ -36,7 +36,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        areaBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_Area");
+                        areaBT.Id = cmd.Parameters.ValorODefecto<int>("@Id");
                     }
                 }
                 return areaBT;

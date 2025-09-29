@@ -6,8 +6,6 @@ namespace BT.Patio
     public class PatioBT: BaseBT
     {
         public string Nombre { get; set; }
-        //public List<VerticeBT> Vertices { get; set; }
-        //public List<IslaBT> Islas { get; set; }
-
+        public List<AreaBT> Area { get; set; }
     }
 }

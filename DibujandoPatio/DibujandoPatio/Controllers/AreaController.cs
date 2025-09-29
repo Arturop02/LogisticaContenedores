@@ -60,7 +60,7 @@ namespace DibujandoPatio.Controllers
                 area.Vertices = new VerticeRN().BuscarPorArea(area.Id);
                 return Json(new { ok = true, data = area }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { ok = false, message = "No se pudo encontrar el patio con el id" + id }, JsonRequestBehavior.AllowGet);
+            return Json(new { ok = false, message = "No se pudo encontrar el area con el id" + id }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult ListarAreas()

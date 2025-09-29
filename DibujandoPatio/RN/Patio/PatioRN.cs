@@ -20,6 +20,15 @@ namespace RN.Patio
                     PatioBD patioBD = new PatioBD(ConstantesRN.BD_CONECTION);
                     patioBT = patioBD.AltaCambio(patioBT, Accion.Alta);
 
+                    //if(patioBT.Area != null)
+                    //{
+                    //    AreaRN areaRN = new AreaRN();
+                    //    foreach(var item in patioBT.Area)
+                    //    {
+                    //        areaRN.Agregar(item);
+                    //    }
+                    //}
+
                     //if (patioBT.Vertices != null)
                     //{
                     //    VerticeRN verticeRN = new VerticeRN();

@@ -21,7 +21,7 @@ namespace BD.Patio
                     using (SqlCommand cmd = new SqlCommand("opera.o_cat_Patio_AC", conex))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@ide_Patio", patioBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@Id", patioBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Nombre", patioBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
 
@@ -31,7 +31,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        patioBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_Patio");
+                        patioBT.Id = cmd.Parameters.ValorODefecto<int>("@Id");
                     }
                 }
                 return patioBT;
