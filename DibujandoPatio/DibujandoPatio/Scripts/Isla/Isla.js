@@ -93,6 +93,9 @@ $(document).on('LienzoReady',function () {
 
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
                         layer.add(grupoIslas);
+                        //layer.add(islaTemporal);
+                        //layer.add(TextoSuperior);
+                        //layer.add(TextoDerecha);
 
                         islaTemporal.on('transform', function () {
                             DameTamano(islaTemporal, layer);
@@ -204,6 +207,7 @@ $(document).on('LienzoReady',function () {
         let ancho = 2 * anchoBahia;
         let alto = altoBahia;
 
+
         //let rotacion = angulo % 360;
         //if (rotacion < 0) rotacion += 360;
 
@@ -243,10 +247,34 @@ $(document).on('LienzoReady',function () {
 function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
     
     const bbox = nodo.getClientRect({ relativeTo: nodo.getParent() });
-    TextoSuperior.x(bbox.x + bbox.width / 2);
-    TextoSuperior.y(bbox.y - 20);
-    TextoSuperior.offsetX(TextoSuperior.width() / 2);
-    TextoSuperior.offsetY(0);
+    var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
+
+    var x = 0;
+    var y = (NodoRectangulo.attrs.height / 2)+(TextoSuperior.textHeight);
+    var rotacion = (nodo.rotation() % 360) + 180;
+
+    console.log(TextoSuperior);
+
+    let r = nodo.height() / 2;
+
+    var rad = (90 + rotacion) * Math.PI / 180;
+    x = r * Math.cos(rad);
+    y = r * Math.sin(rad);
+
+    //console.log(`Rotacion X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`);
+
+    var Centro = {
+        x: (NodoRectangulo.attrs.width / 2) + 10,
+        y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight ),
+    };
+
+    TextoSuperior.x(Centro.x + x);
+    TextoSuperior.y(Centro.y + y);
+    
+
+    //console.log(`nodo X: ${nodo.x}, Y: ${nodo.y}`);
+    //console.log(TextoSuperior);
+    //console.log(`bbox X: ${bbox.x}, Y: ${bbox.y}`);
 
     TextoDerecha.x(bbox.x + bbox.width + 5);
     TextoDerecha.y(bbox.y + bbox.height / 2);
