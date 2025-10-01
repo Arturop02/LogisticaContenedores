@@ -70,26 +70,28 @@ $(document).on('LienzoReady',function () {
                             strokeWidth: 2,
                             name: 'isla'
                         });
+                        //islaTemporal.offsetX(islaTemporal.width() / 2);
+                        //islaTemporal.offsetY(islaTemporal.height() / 2);
 
                         TextoSuperior = new Konva.Text({
-                            x: islaTemporal.width()/2,
-                            y: -20,
-                            text: '',
-                            fontSize: 12,
-                            fill: 'black',
-                            
-                        });
-                        TextoSuperior.offsetX(TextoSuperior.width() / 2);
-
-                        TextoDerecha = new Konva.Text({
-                            x: islaTemporal.width() + 5,
+                            x: islaTemporal.width() / 2,
                             y: islaTemporal.height() / 2,
                             text: '',
                             fontSize: 12,
                             fill: 'black',
                             
                         });
-                        TextoDerecha.offsetY(TextoDerecha.height() / 2);
+                        //TextoSuperior.offsetX(TextoSuperior.width() / 2);
+
+                        TextoDerecha = new Konva.Text({
+                            x: islaTemporal.width() /2,
+                            y: islaTemporal.height() / 2,
+                            text: '',
+                            fontSize: 12,
+                            fill: 'black',
+                            
+                        });
+                        //TextoDerecha.offsetY(TextoDerecha.height() / 2);
 
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
                         layer.add(grupoIslas);
@@ -106,9 +108,7 @@ $(document).on('LienzoReady',function () {
 
                         islaTemporal.on('transformend', function () {
                             DameTamano(islaTemporal, layer);
-                            let rotacion = islaTemporal.rotation() % 360;
-                            if (rotacion < 0) rotacion += 360;
-
+                            var rotacion = DameRotacion(islaTemporal);
                             datosIsla.Orientacion = rotacion;
                         });
 
@@ -126,6 +126,12 @@ $(document).on('LienzoReady',function () {
                             ],
                             rotateEnabled: true,
                             resizeEnabled: true,
+                            boundBoxFunc: (oldBox, newBox) => {
+                                if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
+                                    return oldBox;
+                                }
+                                return newBox;
+                            }
                         });
 
                         layer.add(tr);
@@ -167,8 +173,8 @@ $(document).on('LienzoReady',function () {
             return;
         }
 
-        let rotacion = islaTemporal.rotation() % 360;
-        if (rotacion < 0) rotacion += 360;
+        let rotacion = DameRotacion(islaTemporal); //islaTemporal.rotation() % 360;
+        //if (rotacion < 0) rotacion += 360;
 
         var data = {
             Nombre: datosIsla.Nombre,
@@ -201,32 +207,11 @@ $(document).on('LienzoReady',function () {
 
     const escala = Lienzo.Escala;
     function TamanoIsla(escala) {
-        const anchoBahia = 6 / escala;
-        const altoBahia = 2 / escala;
+        const anchoBahia = 6.06 / escala;
+        const altoBahia = 2.44 / escala;
 
-        let ancho = 2 * anchoBahia;
-        let alto = altoBahia;
-
-
-        //let rotacion = angulo % 360;
-        //if (rotacion < 0) rotacion += 360;
-
-        //switch (rotacion) {
-        //    case 0:
-        //    case 180:
-        //        ancho = numeroBahias * anchoBahia;
-        //        alto = altoBahia;
-        //        break;
-        //    case 90:
-        //    case 270:
-        //        ancho = anchoBahia;
-        //        alto = numeroBahias * altoBahia;
-        //        break;
-        //    default:
-        //        ancho = anchoBahia;
-        //        alto = numeroBahias * altoBahia;
-        //        break;
-        //}
+        var ancho = 2 * anchoBahia;
+        var alto = altoBahia;
 
         return { ancho, alto };
     }
@@ -244,34 +229,56 @@ $(document).on('LienzoReady',function () {
     }
 });
 
+function DameRotacion(nodo) {
+    var rotacion = nodo.rotation() % 360;
+    if (rotacion < 0) rotacion += 360;
+    return rotacion;
+}
+
 function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
     
     const bbox = nodo.getClientRect({ relativeTo: nodo.getParent() });
-    var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
+    var NodoRectangulo = nodo.getParent().findOne('Rect');
+
+    //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
 
     var x = 0;
-    var y = (NodoRectangulo.attrs.height / 2)+(TextoSuperior.textHeight);
-    var rotacion = (nodo.rotation() % 360) + 180;
+    var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
+    var rotacion = (nodo.rotation() % 360) + 180; //DameRotacion(nodo) + 180;
 
-    console.log(TextoSuperior);
+    //console.log(TextoSuperior);
 
-    let r = nodo.height() / 2;
+    let r = nodo.height() / 2; //NodoRectangulo.attrs.height / 2; 
 
     var rad = (90 + rotacion) * Math.PI / 180;
     x = r * Math.cos(rad);
     y = r * Math.sin(rad);
 
+    //console.log("Valor de X" + x);
+    //console.log("Valor de Y" + y);
+
     //console.log(`Rotacion X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`);
 
     var Centro = {
         x: (NodoRectangulo.attrs.width / 2) + 10,
-        y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight ),
+        y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight - 6),
     };
+    //var Derecha = {
+    //    x: (NodoRectangulo.attrs.width / 2),
+    //    y: (NodoRectangulo.attrs.height /2),
+    //}
+
+    //var Pivote = {
+    //    offsetX: TextoSuperior.width() / 2,
+    //    offsetY: TextoSuperior.height() /2,
+    //}
 
     TextoSuperior.x(Centro.x + x);
     TextoSuperior.y(Centro.y + y);
-    
 
+    TextoSuperior.offsetX(TextoSuperior.width() / 2);
+    TextoSuperior.offsetY(TextoSuperior.height() / 2);
+    
     //console.log(`nodo X: ${nodo.x}, Y: ${nodo.y}`);
     //console.log(TextoSuperior);
     //console.log(`bbox X: ${bbox.x}, Y: ${bbox.y}`);
@@ -285,32 +292,12 @@ function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
 }
 
 function ajustarTamanos(isla, escala) {
-    const pasoHorizontal = 6;
-    const pasoVertical = 2;
+    const pasoHorizontal = 6.06;
+    const pasoVertical = 2.44;
 
-    let anchoMetros = isla.width() * isla.scaleX() * escala;
-    let altoMetros = isla.height() * isla.scaleY() * escala;
-
-    let rotacion = isla.rotation() % 360;
-    if (rotacion < 0) rotacion += 360;
-
-    switch (rotacion) {
-        case 0:
-        case 180:
-            anchoMetros = Math.round(anchoMetros / pasoHorizontal) * pasoHorizontal;
-            altoMetros = Math.round(altoMetros / pasoVertical) * pasoVertical;
-            break;
-        case 90:
-        case 270:
-            anchoMetros = Math.round(anchoMetros / pasoVertical) * pasoVertical;
-            altoMetros = Math.round(altoMetros / pasoHorizontal) * pasoHorizontal;
-            break;
-        default:
-            anchoMetros = Math.round(anchoMetros / pasoHorizontal) * pasoHorizontal;
-            altoMetros = Math.round(altoMetros / pasoVertical) * pasoVertical;
-            break;
-    }
-
+    let anchoMetros = Math.round((isla.width() * isla.scaleX() * escala) / pasoHorizontal) * pasoHorizontal;
+    let altoMetros = Math.round((isla.height() * isla.scaleY() * escala) / pasoVertical) * pasoVertical;
+    
     isla.width(anchoMetros / escala);
     isla.height(altoMetros / escala);
 
