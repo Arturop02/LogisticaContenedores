@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace DibujandoPatio.Controllers
 {
@@ -62,7 +63,31 @@ namespace DibujandoPatio.Controllers
             }
             return Json(new { ok = false, message = "No se pudo encontrar el area con el id" + id }, JsonRequestBehavior.AllowGet);
         }
+        
+        [HttpGet]
+        public JsonResult ObtenerIslasPorAreaId(int id)
+        {
+            //try
+            //{
 
+            //}catch (Exception)
+            //{
+            //    throw;
+            //}
+
+            AreaRN areaRN = new AreaRN();
+            IslaRN islaRN = new IslaRN();
+            var area = areaRN.BuscarPorId(id);
+            var islas = islaRN.BuscarPorArea(id);
+            if(area != null)
+            {
+                area.Islas = islas;
+                return Json(new { ok = true, data = area }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new {ok = false, message = "No se pudo encontrar el area con el id " + id}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public JsonResult ListarAreas()
         {
             AreaRN areaRN = new AreaRN();
@@ -85,13 +110,13 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpGet]
-        public ActionResult DibujarIsla(int? Id)
-        {
+        public ActionResult DibujarIsla(int? id)
+       {
             AreaRN areaRN = new AreaRN();
             var area = areaRN.DameTodosAlta();
             ViewBag.Areas = area;
 
-            ViewBag.IdAreaSeleccionada = Id;
+            ViewBag.IdAreaSeleccionada = id;
             return View(RutaBase + "DibujarIsla.cshtml");
         }
 

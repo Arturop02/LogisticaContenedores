@@ -26,8 +26,8 @@ namespace BD.Patio
                     using (SqlCommand cmd = new SqlCommand("opera.o_cat_Isla_AC", conex))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AgregarConValorNull("@ide_isla", islaBT.Id, output: true);
-                        cmd.Parameters.AgregarConValorNull("@ide_Area", islaBT.Area?.Id);
+                        cmd.Parameters.AgregarConValorNull("@Id", islaBT.Id, output: true);
+                        cmd.Parameters.AgregarConValorNull("@IdArea", islaBT.Area?.Id);
                         cmd.Parameters.AgregarConValorNull("@Nombre", islaBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("Orientacion", islaBT.Orientacion);
                         cmd.Parameters.AgregarConValorNull("@X", islaBT.X);
@@ -42,7 +42,7 @@ namespace BD.Patio
                         cmd.ExecuteNonQuery();
                         conex.Close();
 
-                        islaBT.Id = cmd.Parameters.ValorODefecto<int>("@ide_isla");
+                        islaBT.Id = cmd.Parameters.ValorODefecto<int>("@Id");
                     }
                 }
                 return islaBT;
@@ -65,7 +65,7 @@ namespace BD.Patio
                     parametroXML.Agregar("Buscar", Query);
 
                 conn = new SqlConnection(Conexion);
-                SqlCommand comm = new SqlCommand("dbo.sp_Isla_PorOpcion", conn);
+                SqlCommand comm = new SqlCommand("opera.o_cat_Isla_PorOpcion", conn);
                 comm.CommandType = CommandType.StoredProcedure;
 
                 comm.Parameters.AgregarConValorNull("@Opcion", Opcion.ToString());
@@ -78,7 +78,7 @@ namespace BD.Patio
             }
             catch (Exception ex)
             {
-                throw new Exception("No se pudo obtener la información de Vertice", ex);
+                throw new Exception("No se pudo obtener la información de la Isla", ex);
             }
             finally
             {

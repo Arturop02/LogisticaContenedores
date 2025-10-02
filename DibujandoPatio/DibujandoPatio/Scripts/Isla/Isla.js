@@ -3,22 +3,42 @@ var datosIsla = {};
 var TextoSuperior = null;
 var TextoDerecha = null;
 
-$(document).on('LienzoReady',function () {
-    Lienzo.Modo = enumModoLienzo.Isla;
-    Lienzo.Estado = enumEstadoLienzo.Agregando;
-    Lienzo.BloquearArea(true);
+//var enumModoLienzo = {
+//    Area: 'Area',
+//    Isla: 'Isla',
+//    Contenedor: 'Contenedor',
+//}
 
+//var enumEstadoLienzo = {
+//    Agregando: 'Agregando',
+//    Moviendo: 'Moviendo',
+//    Editando: 'Editando',
+//};
+
+//var enumBotton = {
+//    ClickIzquierdo: 0,
+//    ClickDerecho: 2
+//}
+
+$(document).on('LienzoReady', function () {
+    $(document).on("AreaCargada", function () {
+        Lienzo.Modo = enumModoLienzo.Isla;
+        Lienzo.Estado = enumEstadoLienzo.Agregando;
+        Lienzo.BloquearArea(true);
+    });
+
+    if (idAreaSeleccionada != null && idAreaSeleccionada != "") {
+        Lienzo.Modo = enumModoLienzo.Isla;
+        Lienzo.Estado = enumEstadoLienzo.Agregando;
+        Lienzo.BloquearArea(true);
+        let $radio = $(`#lstAreas input[data-id="${idAreaSeleccionada}"]`);
+        //$radio.prop("checked", true).closest("label").addClass("active");
+        $radio.closest("label").trigger('click');
+        $('#crearIsla').data('idpatio', idAreaSeleccionada).prop('disabled', false);
+    }
+    
     var stage = Lienzo.Stage;
     var layer = stage.getLayers()[0];
-    
-
-    //if (idPatioSeleccionado != null && idPatioSeleccionado != "") {
-    //    Lienzo.Modo = enumModoLienzo.Isla;
-    //    let $radio = $(`#lstAreas input[data-id="${idPatioSeleccionado}"]`);
-    //    //$radio.prop("checked", true);
-    //    $radio.closest("label").trigger('click');
-    //    $('#crearIsla').data('idpatio', idPatioSeleccionado).prop('disabled', !idPatioSeleccionado);
-    //}
 
     $(`#crearIsla`).on(`click`, function () {
         bootbox.dialog({
@@ -27,6 +47,8 @@ $(document).on('LienzoReady',function () {
                     <div class="form-group">
                         <label>Nombre de la Isla</label>
                         <input type="text" class="form-control" id="nombreIsla" required />
+                        <label>Observaciones</label>
+                        <input type="text" class="form-control" id="observacionesIsla"/>
                     </div>
                 </form>`
             ,
@@ -43,7 +65,8 @@ $(document).on('LienzoReady',function () {
                     className: "btn-primary",
                     callback: function () {
                         datosIsla = {
-                            Nombre: $(`#nombreIsla`).val()
+                            Nombre: $(`#nombreIsla`).val(),
+                            Observaciones: $(`#observacionesIsla`).val(),
                         };
                         if (!datosIsla.Nombre) {
                             bootbox.alert("Por favor nombra la isla");
@@ -66,13 +89,11 @@ $(document).on('LienzoReady',function () {
                             width: tamano.ancho,
                             height: tamano.alto,
                             stroke: 'blue',
-                            fill: 'lightblue',
+                            fill: '',
                             strokeWidth: 2,
                             name: 'isla'
                         });
-                        //islaTemporal.offsetX(islaTemporal.width() / 2);
-                        //islaTemporal.offsetY(islaTemporal.height() / 2);
-
+                        
                         TextoSuperior = new Konva.Text({
                             x: islaTemporal.width() / 2,
                             y: islaTemporal.height() / 2,
@@ -81,24 +102,18 @@ $(document).on('LienzoReady',function () {
                             fill: 'black',
                             
                         });
-                        //TextoSuperior.offsetX(TextoSuperior.width() / 2);
-
+                        
                         TextoDerecha = new Konva.Text({
                             x: islaTemporal.width() /2,
                             y: islaTemporal.height() / 2,
                             text: '',
                             fontSize: 12,
                             fill: 'black',
-                            
                         });
-                        //TextoDerecha.offsetY(TextoDerecha.height() / 2);
 
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
                         layer.add(grupoIslas);
-                        //layer.add(islaTemporal);
-                        //layer.add(TextoSuperior);
-                        //layer.add(TextoDerecha);
-
+                        
                         islaTemporal.on('transform', function () {
                             DameTamano(islaTemporal, layer);
                             actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
@@ -115,13 +130,10 @@ $(document).on('LienzoReady',function () {
                         var tr = new Konva.Transformer({
                             nodes: [islaTemporal],
                             enabledAnchors: [
-//                                'top-left',
                                 'top-center',
                                 'top-right',
-                                //'bottom-left',
                                 'bottom-right',
                                 'bottom-center',
-                                //'middle-left',
                                 'middle-right'
                             ],
                             rotateEnabled: true,
@@ -160,30 +172,24 @@ $(document).on('LienzoReady',function () {
         });
     });
 
-    $(`#orientacionIsla`).on('change', function () {
-        if (!islaTemporal) return;
-
-        islaTemporal.rotation();
-        layer.draw();
-    });
-
     $(`#guardarBtn`).on('click', function () {
         if (!islaTemporal) {
             bootbox.alert("No hay isla para guardar");
             return;
         }
 
-        let rotacion = DameRotacion(islaTemporal); //islaTemporal.rotation() % 360;
-        //if (rotacion < 0) rotacion += 360;
+        let rotacion = DameRotacion(islaTemporal);
+        let posicionAbsoluta = islaTemporal.getAbsolutePosition();
 
         var data = {
             Nombre: datosIsla.Nombre,
             Orientacion: rotacion,
-            x: islaTemporal.x(),
-            y: islaTemporal.y(),
+            x: posicionAbsoluta.x,
+            y: posicionAbsoluta.y,
             Ancho: islaTemporal.width() * islaTemporal.scaleX(),
             Alto: islaTemporal.height() * islaTemporal.scaleY(),
-            PatioId: $(`#guardarBtn`).data('idpatio')
+            Observaciones: datosIsla.Observaciones,
+            Area: { Id: idAreaSeleccionada },
         };
         $.ajax({
             url: '/Isla/GuardarIsla',
@@ -193,9 +199,7 @@ $(document).on('LienzoReady',function () {
             success: function (res) {
                 if (res.ok) {
                     bootbox.alert("Isla guardada con exito");
-                    islaTemporal.destroy();
                     islaTemporal = null;
-                    layer.find('Transformer').destroy();
                     $(`#guardarIsla`).addClass('d-none');
                     layer.draw();
                 } else {
@@ -236,55 +240,43 @@ function DameRotacion(nodo) {
 }
 
 function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
-    
-    const bbox = nodo.getClientRect({ relativeTo: nodo.getParent() });
     var NodoRectangulo = nodo.getParent().findOne('Rect');
-
     //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
 
     var x = 0;
     var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
-    var rotacion = (nodo.rotation() % 360) + 180; //DameRotacion(nodo) + 180;
+    var rotacion = DameRotacion(nodo) + 180;
 
-    //console.log(TextoSuperior);
-
-    let r = nodo.height() / 2; //NodoRectangulo.attrs.height / 2; 
+    let r = (nodo.height() / 2) + TextoSuperior.textHeight;
 
     var rad = (90 + rotacion) * Math.PI / 180;
     x = r * Math.cos(rad);
     y = r * Math.sin(rad);
 
-    //console.log("Valor de X" + x);
-    //console.log("Valor de Y" + y);
-
-    //console.log(`Rotacion X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`);
+    let rD = (nodo.width() / 2) + TextoDerecha.textWidth;
+    var radD = (180 + rotacion) * Math.PI / 180;
+    var xD = rD * Math.cos(radD);
+    var yD = rD * Math.sin(radD);
 
     var Centro = {
-        x: (NodoRectangulo.attrs.width / 2) + 10,
+        x: (NodoRectangulo.attrs.width / 2),
         y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight - 6),
     };
-    //var Derecha = {
-    //    x: (NodoRectangulo.attrs.width / 2),
-    //    y: (NodoRectangulo.attrs.height /2),
-    //}
-
-    //var Pivote = {
-    //    offsetX: TextoSuperior.width() / 2,
-    //    offsetY: TextoSuperior.height() /2,
-    //}
+    var Derecha = {
+        x: (NodoRectangulo.attrs.width / 2) - TextoDerecha.textWidth + 24,
+        y: (NodoRectangulo.attrs.height /2),
+    }
 
     TextoSuperior.x(Centro.x + x);
     TextoSuperior.y(Centro.y + y);
 
     TextoSuperior.offsetX(TextoSuperior.width() / 2);
     TextoSuperior.offsetY(TextoSuperior.height() / 2);
-    
-    //console.log(`nodo X: ${nodo.x}, Y: ${nodo.y}`);
-    //console.log(TextoSuperior);
-    //console.log(`bbox X: ${bbox.x}, Y: ${bbox.y}`);
 
-    TextoDerecha.x(bbox.x + bbox.width + 5);
-    TextoDerecha.y(bbox.y + bbox.height / 2);
+    TextoDerecha.x(Derecha.x + xD);
+    TextoDerecha.y(Derecha.y + yD);
+
+    TextoDerecha.offsetX(TextoDerecha.width() / 2);
     TextoDerecha.offsetY(TextoDerecha.height() / 2);
 
     TextoSuperior.rotation(nodo.rotation());

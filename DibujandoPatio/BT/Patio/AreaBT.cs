@@ -13,5 +13,7 @@ namespace BT
         public PatioBT Patio { get; set; }
         public List<VerticeBT> Vertices { get; set; }
 
+        public List<IslaBT> Islas { get; set; }
+
     }
 }

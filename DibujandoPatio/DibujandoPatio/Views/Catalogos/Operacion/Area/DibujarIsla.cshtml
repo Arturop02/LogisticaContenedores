@@ -41,12 +41,13 @@
 
         @foreach (var a in areas)
         {
+            //var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
+            //var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
             <label class="btn btn-primary @(i==0 ? "active" : "")">
                 <input type="radio"
                        name="area"
                        id="Area_@(a.Id)"
                        data-id="@a.Id"
-                       @*data-escala="@p.Escala"*@
                        autocomplete="off"
                        @(i == 0 ? "checked" : "")> @a.Nombre
                 </label>
@@ -62,20 +63,17 @@
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 @section scripts{
-    
     <script src="~/Scripts/Area/Area.js"></script>
-    
     <script src="~/Scripts/Isla/Isla.js"></script>
 
     <script>
-        var idPatioSeleccionado = '@ViewBag.IdAreaSeleccionada';
+            idAreaSeleccionada = '@ViewBag.IdAreaSeleccionada';
     </script>
 
     <script>
         $(document).ready(function () {
-            //$(document).trigger('LienzoReady');
             inicializarArea();
-            
+            //$(document).trigger('LienzoReady');
         });
     </script>
 

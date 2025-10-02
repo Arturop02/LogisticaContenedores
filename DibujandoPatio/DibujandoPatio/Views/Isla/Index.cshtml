@@ -69,12 +69,15 @@
     <script src="~/Scripts/Area/Area.js"></script>
 
     <script>
-        var idPatioSeleccionado = '@ViewBag.IdAreaSeleccionada';
-    </script>
-
-    <script>
+        idAreaSeleccionada = '@ViewBag.IdAreaSeleccionada';
         $(document).ready(function () {
             inicializarArea();
+            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
+            if (inputSeleccionado.length) {
+                // Tomar el label padre y disparar el clic para cargar el patio
+                inputSeleccionado.closest('label').trigger('click');
+            }
+            //$(document).trigger('LienzoReady');
         });
     </script>
 

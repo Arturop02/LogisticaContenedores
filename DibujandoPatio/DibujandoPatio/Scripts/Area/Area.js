@@ -500,6 +500,9 @@ function inicializarArea() {
         let input = $(this).find('input[name="area"]');
         let id = input.data('id');
         let nombre = input.data('nombre');
+
+        idAreaSeleccionada = id;
+
         //let patio = $(this).find('input[name="area"]').data('patio');
 
         $('#guardarBtn').data('idpatio', id)
@@ -511,17 +514,12 @@ function inicializarArea() {
         if (!id) return;
 
         layer.destroyChildren();
-        layer.draw();
+        /*layer.draw();*/
         Lienzo.lstPunto = [];
         Lienzo.PuntoActual = null;
 
         $.getJSON('/Area/ObtenerAreaPorId', { id: id }, function (res) {
             if (!res.ok || !res.data) return;
-
-            //layer.destroyChildren();
-            //layer.draw();
-            //Lienzo.lstPunto = [];
-            //Lienzo.PuntoActual = null;
 
             var area = res.data;
             area.Vertices = area.Vertices.OrderBy(c => c.Orden).ToArray();
@@ -536,6 +534,28 @@ function inicializarArea() {
             Lienzo.Modo = enumModoLienzo.Area;
             Lienzo.Estado = enumEstadoLienzo.Editando;
             Lienzo.BloquearArea(false);
+
+            $.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
+                if (!res.ok || !res.data);
+
+                var area = res.data;
+                area.Islas.forEach(i => {
+                    console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion}`);
+                    var rectanguloIsla = new Konva.Rect({
+                        name: i.Nombre,
+                        rotation: i.Orientacion,
+                        x: i.X,
+                        y: i.Y,
+                        width: i.Ancho,
+                        height: i.Alto,
+                        fill: 'lightblue',
+                        strokeWidth: 1,
+                        stroke: 'black',
+                    });
+                    layer.add(rectanguloIsla);
+                });
+                layer.draw();
+            });
         });
     });
 
@@ -664,32 +684,23 @@ function inicializarArea() {
                 },
             });
         }
-        ////Metodo POST usando jquery y ajax para comunicar con la BD
-        //$.ajax({
-        //    url: url,
-        //    method: 'POST',
-        //    data: payload,
-        //    contentType: id ? 'application/x-www-form-urlencoded; charset=UTF-8' : 'application/json',
-        //    success: function (res) {
-        //        if (res.ok) {
-        //            bootbox.alert(id ? "Editado con exito" : "Guardado correctamente");
-        //            dibujando = false;
-        //            $('#guardarBtn').prop('disabled', true);
-        //        } else {
-        //            bootbox.alert("Ha ocurriod un problema")
-        //        }
-        //    }
-        //});
     });
 
     $(`#btnRedirigir`).on('click', function () {
-        let valor = $(`#lstAreas input[name = "area"]`).data('id');
-        //if (!valor) {
-        //    bootbox.alert("Seleccione un patio");
-        //    return;
-        //}
-        window.location.href = objSer.Url.Isla.Index.replace('__id__', valor);
+        let valor = $(`#lstAreas input[name = "area"]:checked`).data('id');
+        //window.location.href = objSer.Url.Isla.Index.replace('__id__', valor);
+        //Lienzo.Modo = enumModoLienzo.Isla;
+        //Lienzo.Estado = enumEstadoLienzo.Agregando;
+        window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', valor);
     });
 
+    $(document).trigger("AreaCargada");
     $(document).trigger('LienzoReady');
+    //$(documen).on('LienzoReady', function () {
+    //    console.log('LienzoReady cargado');
+    //    Lienzo.Modo = enumModoLienzo.Isla;
+    //    Lienzo.Estado = enumEstadoLienzo.Agregando;
+
+
+    //})
 }
