@@ -33,6 +33,21 @@ namespace DibujandoPatio.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult BorrarIsla(IslaBT islaBT)
+        {
+            try
+            {
+                IslaRN islaRN = new IslaRN();
+                var isla = islaRN.Borrado(islaBT);
+                return Json(new { ok = true });
+            }
+            catch(Exception ex)
+            {
+                return Json(new { ok = false });
+            }
+        }
+
         [HttpGet]
         public JsonResult ObtenerIslasPorId(int id)
         {

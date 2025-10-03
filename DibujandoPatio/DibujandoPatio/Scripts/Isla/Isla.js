@@ -114,10 +114,30 @@ $(document).on('LienzoReady', function () {
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
                         layer.add(grupoIslas);
                         
-                        islaTemporal.on('transform', function () {
+                        islaTemporal.on('transform dragmove', function () {
                             DameTamano(islaTemporal, layer);
                             actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
                             ajustarTamanos(islaTemporal, escala);
+                            //var satIsla = KonvaASATPoligono(islaTemporal);
+                            //var satIslaComparar = layer.find('.satIslaGuardada');
+
+                            //console.log(`SatIsla valores ${satIsla}`);
+                            //console.log(`satIslaGuardada valores ${satIslaComparar}`);
+                            //console.log(satIsla);
+
+                            //var islas = layer.find('.rectanguloIsla');
+                            //islas.forEach(i => {
+                            //    var satIslaGuadada = KonvaASATPoligono(i);
+                            //    console.log(satIslaGuadada);
+
+                            //    var respuesta = SAT.testPolygonPolygon(satIslaGuadada, satIsla);
+                            //    if (respuesta) {
+                            //        islaTemporal.fill('green');
+                            //        console.log("Las islas guardadas y la nueva isla han colisionado");
+                            //    } else {
+                            //        islaTemporal.fill('red');
+                            //    }
+                            //});
                             layer.batchDraw();
                         });
 
@@ -153,6 +173,19 @@ $(document).on('LienzoReady', function () {
                         tr.on('transform dragmove', () => {
                             actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
                             ajustarTamanos(islaTemporal, escala);
+                            
+                            //for (let i = 0; i < islas.length; i++) {
+                            //    let area = areas[i];
+                            //    var satArea = KonvaASATPoligono(area);
+                            //    var respuesta = SAT.testPolygonPolygon(satIsla, satArea);
+                            //    if (respuesta) {
+                            //        islaTemporal.fill('green');
+                            //        break;
+                            //    } else {
+                            //        islaTemporal.fill('red');
+                            //    }
+                            //}
+
                             layer.batchDraw();
                         });
 
@@ -295,4 +328,19 @@ function ajustarTamanos(isla, escala) {
 
     isla.scaleX(1);
     isla.scaleY(1);
+}
+
+function KonvaASATCirculo(circulo) {
+    return new SAT.Circle(
+        new SAT.Vector(circulo.x(), circulo.y()),
+        circle.radius());
+}
+
+function KonvaASATPoligono(rectangulo) {
+    var posicion = rectangulo.getAbsolutePosition();
+    return new SAT.Box(
+        new SAT.Vector(posicion.x, posicion.y),
+        rectangulo.width() * rectangulo.scaleX(),
+        rectangulo.height() * rectangulo.scaleY()
+    ).toPolygon();
 }

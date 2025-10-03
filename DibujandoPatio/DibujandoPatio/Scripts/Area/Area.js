@@ -37,6 +37,21 @@ function inicializarArea() {
         return escala;
     }
 
+    function KonvaASATCirculo(circulo) {
+        return new SAT.Circle(
+            new SAT.Vector(circulo.x(), circulo.y()),
+            circle.radius());
+    }
+
+    function KonvaASATPoligono(rectangulo) {
+        var posicion = rectangulo.getAbsolutePosition();
+        return new SAT.Box(
+            new SAT.Vector(posicion.x, posicion.y),
+            rectangulo.width() * rectangulo.scaleX(),
+            rectangulo.height() * rectangulo.scaleY()
+        ).toPolygon();
+    }
+
     Lienzo = {
         Modo: enumModoLienzo.Area, 
         Escala: DameEscala(),
@@ -503,8 +518,6 @@ function inicializarArea() {
 
         idAreaSeleccionada = id;
 
-        //let patio = $(this).find('input[name="area"]').data('patio');
-
         $('#guardarBtn').data('idpatio', id)
             .data('nombre', nombre)
             .prop('disabled', !id);
@@ -514,7 +527,6 @@ function inicializarArea() {
         if (!id) return;
 
         layer.destroyChildren();
-        /*layer.draw();*/
         Lienzo.lstPunto = [];
         Lienzo.PuntoActual = null;
 
@@ -551,6 +563,130 @@ function inicializarArea() {
                         fill: 'lightblue',
                         strokeWidth: 1,
                         stroke: 'black',
+                    });
+
+
+                    rectanguloIsla.on('pointerdown', function () {
+                        bootbox.dialog({
+                            title: `Modificar isla ${i.Nombre}`,
+                            message: "Deseas editar o eliminar la isla",
+                            buttons: {
+                                btnSalir: {
+                                    label: "Cancelar",
+                                    className: "btn btn-primary",
+                                    cancel: true,
+                                },
+                                btnEditar: {
+                                    label: "Editar",
+                                    className: "btn btn-success",
+                                    callback: function () {
+                                        bootbox.dialog({
+                                            title: "Crear Isla",
+                                            message: `<form id="formIsla">
+                                                        <div class="form-group">
+                                                            <label>Nombre de la Isla</label>
+                                                            <input type="text" class="form-control" id="nombreIsla" required />
+                                                            <label>Observaciones</label>
+                                                            <input type="text" class="form-control" id="observacionesIsla"/>
+                                                        </div>
+                                                      </form>`
+                                            ,
+                                            buttons: {
+                                                cancelar: {
+                                                    label: "Cancelar",
+                                                    className: "btn-danger",
+                                                    callback: function () {
+                                                        return;
+                                                    }
+                                                },
+                                                next: {
+                                                    label: "Siguiente",
+                                                    className: "btn btn-primary",
+                                                    callback: function (result) {
+                                                        if (result) {
+                                                            rectanguloIsla.draggable(true);
+                                                            rectanguloIsla.on('click', function () {
+                                                                var payload = {
+                                                                    Id: i.Id,
+                                                                    Nombre: i.Nombre,
+                                                                    Orientacion: i.Orientacion,
+                                                                    X: i.X,
+                                                                    Y: i.Y,
+                                                                    Ancho: i.Ancho,
+                                                                    Alto: i.Alto,
+                                                                    Observaciones: i.Observaciones,
+                                                                }
+                                                                $.ajax({
+                                                                    url: './Isla/EditarIsla',
+                                                                    method: 'POST',
+                                                                    data: JSON.stringify(payload),
+                                                                    contentType: 'application/json; charset=utf-8',
+                                                                    success: function (res) {
+                                                                        if (res.ok) {
+                                                                            bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                                        } else {
+                                                                            bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
+                                                                        }
+                                                                    }
+                                                                });
+                                                            });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                        //console.log("Se selecciono la opcion editar");
+                                    }
+                                },
+                                btnEliminar: {
+                                    label: "Eliminar",
+                                    className: "btn btn-danger",
+                                    callback: function () {
+                                        bootbox.dialog({
+                                            title: 'Confirmar borrado',
+                                            message: `Estas de acuerdo en eliminar la isla ${i.Nombre}`,
+                                            buttons: {
+                                                btnCancelar: {
+                                                    label: "Cancelar",
+                                                    className: "btn btn-primary",
+                                                    cancel: true,
+                                                },
+                                                btnConfirmarEliminacion: {
+                                                    label: "Eliminar",
+                                                    className: "btn btn-danger",
+                                                    callback: function () {
+                                                        var payload = {
+                                                            Id: i.Id,
+                                                            Nombre: i.Nombre,
+                                                            Orientacion: i.Orientacion,
+                                                            X: i.X,
+                                                            Y: i.Y,
+                                                            Ancho: i.Ancho,
+                                                            Alto: i.Alto,
+                                                            Observaciones: i.Observaciones,
+                                                        }
+                                                        $.ajax({
+                                                            url: './Isla/BorrarIsla',
+                                                            method: 'POST',
+                                                            data: JSON.stringify(payload),
+                                                            contentType: 'application/json; charset=utf-8',
+                                                            success: function (res) {
+                                                                if (res.ok) {
+                                                                    bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                                } else {
+                                                                    bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        });
+                                        //console.log("Se selecciono la opcion eliminar");
+                                    }
+                                }
+                            }
+                        });
                     });
                     layer.add(rectanguloIsla);
                 });
@@ -604,7 +740,7 @@ function inicializarArea() {
                 data: JSON.stringify(payload),
                 contentType: 'application/json; charset=utf-8',
                 success: function (res) {
-                    console.log("respuesta del server", res);
+                    //console.log("respuesta del server", res);
                     if (res.ok) {
                         bootbox.alert("Editado correctamente");
                         dibujando = false;
@@ -688,19 +824,9 @@ function inicializarArea() {
 
     $(`#btnRedirigir`).on('click', function () {
         let valor = $(`#lstAreas input[name = "area"]:checked`).data('id');
-        //window.location.href = objSer.Url.Isla.Index.replace('__id__', valor);
-        //Lienzo.Modo = enumModoLienzo.Isla;
-        //Lienzo.Estado = enumEstadoLienzo.Agregando;
         window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', valor);
     });
 
     $(document).trigger("AreaCargada");
     $(document).trigger('LienzoReady');
-    //$(documen).on('LienzoReady', function () {
-    //    console.log('LienzoReady cargado');
-    //    Lienzo.Modo = enumModoLienzo.Isla;
-    //    Lienzo.Estado = enumEstadoLienzo.Agregando;
-
-
-    //})
 }

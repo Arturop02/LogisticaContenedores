@@ -107,7 +107,7 @@ namespace RN.Patio
             try
             {
                 AreaBD areaBD = new AreaBD(ConstantesRN.BD_CONECTION);
-                return areaBD.AltaCambio(areaBT, BD.Utilidades.Accion.Borrar);
+                return areaBD.AltaCambio(areaBT, Accion.Borrar);
             }
             catch (Exception)
             {
