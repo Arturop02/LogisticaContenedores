@@ -1,6 +1,8 @@
 ﻿var stage;
 var layer;
 var Lienzo;
+var TextoSuperior = null;
+var TextoDerecha = null;
 
 var enumModoLienzo = {
     Area: 'Area',
@@ -37,20 +39,126 @@ function inicializarArea() {
         return escala;
     }
 
-    function KonvaASATCirculo(circulo) {
-        return new SAT.Circle(
-            new SAT.Vector(circulo.x(), circulo.y()),
-            circle.radius());
+    function DameRotacion(nodo) {
+        var rotacion = nodo.rotation() % 360;
+        if (rotacion < 0) rotacion += 360;
+        return rotacion;
     }
 
-    function KonvaASATPoligono(rectangulo) {
-        var posicion = rectangulo.getAbsolutePosition();
-        return new SAT.Box(
-            new SAT.Vector(posicion.x, posicion.y),
-            rectangulo.width() * rectangulo.scaleX(),
-            rectangulo.height() * rectangulo.scaleY()
-        ).toPolygon();
+    function TamanoIsla(escala) {
+        const anchoBahia = 6.06 / escala;
+        const altoBahia = 2.44 / escala;
+
+        var ancho = 2 * anchoBahia;
+        var alto = altoBahia;
+
+        return { ancho, alto };
     }
+
+    var tamano = TamanoIsla(DameEscala()); 
+
+    var tr = new Konva.Transformer({
+        enabledAnchors: [
+            'top-center',
+            'top-right',
+            'bottom-right',
+            'bottom-center',
+            'middle-right'
+        ],
+        rotateEnabled: true,
+        resizeEnabled: true,
+        boundBoxFunc: (oldBox, newBox) => {
+            if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
+                return oldBox;
+            }
+            return newBox;
+        }
+    });
+
+    function ajustarTamanos(isla, escala) {
+        const pasoHorizontal = 6.06;
+        const pasoVertical = 2.44;
+
+        let anchoMetros = Math.round((isla.width() * isla.scaleX() * escala) / pasoHorizontal) * pasoHorizontal;
+        let altoMetros = Math.round((isla.height() * isla.scaleY() * escala) / pasoVertical) * pasoVertical;
+
+        isla.width(anchoMetros / escala);
+        isla.height(altoMetros / escala);
+
+        isla.scaleX(1);
+        isla.scaleY(1);
+    }
+
+    function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
+        var NodoRectangulo = nodo.getParent().findOne('Rect');
+        //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
+
+        var x = 0;
+        var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
+        var rotacion = DameRotacion(nodo) + 180;
+
+        let r = (nodo.height() / 2) + TextoSuperior.textHeight;
+
+        var rad = (90 + rotacion) * Math.PI / 180;
+        x = r * Math.cos(rad);
+        y = r * Math.sin(rad);
+
+        let rD = (nodo.width() / 2) + TextoDerecha.textWidth;
+        var radD = (180 + rotacion) * Math.PI / 180;
+        var xD = rD * Math.cos(radD);
+        var yD = rD * Math.sin(radD);
+
+        var Centro = {
+            x: (NodoRectangulo.attrs.width / 2),
+            y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight - 6),
+        };
+        var Derecha = {
+            x: (NodoRectangulo.attrs.width / 2) - TextoDerecha.textWidth + 24,
+            y: (NodoRectangulo.attrs.height / 2),
+        }
+
+        TextoSuperior.x(Centro.x + x);
+        TextoSuperior.y(Centro.y + y);
+
+        TextoSuperior.offsetX(TextoSuperior.width() / 2);
+        TextoSuperior.offsetY(TextoSuperior.height() / 2);
+
+        TextoDerecha.x(Derecha.x + xD);
+        TextoDerecha.y(Derecha.y + yD);
+
+        TextoDerecha.offsetX(TextoDerecha.width() / 2);
+        TextoDerecha.offsetY(TextoDerecha.height() / 2);
+
+        TextoSuperior.rotation(nodo.rotation());
+        TextoDerecha.rotation(nodo.rotation());
+    }
+
+    function DameTamano(isla, layer) {
+        if (!isla) return;
+
+        const anchoMetros = (isla.width() * isla.scaleX() * Lienzo.Escala).toFixed(2);
+        const altoMetros = (isla.height() * isla.scaleY() * Lienzo.Escala).toFixed(2);
+
+        TextoSuperior.text(`${anchoMetros} m`);
+        TextoDerecha.text(`${altoMetros} m`);
+
+        actualizarTexto(isla, TextoSuperior, TextoDerecha);
+    }
+
+    //function KonvaASATCirculo(circulo) {
+    //    return new SAT.Circle(
+    //        new SAT.Vector(circulo.x(), circulo.y()),
+    //        circle.radius());
+    //}
+
+    //function KonvaASATPoligono(rectangulo) {
+    //    var posicion = rectangulo.getAbsolutePosition();
+    //    return new SAT.Box(
+    //        new SAT.Vector(posicion.x, posicion.y),
+    //        rectangulo.width() * rectangulo.scaleX(),
+    //        rectangulo.height() * rectangulo.scaleY()
+    //    ).toPolygon();
+    //}
 
     Lienzo = {
         Modo: enumModoLienzo.Area, 
@@ -553,6 +661,7 @@ function inicializarArea() {
                 var area = res.data;
                 area.Islas.forEach(i => {
                     console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion}`);
+
                     var rectanguloIsla = new Konva.Rect({
                         name: i.Nombre,
                         rotation: i.Orientacion,
@@ -565,8 +674,25 @@ function inicializarArea() {
                         stroke: 'black',
                     });
 
+                    TextoSuperior = new Konva.Text({
+                        x: rectanguloIsla.width() / 2,
+                        y: rectanguloIsla.height() / 2,
+                        text: '',
+                        fontSize: 12,
+                        fill: 'black',
 
-                    rectanguloIsla.on('pointerdown', function () {
+                    });
+
+                    TextoDerecha = new Konva.Text({
+                        x: rectanguloIsla.width() / 2,
+                        y: rectanguloIsla.height() / 2,
+                        text: '',
+                        fontSize: 12,
+                        fill: 'black',
+                    });
+
+
+                    rectanguloIsla.on('pointerdblclick', function () {
                         bootbox.dialog({
                             title: `Modificar isla ${i.Nombre}`,
                             message: "Deseas editar o eliminar la isla",
@@ -603,19 +729,39 @@ function inicializarArea() {
                                                     label: "Siguiente",
                                                     className: "btn btn-primary",
                                                     callback: function (result) {
+                                                        tr.nodes([rectanguloIsla]);
+                                                        layer.draw();
+                                                        layer.add(tr);
+                                                        const escala = DameEscala();
+
                                                         if (result) {
                                                             rectanguloIsla.draggable(true);
-                                                            rectanguloIsla.on('click', function () {
+                                                            rectanguloIsla.on('transform', function () {
+                                                                ajustarTamanos(rectanguloIsla, escala);
+                                                                DameTamano(rectanguloIsla, layer);
+                                                                actualizarTexto(rectanguloIsla, TextoSuperior, TextoDerecha)
+                                                            });
+
+                                                            var nuevosDatos = {
+                                                                Nombre: $('#nombreIsla').val(),
+                                                                Observaciones: $('#observacionesIsla').val(),
+                                                            }
+
+                                                            rectanguloIsla.on('pointerup', function () {
+                                                                const pos = rectanguloIsla.getAbsolutePosition();
+                                                                var rotacion = DameRotacion(rectanguloIsla);
+
                                                                 var payload = {
                                                                     Id: i.Id,
-                                                                    Nombre: i.Nombre,
-                                                                    Orientacion: i.Orientacion,
-                                                                    X: i.X,
-                                                                    Y: i.Y,
-                                                                    Ancho: i.Ancho,
-                                                                    Alto: i.Alto,
-                                                                    Observaciones: i.Observaciones,
-                                                                }
+                                                                    Nombre: nuevosDatos.Nombre,
+                                                                    Orientacion: rotacion,
+                                                                    X: pos.x,
+                                                                    Y: pos.y,
+                                                                    Ancho: rectanguloIsla.width() * rectanguloIsla.scaleX(),
+                                                                    Alto: rectanguloIsla.height() * rectanguloIsla.scaleY(),
+                                                                    Observaciones: nuevosDatos.Observaciones,
+                                                                };
+
                                                                 $.ajax({
                                                                     url: './Isla/EditarIsla',
                                                                     method: 'POST',
@@ -623,9 +769,9 @@ function inicializarArea() {
                                                                     contentType: 'application/json; charset=utf-8',
                                                                     success: function (res) {
                                                                         if (res.ok) {
-                                                                            bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                                            bootbox.alert(`La isla ${i.Nombre} ha sido editada`);
                                                                         } else {
-                                                                            bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
+                                                                            bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${i.Nombre}`);
                                                                         }
                                                                     }
                                                                 });
@@ -635,7 +781,6 @@ function inicializarArea() {
                                                 }
                                             }
                                         });
-                                        //console.log("Se selecciono la opcion editar");
                                     }
                                 },
                                 btnEliminar: {
@@ -682,13 +827,13 @@ function inicializarArea() {
                                                 }
                                             }
                                         });
-                                        //console.log("Se selecciono la opcion eliminar");
                                     }
                                 }
                             }
                         });
                     });
-                    layer.add(rectanguloIsla);
+                    layer.add(rectanguloIsla, TextoSuperior, TextoDerecha);
+                    actualizarTexto(rectanguloIsla, TextoSuperior, TextoDerecha);
                 });
                 layer.draw();
             });

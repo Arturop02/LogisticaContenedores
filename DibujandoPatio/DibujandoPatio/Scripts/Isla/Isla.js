@@ -111,8 +111,28 @@ $(document).on('LienzoReady', function () {
                             fill: 'black',
                         });
 
+                        var tr = new Konva.Transformer({
+                            enabledAnchors: [
+                                'top-center',
+                                'top-right',
+                                'bottom-right',
+                                'bottom-center',
+                                'middle-right'
+                            ],
+                            rotateEnabled: true,
+                            resizeEnabled: true,
+                            boundBoxFunc: (oldBox, newBox) => {
+                                if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
+                                    return oldBox;
+                                }
+                                return newBox;
+                            }
+                        });
+
+                        tr.nodes([islaTemporal]);
+                        
                         grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
-                        layer.add(grupoIslas);
+                        layer.add(grupoIslas, tr);
                         
                         islaTemporal.on('transform dragmove', function () {
                             DameTamano(islaTemporal, layer);
@@ -146,27 +166,6 @@ $(document).on('LienzoReady', function () {
                             var rotacion = DameRotacion(islaTemporal);
                             datosIsla.Orientacion = rotacion;
                         });
-
-                        var tr = new Konva.Transformer({
-                            nodes: [islaTemporal],
-                            enabledAnchors: [
-                                'top-center',
-                                'top-right',
-                                'bottom-right',
-                                'bottom-center',
-                                'middle-right'
-                            ],
-                            rotateEnabled: true,
-                            resizeEnabled: true,
-                            boundBoxFunc: (oldBox, newBox) => {
-                                if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
-                                    return oldBox;
-                                }
-                                return newBox;
-                            }
-                        });
-
-                        layer.add(tr);
 
                         actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
 
@@ -330,17 +329,17 @@ function ajustarTamanos(isla, escala) {
     isla.scaleY(1);
 }
 
-function KonvaASATCirculo(circulo) {
-    return new SAT.Circle(
-        new SAT.Vector(circulo.x(), circulo.y()),
-        circle.radius());
-}
+//function KonvaASATCirculo(circulo) {
+//    return new SAT.Circle(
+//        new SAT.Vector(circulo.x(), circulo.y()),
+//        circle.radius());
+//}
 
-function KonvaASATPoligono(rectangulo) {
-    var posicion = rectangulo.getAbsolutePosition();
-    return new SAT.Box(
-        new SAT.Vector(posicion.x, posicion.y),
-        rectangulo.width() * rectangulo.scaleX(),
-        rectangulo.height() * rectangulo.scaleY()
-    ).toPolygon();
-}
+//function KonvaASATPoligono(rectangulo) {
+//    var posicion = rectangulo.getAbsolutePosition();
+//    return new SAT.Box(
+//        new SAT.Vector(posicion.x, posicion.y),
+//        rectangulo.width() * rectangulo.scaleX(),
+//        rectangulo.height() * rectangulo.scaleY()
+//    ).toPolygon();
+//}
