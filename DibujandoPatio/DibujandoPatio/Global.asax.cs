@@ -16,6 +16,11 @@ namespace DibujandoPatio
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            foreach (var item in BundleTable.Bundles)
+            {
+                item.Transforms.Clear();
+            }
         }
     }
 }

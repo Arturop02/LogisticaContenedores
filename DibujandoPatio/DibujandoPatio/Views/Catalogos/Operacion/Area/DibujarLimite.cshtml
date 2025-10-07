@@ -44,7 +44,7 @@
         }
 
         @foreach (var a in areas)
-         {
+        {
             var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
             var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
             <label class="btn btn-primary @activo">
@@ -55,9 +55,9 @@
                        data-nombre="@a.Nombre"
                        autocomplete="off"
                        @checkedAtrr> @a.Nombre
-            </label>
-            i++;
-         }
+                </label>
+                i++;
+            }
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
     <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
@@ -67,6 +67,8 @@
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 @section scripts{
+    @Scripts.Render("~/bundles/konva")
+    @Scripts.Render("~/bundles/linq")
     <script src="~/Scripts/Area/Area.js"></script>
     <script>
         var objSer = {

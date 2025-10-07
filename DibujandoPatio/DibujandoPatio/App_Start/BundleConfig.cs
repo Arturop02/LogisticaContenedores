@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using Microsoft.Ajax.Utilities;
+using System.Web;
 using System.Web.Optimization;
 
 namespace DibujandoPatio
@@ -8,6 +9,7 @@ namespace DibujandoPatio
         // Para obtener más información sobre las uniones, visite https://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
+            
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 
@@ -20,11 +22,23 @@ namespace DibujandoPatio
                         "~/Scripts/modernizr-*"));
 
             bundles.Add(new Bundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.js"));
+                      "~/Scripts/bootstrap.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/linq").Include(
+                        "~/Scripts/linq-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/bootbox").Include(
+                       "~/Scripts/bootbox.min.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/sat").Include(
+                        "~/Scripts/sat-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/konva").Include(
+                        "~/Scripts/konva-{version}.js"));
         }
     }
 }

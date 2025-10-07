@@ -2,9 +2,7 @@
 using RN.Patio;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Web.Mvc;
-using System.Web.Services.Description;
 
 namespace DibujandoPatio.Controllers
 {
