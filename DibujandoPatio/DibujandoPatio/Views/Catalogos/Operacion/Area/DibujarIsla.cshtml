@@ -41,8 +41,6 @@
 
         @foreach (var a in areas)
         {
-            //var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
-            //var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
             <label class="btn btn-primary @(i==0 ? "active" : "")">
                 <input type="radio"
                        name="area"
@@ -57,7 +55,6 @@
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
     <button id="crearIsla" class="btn btn-warning"><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
-
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
@@ -65,7 +62,6 @@
 @section scripts{
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
-    <script src="~/Scripts/Area/Area.js"></script>
     <script src="~/Scripts/Isla/Isla.js"></script>
 
     <script>
@@ -75,7 +71,6 @@
     <script>
         $(document).ready(function () {
             inicializarArea();
-            //$(document).trigger('LienzoReady');
         });
     </script>
 

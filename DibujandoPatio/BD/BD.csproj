@@ -44,9 +44,13 @@
     <Compile Include="BaseBD.cs" />
     <Compile Include="IMapeo.cs" />
     <Compile Include="Patio\AreaBD.cs" />
+    <Compile Include="Patio\DetalleEnuBD.cs" />
+    <Compile Include="Patio\EstructuraBD.cs" />
     <Compile Include="Patio\IslaBD.cs" />
     <Compile Include="Patio\Mapeo\AreaMapeo.cs" />
     <Compile Include="Patio\Mapeo\BahiaMapeo.cs" />
+    <Compile Include="Patio\Mapeo\DetalleEnuMapeo.cs" />
+    <Compile Include="Patio\Mapeo\EstructuraMapeo.cs" />
     <Compile Include="Patio\Mapeo\IslaMapeo.cs" />
     <Compile Include="Patio\Mapeo\VerticeMapeo.cs" />
     <Compile Include="Patio\Mapeo\PatioMapeo.cs" />

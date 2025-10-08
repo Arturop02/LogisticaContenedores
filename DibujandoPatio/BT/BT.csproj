@@ -48,6 +48,7 @@
     <Compile Include="Patio\ContenedorBT.cs" />
     <Compile Include="Patio\DetalleEnuBT.cs" />
     <Compile Include="Patio\EnumBT.cs" />
+    <Compile Include="Patio\EstructuraBT.cs" />
     <Compile Include="Patio\EtiquetaPosicionBT.cs" />
     <Compile Include="Patio\IslaBT.cs" />
     <Compile Include="Patio\PatioBT.cs" />

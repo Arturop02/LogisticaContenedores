@@ -4,10 +4,7 @@ using BT;
 using BT.Utilidades;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Transactions;
 
 namespace RN.Patio
@@ -83,14 +80,6 @@ namespace RN.Patio
                         }
 
                     }
-                    //if (areaBT.Vertices != null)
-                    //{
-                    //    VerticeRN verticeRN = new VerticeRN();
-                    //    foreach (var item in areaBT.Vertices)
-                    //    {
-                    //        verticeRN.Agregar(item);
-                    //    }
-                    //}
                     ts.Complete();
 
                 }
@@ -120,7 +109,7 @@ namespace RN.Patio
             try
             {
                 AreaBD areaBD = new AreaBD(ConstantesRN.BD_CONECTION);
-                return areaBD.BuscaPorOpcion(BD.Utilidades.BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
+                return areaBD.BuscaPorOpcion(BuscarOpcion.Id, Query: id.ToString()).FirstOrDefault();
             }
             catch (Exception)
             {

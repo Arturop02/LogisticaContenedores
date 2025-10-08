@@ -28,6 +28,7 @@ namespace BD.Patio
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AgregarConValorNull("@Id", islaBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@IdArea", islaBT.Area?.Id);
+                        cmd.Parameters.AgregarConValorNull("@IdEstructura", islaBT.Estructura?.Id);
                         cmd.Parameters.AgregarConValorNull("@Nombre", islaBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("Orientacion", islaBT.Orientacion);
                         cmd.Parameters.AgregarConValorNull("@X", islaBT.X);

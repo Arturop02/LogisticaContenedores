@@ -45,6 +45,8 @@
   <ItemGroup>
     <Compile Include="ConstantesRN.cs" />
     <Compile Include="Patio\AreaRN.cs" />
+    <Compile Include="Patio\DetalleEnuRN.cs" />
+    <Compile Include="Patio\EstructuraRN.cs" />
     <Compile Include="Patio\IslaRN.cs" />
     <Compile Include="Patio\VerticeRN.cs" />
     <Compile Include="Patio\PatioRN.cs" />

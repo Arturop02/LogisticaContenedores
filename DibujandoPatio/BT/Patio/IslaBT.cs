@@ -10,6 +10,7 @@ namespace BT.Patio
     public class IslaBT: BaseBT
     {
         public AreaBT Area {  get; set; }
+        public EstructuraBT Estructura { get; set; }
         public string Nombre { get; set; }
         public decimal Orientacion { get; set; }
         public decimal X { get; set; }
