@@ -78,7 +78,7 @@ namespace RN.Patio
             }
         }
 
-        public List<DetalleEnuBT> DameTodos()
+        public List<DetalleEnuBT> DameTodosAlta()
         {
             try
             {

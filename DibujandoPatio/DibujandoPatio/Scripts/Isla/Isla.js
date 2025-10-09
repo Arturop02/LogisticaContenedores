@@ -4,6 +4,8 @@ var Lienzo;
 var TextoSuperior = null;
 var TextoDerecha = null;
 var datosIsla = {};
+var listarTipoEstructuras = [];
+var listarEnus = []
 
 var enumModoLienzo = {
     Area: 'Area',
@@ -23,17 +25,7 @@ var enumBotton = {
 }
 
 function inicializarArea() {
-    //function throttle(func, limit) {
-    //    var inThrottle = false;
-    //    return function (...args) {
-    //        if (!inThrottle) {
-    //            inThrottle = true;
-    //            setTimeout(() => inThrottle = false, limit);
-    //            func.apply(this, args);
-    //        }
-    //    }
-    //}
-
+    
     function DameEscala() {
         const escala = 0.4;
         return escala;
@@ -288,7 +280,6 @@ function inicializarArea() {
     const escala = Lienzo.Escala;
 
     var container = document.getElementById('container');
-    var listarTipoEstructuras = [];
 
     stage = new Konva.Stage({
         container: 'container',
@@ -381,7 +372,11 @@ function inicializarArea() {
     });
 
     $.getJSON('/Estructura/ListarTiposEstructura', function (res) {
-        listarTipoEstructuras = res.map(t => `<option value="${t.Id, t.Color}">${t.Descripcion}</option>`).join('');
+        listarTipoEstructuras = res.map(t => `<option value="${t.Id}" data-color="${t.Color}">${t.Descripcion}</option>`).join('');
+    });
+
+    $.getJSON('/DetallesEnu/ListarEnus', function (res) {
+        listarEnus = res.map(e => `<option value="${e.Id}">${e.Descripcion}</option>`).join('');
     });
 
     $(`#lstAreas`).on('click', 'label.btn', function () {
@@ -424,7 +419,7 @@ function inicializarArea() {
 
                 var area = res.data;
                 area.Islas.forEach(i => {
-                    console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion}`);
+                    //console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion} color ${i.Color}`);
 
                     var rectanguloIsla = new Konva.Rect({
                         name: i.Nombre,
@@ -433,15 +428,15 @@ function inicializarArea() {
                         y: i.Y,
                         width: i.Ancho,
                         height: i.Alto,
-                        fill: 'lightblue',
+                        fill: `#${i.Color}`,
                         strokeWidth: 1,
                         stroke: 'black',
                     });
 
                     rectanguloIsla.on('pointerdblclick', function () {
                         bootbox.dialog({
-                            title: `Modificar isla ${i.Nombre}`,
-                            message: "Deseas editar o eliminar la isla",
+                            title: `Modificar zona ${i.Nombre}`,
+                            message: "Deseas editar o eliminar la zona",
                             buttons: {
                                 btnSalir: {
                                     label: "Cancelar",
@@ -453,10 +448,10 @@ function inicializarArea() {
                                     className: "btn btn-success",
                                     callback: function () {
                                         bootbox.dialog({
-                                            title: "Crear Isla",
+                                            title: "Crear Zona",
                                             message: `<form id="formIsla">
                                                         <div class="form-group">
-                                                            <label>Nombre de la</label>
+                                                            <label>Nombre de la zona</label>
                                                             <input type="text" class="form-control" id="nombreIsla" required />
                                                             <label>Observaciones</label>
                                                             <input type="text" class="form-control" id="observacionesIsla"/>
@@ -514,9 +509,9 @@ function inicializarArea() {
                                                                     contentType: 'application/json; charset=utf-8',
                                                                     success: function (res) {
                                                                         if (res.ok) {
-                                                                            bootbox.alert(`La isla ${i.Nombre} ha sido editada`);
+                                                                            bootbox.alert(`La zona ${i.Nombre} ha sido editada`);
                                                                         } else {
-                                                                            bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${i.Nombre}`);
+                                                                            bootbox.alert(`Ha ocurrido un error al intentar editar la zona ${i.Nombre}`);
                                                                         }
                                                                     }
                                                                 });
@@ -534,7 +529,7 @@ function inicializarArea() {
                                     callback: function () {
                                         bootbox.dialog({
                                             title: 'Confirmar borrado',
-                                            message: `Estas de acuerdo en eliminar la isla ${i.Nombre}`,
+                                            message: `Estas de acuerdo en eliminar la zona ${i.Nombre}`,
                                             buttons: {
                                                 btnCancelar: {
                                                     label: "Cancelar",
@@ -562,9 +557,9 @@ function inicializarArea() {
                                                             contentType: 'application/json; charset=utf-8',
                                                             success: function (res) {
                                                                 if (res.ok) {
-                                                                    bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                                    bootbox.alert(`La zona ${i.Nombre} ha sido eliminada`);
                                                                 } else {
-                                                                    bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
+                                                                    bootbox.alert(`Ha ocurrido un error al intentar eliminar la zona ${i.Nombre}`);
                                                                 }
                                                             }
                                                         });
@@ -584,12 +579,78 @@ function inicializarArea() {
         }); 
     });
 
-    $(`#crearIsla`).on(`click`, function () {
+    $('#agregarTipoEstructura').on('click', function () {
+        let formularioEstructura = `<form id="formTipoEstructura">
+            <div class="form-group">
+                <label>Descripcion</label>
+                    <input type="text" class="form-control" id="descripcionEstructura" required />
+                <br />
+                <label>Seleccionar Enu</label>
+                <select id="enuEstructura" class="form-control" required />
+                    <option value=""> --Selecciona-- </option>
+                    ${listarEnus}
+                </select>
+                <label>Color</label>
+                <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
+            </div>
+        `;
         bootbox.dialog({
-            title: "Crear Isla",
+            title: 'Agregar nuevo tipo de estructura',
+            message: formularioEstructura,
+            buttons: {
+                cancelar: {
+                    label: "Cancelar",
+                    className: "btn-danger",
+                    callback: function () {
+                        return;
+                    }
+                },
+                confirm: {
+                    label: "Guardar",
+                    className: "btn-success",
+                    callback: function () {
+                        const descripcion = $(`#descripcionEstructura`).val();
+                        const idEnu = $(`#enuEstructura`).val();
+                        const color = $(`#colorEstructura`).val().replace('#', '');
+
+                        console.log(idEnu);
+
+                        var payload = {
+                            Descripcion: descripcion,
+                            DetalleTipoEstructura: { Id: idEnu },
+                            Color: color,
+                        }
+                        var url = '/Estructura/GuardarTipoEstructura';
+
+                        console.log(payload);
+
+                        $.ajax({
+                            method: 'POST',
+                            url: url,
+                            data: JSON.stringify(payload),
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (res) {
+                                if (res.ok) {
+                                    bootbox.alert('Tipo de estructura guardada con exito')
+                                } else {
+                                    bootbox.alert('Error al guardar el tipo de estructura');
+                                }
+                            }
+                        });
+
+                    }
+                }
+            }
+        });
+    });
+
+
+    $(`#crearZona`).on(`click`, function () {
+        bootbox.dialog({
+            title: "Crear Zona",
             message: `<form id="formIsla">
                     <div class="form-group">
-                        <label>Nombre de la Isla</label>
+                        <label>Nombre de la Zona</label>
                         <input type="text" class="form-control" id="nombreIsla" required />
                         <br />
                         <label>Tipo de estructura</label>
@@ -759,7 +820,6 @@ function inicializarArea() {
             }
         });
     });
-
 
     function TamanoIsla(escala) {
         const anchoBahia = 6.06 / escala;

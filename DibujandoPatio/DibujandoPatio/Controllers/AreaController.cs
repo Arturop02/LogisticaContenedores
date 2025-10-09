@@ -65,14 +65,6 @@ namespace DibujandoPatio.Controllers
         [HttpGet]
         public JsonResult ObtenerIslasPorAreaId(int id)
         {
-            //try
-            //{
-
-            //}catch (Exception)
-            //{
-            //    throw;
-            //}
-
             AreaRN areaRN = new AreaRN();
             IslaRN islaRN = new IslaRN();
             var area = areaRN.BuscarPorId(id);

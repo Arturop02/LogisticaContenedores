@@ -1,4 +1,5 @@
-﻿using Microsoft.Ajax.Utilities;
+﻿using BT.Patio;
+using Microsoft.Ajax.Utilities;
 using RN.Patio;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,13 @@ namespace DibujandoPatio.Controllers
 {
     public class EstructuraController : Controller
     {
+        [HttpPost]
+        public JsonResult GuardarTipoEstructura(EstructuraBT estructuraBT)
+        {
+            EstructuraRN estructuraRN = new EstructuraRN();
+            estructuraRN.Agregar(estructuraBT);
+            return Json(new { ok = true });
+        }
 
         [HttpGet]
         public JsonResult ObtenerTipoEstructuraPorId(int id)

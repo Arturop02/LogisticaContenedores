@@ -18,13 +18,11 @@ namespace BD.Patio
         {
             try
             {
-                using (SqlConnection conexion = new SqlConnection())
+                using (SqlConnection conexion = new SqlConnection(Conexion))
                 {
-                    using (SqlCommand cmd = new SqlCommand())
+                    using (SqlCommand cmd = new SqlCommand("utili.o_dca_Detalle_Enu_AC", conexion))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandText = "utili.o_dca_Detalle_Enu_AC";
-
                         cmd.Parameters.AgregarConValorNull("@Id", detalleEnuBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Descripcion", detalleEnuBT.Descripcion);
                         cmd.Parameters.AgregarConValorNull("@Valor", detalleEnuBT.Valor);
@@ -57,7 +55,7 @@ namespace BD.Patio
                     parametroXML.Agregar("Query", Query);
                 
                 conn = new SqlConnection(Conexion);
-                SqlCommand comm = new SqlCommand("utili.o_dca_DetalleEnu_PorOpcion");
+                SqlCommand comm = new SqlCommand("utili.o_dca_Detalle_Enu_PorOpcion", conn);
                 comm.CommandType = CommandType.StoredProcedure;
                 comm.Parameters.AgregarConValorNull("@Opcion", Opcion.ToString());
                 comm.Parameters.AgregarConValorNull("@XML", parametroXML.DameXML());

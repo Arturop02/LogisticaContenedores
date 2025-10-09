@@ -1,4 +1,5 @@
-﻿using RN.Patio;
+﻿using BT.Patio;
+using RN.Patio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,14 @@ namespace DibujandoPatio.Controllers
 {
     public class DetallesEnuController : Controller
     {
+        [HttpPost]
+        public JsonResult GuardarDetalleEnu(DetalleEnuBT detalleEnuBT)
+        {
+            DetalleEnuRN detalleEnuRN = new DetalleEnuRN();
+            detalleEnuRN.Agregar(detalleEnuBT);
+            return Json(new { ok = true });
+        }
+
         [HttpGet]
         public JsonResult ObtenerDetallesEnuPorId(int id)
         {
@@ -17,13 +26,13 @@ namespace DibujandoPatio.Controllers
             return Json(new { ok = true, data = detalles }, JsonRequestBehavior.AllowGet);
         }
 
-
         [HttpGet]
-        public JsonResult ListarTiposEstructura()
+        public JsonResult ListarEnus()
         {
-            EstructuraRN estructuraRN = new EstructuraRN();
-            var lista = estructuraRN.DameTodosAlta().ToList();
-            return Json(new { ok = true, data = lista }, JsonRequestBehavior.AllowGet);
+            DetalleEnuRN detalleEnu = new DetalleEnuRN();
+            var listaEnu = detalleEnu.DameTodosAlta()
+                .ToList();
+            return Json(listaEnu, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Index()

@@ -18,17 +18,17 @@ namespace BD.Patio
         {
             try
             {
-                using (SqlConnection conexion = new SqlConnection())
+                using (SqlConnection conexion = new SqlConnection(Conexion))
                 {
-                    using (SqlCommand cmd = new SqlCommand())
+                    using (SqlCommand cmd = new SqlCommand("opera.o_cat_Estructura_AC", conexion))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.CommandText = "opera.o_cat_Estructura_AC";
+                        
                         cmd.Parameters.AgregarConValorNull("@Id", estructuraBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Descripcion", estructuraBT.Descripcion);
                         cmd.Parameters.AgregarConValorNull("@ClaveMov", estructuraBT.ClaveMov);
                         cmd.Parameters.AgregarConValorNull("@Icono", estructuraBT.Icono);
-                        cmd.Parameters.AgregarConValorNull("@ide_Detalle_Enu", estructuraBT?.DetalleTipoEstructura.Id);
+                        cmd.Parameters.AgregarConValorNull("@ide_Detalle_Enu", estructuraBT.DetalleTipoEstructura.Id);
                         string color = estructuraBT.Color.Trim();
                         if (color.Length > 8) color = color.Substring(0, 8);
                         cmd.Parameters.AgregarConValorNull("@Color", color);

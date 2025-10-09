@@ -481,7 +481,7 @@ function inicializarArea() {
 
             var area = res.data;
             area.Islas.forEach(i => {
-                console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion}`);
+                //console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion} color ${i.Color}`);
 
                 var rectanguloIsla = new Konva.Rect({
                     name: i.Nombre,
@@ -490,7 +490,7 @@ function inicializarArea() {
                     y: i.Y,
                     width: i.Ancho,
                     height: i.Alto,
-                    fill: 'lightblue',
+                    fill: `#${i.Color}`,
                     strokeWidth: 1,
                     stroke: 'black',
                 });
@@ -820,6 +820,54 @@ function inicializarArea() {
         $('#guardarBtn').removeData('idpatio').prop('disabled', false);
     });
 
+    $('#agregarEnu').on('click', function () {
+        let formularioEnu = `
+            <div class="mb-3">
+                <label for="nuevoEnu">Nuevo ENU:</label>
+                <input type="text" id="nuevoEnu" class="form-control" placeholder="Ingresa el nombre del nuevo ENU"/> 
+            </div>
+        `;
+        bootbox.dialog({
+            title: 'Confirmar Guardado',
+            message: formularioEnu,
+            buttons: {
+                cancel: {
+                    label: 'Cancelar',
+                    className: 'btn-danger'
+                },
+                confirm: {
+                    label: 'Guardar',
+                    className: 'btn-success',
+                    callback: function () {
+                        const DescripcionEnu = $('#nuevoEnu').val().trim();
+
+                        url = '/DetallesEnu/GuardarDetalleEnu';
+                        payload = {
+                            Descripcion: DescripcionEnu,
+                        }
+
+                        $.ajax({
+                            url: url,
+                            method: 'POST',
+                            data: JSON.stringify(payload),
+                            contentType: 'application/json; charset=UTF-8',
+                            success: function (res) {
+                                if (res.ok) {
+                                    bootbox.alert("Guardado correctamente");
+                                    dibujando = false;
+                                    $('#guardarBtn').prop('disabled', true);
+                                } else {
+                                    bootbox.alert("Ha ocurrido un problema");
+                                }
+                            }
+                        });
+
+                    }
+                }
+            }
+        });
+    })
+
     $('#guardarBtn').on('click', function (e) {
         Lienzo.Cerrar();
         let id = $(this).data('idpatio');
@@ -937,7 +985,4 @@ function inicializarArea() {
         let valor = $(`#lstAreas input[name = "area"]:checked`).data('id');
         window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', valor);
     });
-
-    //$(document).trigger("AreaCargada");
-    //$(document).trigger('LienzoReady');
 }
