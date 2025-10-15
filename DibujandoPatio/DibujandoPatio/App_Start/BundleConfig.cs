@@ -39,6 +39,15 @@ namespace DibujandoPatio
 
             bundles.Add(new ScriptBundle("~/bundles/konva").Include(
                         "~/Scripts/konva-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqgrid").Include(
+                        "~/Scripts/jquery.jqGrid.min.js"));
+
+            bundles.Add(new StyleBundle("~/bundles/grid").Include(
+                        "~/Script/grid.locale-es.js"));
+
+            bundles.Add(new StyleBundle("~/Content/jqgrid").Include(
+                      "~/Content/ui.jqgrid.css"));
         }
     }
 }

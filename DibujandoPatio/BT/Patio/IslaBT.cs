@@ -18,6 +18,9 @@ namespace BT.Patio
         public decimal Ancho { get; set; }
         public decimal Alto { get; set; }
         public string Observaciones { get; set; }
+        
+        //Datos extra de EstructuraBT
         public string Color { get; set; }
+        public string Descripcion { get; set; }
     }
 }

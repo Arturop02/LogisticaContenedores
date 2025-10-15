@@ -95,6 +95,23 @@ function inicializarArea() {
         isla.scaleY(1);
     }
 
+    function DameDatosIsla(isla) {
+        const escala = DameEscala();
+        var alto = (isla.Alto * escala).toFixed(2);
+        var ancho = (isla.Ancho * escala).toFixed(2);
+
+        let contenido = "";
+        contenido = `
+            <p><strong>Nombre:</strong> ${isla.Nombre}</p>
+            <p><strong>Tipo de Isla:</strong> ${isla.Descripcion}</p>
+            <p><strong>Ancho:</strong> ${ancho}m</p>
+            <p><strong>Alto:</strong> ${alto}m</p>
+            <p><strong>Observaciones:</strong> ${isla.Observaciones}</p>
+        `;
+        $("#sidebar-content").html(contenido);
+        $("#sidebar").addClass("active");
+    }
+
 
     Lienzo = {
         Modo: enumModoLienzo.Isla,
@@ -419,11 +436,11 @@ function inicializarArea() {
 
                 var area = res.data;
                 area.Islas.forEach(i => {
-                    //console.log(`Dibujando Isla ${i.Nombre} en X:${i.X}, Y:${i.Y}, con rotacion en ${i.Orientacion} color ${i.Color}`);
-
+                    
                     var rectanguloIsla = new Konva.Rect({
                         name: i.Nombre,
                         rotation: i.Orientacion,
+                        text: i.Descripcion,
                         x: i.X,
                         y: i.Y,
                         width: i.Ancho,
@@ -431,6 +448,10 @@ function inicializarArea() {
                         fill: `#${i.Color}`,
                         strokeWidth: 1,
                         stroke: 'black',
+                    });
+
+                    rectanguloIsla.on('pointerclick', function () {
+                        DameDatosIsla(i);
                     });
 
                     rectanguloIsla.on('pointerdblclick', function () {
@@ -819,6 +840,10 @@ function inicializarArea() {
                 }
             }
         });
+    });
+
+    $('#cerrarSidebar').on('click', function () {
+        $('#sidebar').removeClass("active");
     });
 
     function TamanoIsla(escala) {
