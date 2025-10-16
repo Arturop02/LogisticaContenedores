@@ -92,15 +92,40 @@ function inicializarArea() {
         var alto = (isla.Alto * escala).toFixed(2);
         var ancho = (isla.Ancho * escala).toFixed(2);
 
-        let contenido ="";
-        contenido = `
-            <p><strong>Nombre:</strong> ${isla.Nombre}</p>
-            <p><strong>Tipo de Isla:</strong> ${isla.Descripcion}</p>
-            <p><strong>Ancho:</strong> ${ancho}m</p>
-            <p><strong>Alto:</strong> ${alto}m</p>
-            <p><strong>Observaciones:</strong> ${isla.Observaciones}</p>
-        `;
-        $("#sidebar-content").html(contenido);
+        const datosIsla = [{
+            Nombre: isla.Nombre,
+            Descripcion: isla.Descripcion,
+            Ancho: ancho + 'm',
+            Alto: alto + 'm',
+            Observaciones: isla.Observaciones
+        }];
+
+        const tabla = $('#tablaDatos');
+
+        if (tabla.data('initialized')) {
+            $('#tablaDatos').jqGrid('clearGridData');
+            $('#tablaDatos').jqGrid('setGridParam', { data: datosIsla }).trigger('reloadGrid');
+            console.log("Tabla actualizada");
+        } else if (tabla) {
+            $('#tablaDatos').jqGrid({
+                datatype: 'local',
+                data: datosIsla,
+                colModel: [
+                    { label: "Nombre", name: "Nombre", width: 200 },
+                    { label: "Tipo de Estructura", name: "Descripcion", width: 200 },
+                    { label: "Ancho", name: "Ancho", width: 150, align: "center" },
+                    { label: "Alto", name: "Alto", width: 150, align: "center" },
+                    { label: "Observaciones", name: "Observaciones", width: 200 },
+                ],
+                viewrecords: true,
+                height: "auto",
+                rowNum: 10,
+            });
+            tabla.data('initialized', true);
+            console.log("Tabla inicializada");
+            //console.log($("#tablaDatos").jqGrid('getGridParam', 'data'));
+            $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
+        }
         $("#sidebar").addClass("active");
     }
 

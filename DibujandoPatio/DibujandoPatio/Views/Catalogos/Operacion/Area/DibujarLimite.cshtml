@@ -47,7 +47,7 @@
         flex-direction: column;
     }
 
-    .sidebar-header{
+    .sidebar-header {
         position: sticky;
         top: 0;
         display: flex;
@@ -55,16 +55,15 @@
         justify-content: space-between
     }
 
-    .sidebar-content{
+    .sidebar-content {
         flex: 1;
         overflow: auto;
         padding: 10px;
     }
 
-    .sidebar.active{
+    .sidebar.active {
         right: 0;
     }
-
 </style>
 <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
     <div id="lstAreas" class="btn-group" data-toggle="buttons">
@@ -101,13 +100,17 @@
             <i class="glyphicon glyphicon-remove"></i>
         </button>
     </div>
-    <div id="sidebar-content" class="sidebar-content"></div>
+    <div id="sidebar-content" class="sidebar-content">
+        <table id="tablaDatos"></table>
+    </div>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 @section scripts{
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
+    <script src="~/Scripts/grid.locale-es.js"></script>
+    <link href="~/Content/ui.jqgrid.min.css" rel="stylesheet" />
     @Scripts.Render("~/bundles/jqgrid")
 
     <script src="~/Scripts/Area/Area.js"></script>

@@ -64,7 +64,6 @@
     .sidebar.active {
         right: 0;
     }
-
 </style>
 <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
     <div id="lstAreas" class="btn-group" data-toggle="buttons">
@@ -98,14 +97,21 @@
             <i class="glyphicon glyphicon-remove"></i>
         </button>
     </div>
-    <div id="sidebar-content" class="sidebar-content"></div>
+    <div id="sidebar-content" class="sidebar-content">
+        <table id="tablaDatos"></table>
+    </div>
 </div>
-<div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 @section scripts{
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
+    @*@Scripts.Render("~/bundles/grid")
+    @Styles.Render("~/bundles/jqgrid")*@
+    <script src="~/Scripts/grid.locale-es.js"></script>
+    <link href="~/Content/ui.jqgrid.min.css" rel="stylesheet"/>
+    @Scripts.Render("~/bundles/jqgrid")
+
     <script src="~/Scripts/Isla/Isla.js"></script>
 
     <script>
