@@ -117,7 +117,7 @@ function inicializarArea() {
         isla.scaleY(1);
     }
 
-    function DameDatosIsla(isla) {
+    function DibujarDatosIsla(isla) {
         const escala = DameEscala();
         var alto = (isla.Alto * escala).toFixed(2);
         var ancho = (isla.Ancho * escala).toFixed(2);
@@ -171,6 +171,182 @@ function inicializarArea() {
         $("#sidebar").addClass("active");
     }
 
+    function cargarIslas(idAreaSeleccionada) {
+        var idAreaActual = null;
+        if (idAreaActual == idAreaSeleccionada) return;
+
+        idAreaActual = idAreaSeleccionada;
+        layer.destroyChildren();
+        layer.draw();
+
+        $.getJSON('/Area/ObtenerIslasPorAreaId', { id: idAreaSeleccionada }, function (res) {
+            if (!res.ok || !res.data);
+
+            var area = res.data;
+            area.Islas.forEach(i => {
+
+                var rectanguloIsla = new Konva.Rect({
+                    name: i.Nombre,
+                    text: i.Descripcion,
+                    rotation: i.Orientacion,
+                    x: i.X,
+                    y: i.Y,
+                    width: i.Ancho,
+                    height: i.Alto,
+                    fill: `#${i.Color}`,
+                    strokeWidth: 1,
+                    stroke: 'black',
+                });
+
+                rectanguloIsla.on('pointerclick', function () {
+                    DibujarDatosIsla(i);
+                });
+
+                rectanguloIsla.on('pointerdblclick', function () {
+                    bootbox.dialog({
+                        title: `Modificar isla ${i.Nombre}`,
+                        message: "Deseas editar o eliminar la isla",
+                        buttons: {
+                            btnSalir: {
+                                label: "Cancelar",
+                                className: "btn btn-primary",
+                                cancel: true,
+                            },
+                            btnEditar: {
+                                label: "Editar",
+                                className: "btn btn-success",
+                                callback: function () {
+                                    bootbox.dialog({
+                                        title: "Editar Isla",
+                                        message: `<form id="formIsla">
+                                                        <div class="form-group">
+                                                            <label>Nombre de la Isla</label>
+                                                            <input type="text" class="form-control" id="nombreIsla" required />
+                                                            <label>Observaciones</label>
+                                                            <input type="text" class="form-control" id="observacionesIsla"/>
+                                                        </div>
+                                                      </form>`
+                                        ,
+                                        buttons: {
+                                            cancelar: {
+                                                label: "Cancelar",
+                                                className: "btn-danger",
+                                                callback: function () {
+                                                    return;
+                                                }
+                                            },
+                                            next: {
+                                                label: "Siguiente",
+                                                className: "btn btn-primary",
+                                                callback: function (result) {
+                                                    tr.nodes([rectanguloIsla]);
+                                                    layer.draw();
+                                                    layer.add(tr);
+                                                    const escala = DameEscala();
+
+                                                    if (result) {
+                                                        rectanguloIsla.draggable(true);
+                                                        rectanguloIsla.on('transform', function () {
+                                                            ajustarTamanos(rectanguloIsla, escala);
+                                                        });
+
+                                                        var nuevosDatos = {
+                                                            Nombre: $('#nombreIsla').val(),
+                                                            Observaciones: $('#observacionesIsla').val(),
+                                                        }
+
+                                                        rectanguloIsla.on('pointerup', function () {
+                                                            const transform = stage.getAbsoluteTransform().copy().invert();
+                                                            const pos = transform.point(rectanguloIsla.getAbsolutePosition());
+                                                            var rotacion = DameRotacion(rectanguloIsla);
+
+                                                            var payload = {
+                                                                Id: i.Id,
+                                                                Nombre: nuevosDatos.Nombre,
+                                                                Orientacion: rotacion,
+                                                                X: pos.x,
+                                                                Y: pos.y,
+                                                                Ancho: rectanguloIsla.width() * rectanguloIsla.scaleX(),
+                                                                Alto: rectanguloIsla.height() * rectanguloIsla.scaleY(),
+                                                                Observaciones: nuevosDatos.Observaciones,
+                                                            };
+
+                                                            $.ajax({
+                                                                url: '/Isla/EditarIsla',
+                                                                method: 'POST',
+                                                                data: JSON.stringify(payload),
+                                                                contentType: 'application/json; charset=utf-8',
+                                                                success: function (res) {
+                                                                    if (res.ok) {
+                                                                        bootbox.alert(`La isla ${i.Nombre} ha sido editada`);
+                                                                    } else {
+                                                                        bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${i.Nombre}`);
+                                                                    }
+                                                                }
+                                                            });
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            },
+                            btnEliminar: {
+                                label: "Eliminar",
+                                className: "btn btn-danger",
+                                callback: function () {
+                                    bootbox.dialog({
+                                        title: 'Confirmar borrado',
+                                        message: `Estas de acuerdo en eliminar la isla ${i.Nombre}`,
+                                        buttons: {
+                                            btnCancelar: {
+                                                label: "Cancelar",
+                                                className: "btn btn-primary",
+                                                cancel: true,
+                                            },
+                                            btnConfirmarEliminacion: {
+                                                label: "Eliminar",
+                                                className: "btn btn-danger",
+                                                callback: function () {
+                                                    var payload = {
+                                                        Id: i.Id,
+                                                        Nombre: i.Nombre,
+                                                        Orientacion: i.Orientacion,
+                                                        X: i.X,
+                                                        Y: i.Y,
+                                                        Ancho: i.Ancho,
+                                                        Alto: i.Alto,
+                                                        Observaciones: i.Observaciones,
+                                                    }
+                                                    $.ajax({
+                                                        url: '/Isla/BorrarIsla',
+                                                        method: 'POST',
+                                                        data: JSON.stringify(payload),
+                                                        contentType: 'application/json; charset=utf-8',
+                                                        success: function (res) {
+                                                            if (res.ok) {
+                                                                bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                            } else {
+                                                                bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                });
+                layer.add(rectanguloIsla);
+
+            });
+            layer.draw();
+        });
+    }
 
     Lienzo = {
         Modo: enumModoLienzo.Isla,
@@ -354,6 +530,27 @@ function inicializarArea() {
 
     Punto.OrdenActual = 0;
     const escala = Lienzo.Escala;
+    const tamano = TamanoIsla(
+        escala
+    );
+
+    var tr = new Konva.Transformer({
+        enabledAnchors: [
+            'top-center',
+            'top-right',
+            'bottom-right',
+            'bottom-center',
+            'middle-right'
+        ],
+        rotateEnabled: true,
+        resizeEnabled: true,
+        boundBoxFunc: (oldBox, newBox) => {
+            if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
+                return oldBox;
+            }
+            return newBox;
+        }
+    });
 
     var container = document.getElementById('container');
 
@@ -492,173 +689,9 @@ function inicializarArea() {
             Lienzo.Estado = enumEstadoLienzo.Editando;
             Lienzo.BloquearArea(false);
 
-            $.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
-                if (!res.ok || !res.data);
-
-                var area = res.data;
-                area.Islas.forEach(i => {
-                    
-                    var rectanguloIsla = new Konva.Rect({
-                        name: i.Nombre,
-                        rotation: i.Orientacion,
-                        text: i.Descripcion,
-                        x: i.X,
-                        y: i.Y,
-                        width: i.Ancho,
-                        height: i.Alto,
-                        fill: `#${i.Color}`,
-                        strokeWidth: 1,
-                        stroke: 'black',
-                    });
-
-                    rectanguloIsla.on('pointerclick', function () {
-                        DameDatosIsla(i);
-                    });
-
-                    rectanguloIsla.on('pointerdblclick', function () {
-                        bootbox.dialog({
-                            title: `Modificar zona ${i.Nombre}`,
-                            message: "Deseas editar o eliminar la zona",
-                            buttons: {
-                                btnSalir: {
-                                    label: "Cancelar",
-                                    className: "btn btn-primary",
-                                    cancel: true,
-                                },
-                                btnEditar: {
-                                    label: "Editar",
-                                    className: "btn btn-success",
-                                    callback: function () {
-                                        bootbox.dialog({
-                                            title: "Crear Zona",
-                                            message: `<form id="formIsla">
-                                                        <div class="form-group">
-                                                            <label>Nombre de la zona</label>
-                                                            <input type="text" class="form-control" id="nombreIsla" required />
-                                                            <label>Observaciones</label>
-                                                            <input type="text" class="form-control" id="observacionesIsla"/>
-                                                        </div>
-                                                      </form>`
-                                            ,
-                                            buttons: {
-                                                cancelar: {
-                                                    label: "Cancelar",
-                                                    className: "btn-danger",
-                                                    callback: function () {
-                                                        return;
-                                                    }
-                                                },
-                                                next: {
-                                                    label: "Siguiente",
-                                                    className: "btn btn-primary",
-                                                    callback: function (result) {
-                                                        tr.nodes([rectanguloIsla]);
-                                                        layer.draw();
-                                                        layer.add(tr);
-                                                        const escala = DameEscala();
-
-                                                        if (result) {
-                                                            rectanguloIsla.draggable(true);
-                                                            rectanguloIsla.on('transform', function () {
-                                                                ajustarTamanos(rectanguloIsla, escala);
-                                                                DameTamano(rectanguloIsla, layer);
-                                                            });
-
-                                                            var nuevosDatos = {
-                                                                Nombre: $('#nombreIsla').val(),
-                                                                Observaciones: $('#observacionesIsla').val(),
-                                                            }
-
-                                                            rectanguloIsla.on('pointerup', function () {
-                                                                const pos = rectanguloIsla.getAbsolutePosition();
-                                                                var rotacion = DameRotacion(rectanguloIsla);
-
-                                                                var payload = {
-                                                                    Id: i.Id,
-                                                                    Nombre: nuevosDatos.Nombre,
-                                                                    Orientacion: rotacion,
-                                                                    X: pos.x,
-                                                                    Y: pos.y,
-                                                                    Ancho: rectanguloIsla.width() * rectanguloIsla.scaleX(),
-                                                                    Alto: rectanguloIsla.height() * rectanguloIsla.scaleY(),
-                                                                    Observaciones: nuevosDatos.Observaciones,
-                                                                };
-
-                                                                $.ajax({
-                                                                    url: '/Isla/EditarIsla',
-                                                                    method: 'POST',
-                                                                    data: JSON.stringify(payload),
-                                                                    contentType: 'application/json; charset=utf-8',
-                                                                    success: function (res) {
-                                                                        if (res.ok) {
-                                                                            bootbox.alert(`La zona ${i.Nombre} ha sido editada`);
-                                                                        } else {
-                                                                            bootbox.alert(`Ha ocurrido un error al intentar editar la zona ${i.Nombre}`);
-                                                                        }
-                                                                    }
-                                                                });
-                                                            });
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    }
-                                },
-                                btnEliminar: {
-                                    label: "Eliminar",
-                                    className: "btn btn-danger",
-                                    callback: function () {
-                                        bootbox.dialog({
-                                            title: 'Confirmar borrado',
-                                            message: `Estas de acuerdo en eliminar la zona ${i.Nombre}`,
-                                            buttons: {
-                                                btnCancelar: {
-                                                    label: "Cancelar",
-                                                    className: "btn btn-primary",
-                                                    cancel: true,
-                                                },
-                                                btnConfirmarEliminacion: {
-                                                    label: "Eliminar",
-                                                    className: "btn btn-danger",
-                                                    callback: function () {
-                                                        var payload = {
-                                                            Id: i.Id,
-                                                            Nombre: i.Nombre,
-                                                            Orientacion: i.Orientacion,
-                                                            X: i.X,
-                                                            Y: i.Y,
-                                                            Ancho: i.Ancho,
-                                                            Alto: i.Alto,
-                                                            Observaciones: i.Observaciones,
-                                                        }
-                                                        $.ajax({
-                                                            url: '/Isla/BorrarIsla',
-                                                            method: 'POST',
-                                                            data: JSON.stringify(payload),
-                                                            contentType: 'application/json; charset=utf-8',
-                                                            success: function (res) {
-                                                                if (res.ok) {
-                                                                    bootbox.alert(`La zona ${i.Nombre} ha sido eliminada`);
-                                                                } else {
-                                                                    bootbox.alert(`Ha ocurrido un error al intentar eliminar la zona ${i.Nombre}`);
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                        });
-                    });
-                    layer.add(rectanguloIsla)
-            });
-                layer.draw();
-            });
         }); 
+
+        cargarIslas(id);
     });
 
     $('#agregarTipoEstructura').on('click', function () {
@@ -769,10 +802,6 @@ function inicializarArea() {
                             return false;
                         }
 
-                        const tamano = TamanoIsla(
-                            escala
-                        );
-
                         var grupoIslas = new Konva.Group({
                             x: 50,
                             y: 50,
@@ -805,24 +834,6 @@ function inicializarArea() {
                             text: '',
                             fontSize: 12,
                             fill: 'black',
-                        });
-
-                        var tr = new Konva.Transformer({
-                            enabledAnchors: [
-                                'top-center',
-                                'top-right',
-                                'bottom-right',
-                                'bottom-center',
-                                'middle-right'
-                            ],
-                            rotateEnabled: true,
-                            resizeEnabled: true,
-                            boundBoxFunc: (oldBox, newBox) => {
-                                if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
-                                    return oldBox;
-                                }
-                                return newBox;
-                            }
                         });
 
                         tr.nodes([islaTemporal]);
@@ -874,7 +885,8 @@ function inicializarArea() {
         }
 
         let rotacion = DameRotacion(islaTemporal);
-        let posicionAbsoluta = islaTemporal.getAbsolutePosition();
+        const transform = stage.getAbsoluteTransform().copy().invert();
+        let posicionAbsoluta = transform.point(islaTemporal.getAbsolutePosition());
 
         var data = JSON.parse(JSON.stringify(datosIsla));
 

@@ -514,7 +514,6 @@ function inicializarArea() {
                                                         rectanguloIsla.draggable(true);
                                                         rectanguloIsla.on('transform', function () {
                                                             ajustarTamanos(rectanguloIsla, escala);
-                                                            DameTamano(rectanguloIsla, layer);
                                                         });
 
                                                         var nuevosDatos = {
@@ -523,7 +522,8 @@ function inicializarArea() {
                                                         }
 
                                                         rectanguloIsla.on('pointerup', function () {
-                                                            const pos = rectanguloIsla.getAbsolutePosition();
+                                                            const transform = stage.getAbsoluteTransform().copy().invert();
+                                                            const pos = transform.point(rectanguloIsla.getAbsolutePosition());
                                                             var rotacion = DameRotacion(rectanguloIsla);
 
                                                             var payload = {
