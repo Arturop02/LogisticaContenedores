@@ -87,7 +87,7 @@ function inicializarArea() {
         isla.scaleY(1);
     }
 
-    function DameDatosIsla(isla) {
+    function DibujaDatosIsla(isla) {
         const escala = DameEscala();
         var alto = (isla.Alto * escala).toFixed(2);
         var ancho = (isla.Ancho * escala).toFixed(2);
@@ -465,7 +465,7 @@ function inicializarArea() {
                 });
 
                 rectanguloIsla.on('pointerclick', function () {
-                    DameDatosIsla(i);
+                    DibujaDatosIsla(i);
                 });
 
                 rectanguloIsla.on('pointerdblclick', function () {

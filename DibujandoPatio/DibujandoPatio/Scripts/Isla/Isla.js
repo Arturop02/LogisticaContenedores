@@ -122,13 +122,7 @@ function inicializarArea() {
         var alto = (isla.Alto * escala).toFixed(2);
         var ancho = (isla.Ancho * escala).toFixed(2);
 
-        const datosIsla = [{
-            Nombre: isla.Nombre,
-            Descripcion: isla.Descripcion,
-            Ancho: ancho + 'm',
-            Alto: alto + 'm',
-            Observaciones: isla.Observaciones
-        }];
+        const datosIsla = [isla];
 
         const tabla = $('#tablaDatos');
 
@@ -140,17 +134,35 @@ function inicializarArea() {
             $('#tablaDatos').jqGrid({
                 datatype: 'local',
                 data: datosIsla,
+                styleUI: 'Bootstrap',
+                //responsive: true,
+                shrinkToFit: false,
+                autowidth: true,
+                //toppager: true,
+                rowList: [30, 40, 50],
+                search: true,
+                sortname: 'Documentacion',
+                sortorder: 'asc',
+                viewsortcols: [true, 'vertical', true],
+                pager: "#jqGridServiciosPager",
                 colModel: [
-                    { label: "Nombre", name: "Nombre", width: 200 },
-                    { label: "Tipo de Estructura", name: "Descripcion", width: 200 },
-                    { label: "Ancho", name: "Ancho", width: 150, align: "center" },
-                    { label: "Alto", name: "Alto", width: 150, align: "center" },
-                    { label: "Observaciones", name: "Observaciones", width: 200 },
+                    { label: "Nombre", name: "Nombre", width: 48, sortable: false, formatter:fnFormatNombreIsla },
+                    { label: "Tipo de Estructura", name: "Descripcion", width: 100, sortable: false },
+                    { label: "Ancho", name: "Ancho", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
+                    { label: "Alto", name: "Alto", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
+                    { label: "Observaciones", name: "Observaciones", width: 107, sortable: false },
                 ],
                 viewrecords: true,
                 height: "auto",
                 rowNum: 10,
             });
+
+            function fnFormatNombreIsla(cellValue, options, rowObject) {
+                console.log(arguments);
+
+                return cellValue.toUpperCase();
+            }
+
             tabla.data('initialized', true);
             console.log("Tabla inicializada");
             //console.log($("#tablaDatos").jqGrid('getGridParam', 'data'));
@@ -573,7 +585,7 @@ function inicializarArea() {
                                                                 };
 
                                                                 $.ajax({
-                                                                    url: './Isla/EditarIsla',
+                                                                    url: '/Isla/EditarIsla',
                                                                     method: 'POST',
                                                                     data: JSON.stringify(payload),
                                                                     contentType: 'application/json; charset=utf-8',
@@ -621,7 +633,7 @@ function inicializarArea() {
                                                             Observaciones: i.Observaciones,
                                                         }
                                                         $.ajax({
-                                                            url: './Isla/BorrarIsla',
+                                                            url: '/Isla/BorrarIsla',
                                                             method: 'POST',
                                                             data: JSON.stringify(payload),
                                                             contentType: 'application/json; charset=utf-8',
