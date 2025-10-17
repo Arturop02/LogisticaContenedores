@@ -37,6 +37,28 @@ function inicializarArea() {
         return rotacion;
     }
 
+    function TamanoIsla(escala) {
+        const anchoBahia = 6.06 / escala;
+        const altoBahia = 2.44 / escala;
+
+        var ancho = 2 * anchoBahia;
+        var alto = altoBahia;
+
+        return { ancho, alto };
+    }
+
+    function DameTamano(isla, layer) {
+        if (!isla) return;
+
+        const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
+        const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
+
+        TextoSuperior.text(`${anchoMetros} m`);
+        TextoDerecha.text(`${altoMetros} m`);
+
+        actualizarTexto(isla, TextoSuperior, TextoDerecha);
+    }
+
     function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
         var NodoRectangulo = nodo.getParent().findOne('Rect');
         //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
@@ -349,8 +371,10 @@ function inicializarArea() {
         Lienzo.Estado = enumEstadoLienzo.Agregando;
         Lienzo.BloquearArea(true);
         let $radio = $(`#lstAreas input[data-id="${idAreaSeleccionada}"]`);
-        $radio.closest("label").trigger('click');
-        $('#crearIsla').data('idpatio', idAreaSeleccionada).prop('disabled', false);
+        $radio.closest("label.btn").trigger('click');
+        $radio.prop('checked', true).trigger('change')
+        //$('#crearIsla').data('idpatio', idAreaSeleccionada).prop('disabled', false);
+        //console.log($radio.length);
     }
 
     //Evento que permite el zoom al girar la rueda del raton
@@ -402,7 +426,7 @@ function inicializarArea() {
         let esTouch = e.type.startsWith("touch");
         const boton = e.evt.button;
 
-        if (Lienzo.Modo === enumModoLienzo.is) {
+        if (Lienzo.Modo === enumModoLienzo.Isla) {
             if (boton === 2) {
                 Lienzo.HabilitarArrastrable(false);
             }
@@ -871,26 +895,5 @@ function inicializarArea() {
         $('#sidebar').removeClass("active");
     });
 
-    function TamanoIsla(escala) {
-        const anchoBahia = 6.06 / escala;
-        const altoBahia = 2.44 / escala;
-
-        var ancho = 2 * anchoBahia;
-        var alto = altoBahia;
-
-        return { ancho, alto };
-    }
-
-    function DameTamano(isla, layer) {
-        if (!isla) return;
-
-        const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
-        const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
-
-        TextoSuperior.text(`${anchoMetros} m`);
-        TextoDerecha.text(`${altoMetros} m`);
-
-        actualizarTexto(isla, TextoSuperior, TextoDerecha);
-    }
 }
 

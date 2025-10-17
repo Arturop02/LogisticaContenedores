@@ -122,8 +122,6 @@ function inicializarArea() {
                 rowNum: 10,
             });
             tabla.data('initialized', true);
-            console.log("Tabla inicializada");
-            //console.log($("#tablaDatos").jqGrid('getGridParam', 'data'));
             $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
         }
         $("#sidebar").addClass("active");
