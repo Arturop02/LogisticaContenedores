@@ -511,6 +511,7 @@ function inicializarArea() {
                                                     const escala = DameEscala();
 
                                                     if (result) {
+                                                        
                                                         rectanguloIsla.draggable(true);
                                                         rectanguloIsla.on('transform', function () {
                                                             ajustarTamanos(rectanguloIsla, escala);
@@ -521,7 +522,8 @@ function inicializarArea() {
                                                             Observaciones: $('#observacionesIsla').val(),
                                                         }
 
-                                                        rectanguloIsla.on('pointerup', function () {
+                                                        $('#guardarBtn').on('click', function () {
+                                                            
                                                             const transform = stage.getAbsoluteTransform().copy().invert();
                                                             const pos = transform.point(rectanguloIsla.getAbsolutePosition());
                                                             var rotacion = DameRotacion(rectanguloIsla);
@@ -578,12 +580,6 @@ function inicializarArea() {
                                                     var payload = {
                                                         Id: i.Id,
                                                         Nombre: i.Nombre,
-                                                        Orientacion: i.Orientacion,
-                                                        X: i.X,
-                                                        Y: i.Y,
-                                                        Ancho: i.Ancho,
-                                                        Alto: i.Alto,
-                                                        Observaciones: i.Observaciones,
                                                     }
                                                     $.ajax({
                                                         url: './Isla/BorrarIsla',

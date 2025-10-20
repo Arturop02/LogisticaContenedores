@@ -43,6 +43,9 @@ namespace DibujandoPatio
             bundles.Add(new StyleBundle("~/bundles/jqgridcss").Include(
                       "~/Content/ui.jqgrid.min.css"));
 
+            bundles.Add(new StyleBundle("~/bundles/fontawesome").Include(
+                      "~/Content/font-awesome.min.css"));
+
             //bundles.Add(new ScriptBundle("~/bundles/grid").Include(
             //            "~/Scripts/grid.locale-es.js"));
 

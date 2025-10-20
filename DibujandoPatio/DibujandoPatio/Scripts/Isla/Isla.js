@@ -129,7 +129,6 @@ function inicializarArea() {
         if (tabla.data('initialized')) {
             $('#tablaDatos').jqGrid('clearGridData');
             $('#tablaDatos').jqGrid('setGridParam', { data: datosIsla }).trigger('reloadGrid');
-            console.log("Tabla actualizada");
         } else if (tabla) {
             $('#tablaDatos').jqGrid({
                 datatype: 'local',
@@ -164,8 +163,6 @@ function inicializarArea() {
             }
 
             tabla.data('initialized', true);
-            console.log("Tabla inicializada");
-            //console.log($("#tablaDatos").jqGrid('getGridParam', 'data'));
             $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
         }
         $("#sidebar").addClass("active");
@@ -255,7 +252,8 @@ function inicializarArea() {
                                                             Observaciones: $('#observacionesIsla').val(),
                                                         }
 
-                                                        rectanguloIsla.on('pointerup', function () {
+                                                        $('#guardarBtn').on('click', function () {
+
                                                             const transform = stage.getAbsoluteTransform().copy().invert();
                                                             const pos = transform.point(rectanguloIsla.getAbsolutePosition());
                                                             var rotacion = DameRotacion(rectanguloIsla);
@@ -272,7 +270,7 @@ function inicializarArea() {
                                                             };
 
                                                             $.ajax({
-                                                                url: '/Isla/EditarIsla',
+                                                                url: './Isla/EditarIsla',
                                                                 method: 'POST',
                                                                 data: JSON.stringify(payload),
                                                                 contentType: 'application/json; charset=utf-8',
@@ -701,14 +699,24 @@ function inicializarArea() {
                     <input type="text" class="form-control" id="descripcionEstructura" required />
                 <br />
                 <label>Seleccionar Enu</label>
-                <select id="enuEstructura" class="form-control" required />
+                <select id="enuEstructura" class="form-control" required>
                     <option value=""> --Selecciona-- </option>
                     ${listarEnus}
                 </select>
                 <label>Color</label>
                 <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
+                <label>Icono</label>
+                <select id="selectIconos" class="selectpicker">
+                    <option value="glyphicon-th-large" data-content="<i class='fa fa-address-book' aria-hidden='true'></i>"></option>
+                    <option value="glyphicon-trash" data-content="<span class='glyphicon glyphicon-trash'></span>"></option>
+                    <option value="glyphicon-road" data-content="<span class='glyphicon glyphicon-road'></span>"></option>
+                    <option value="glyphicon-wrench" data-content="<span class='glyphicon glyphicon-wrench'></span>"></option>
+                    <option value="glyphicon-flash" data-content="<span class='glyphicon glyphicon-flash'></span>"></option>
+                </select>
             </div>
-        `;
+        </form>`;
+
+        //"fa-.*?(?=:before)"gm
         bootbox.dialog({
             title: 'Agregar nuevo tipo de estructura',
             message: formularioEstructura,
@@ -755,6 +763,9 @@ function inicializarArea() {
 
                     }
                 }
+            },
+            onShown: function () {
+                $('#selectIconos').selectpicker();
             }
         });
     });
