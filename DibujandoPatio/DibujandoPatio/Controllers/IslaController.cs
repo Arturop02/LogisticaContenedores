@@ -1,7 +1,9 @@
 ﻿using BT.Patio;
 using RN.Patio;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
 
@@ -28,7 +30,8 @@ namespace DibujandoPatio.Controllers
                 var isla = islaRN.Cambio(islaBT);
                 return Json(new { ok = true });
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 return Json(new { ok = false });
             }
         }
@@ -42,7 +45,7 @@ namespace DibujandoPatio.Controllers
                 var isla = islaRN.Borrado(islaBT);
                 return Json(new { ok = true });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new { ok = false });
             }
@@ -53,9 +56,9 @@ namespace DibujandoPatio.Controllers
         {
             IslaRN islaRN = new IslaRN();
             var isla = islaRN.BuscarPorId(id);
-            return Json(new { ok = true, data = isla}, JsonRequestBehavior.AllowGet);
+            return Json(new { ok = true, data = isla }, JsonRequestBehavior.AllowGet);
         }
-        
+
         public ActionResult Index(int? id)
         {
             AreaRN areaRN = new AreaRN();
@@ -64,6 +67,23 @@ namespace DibujandoPatio.Controllers
 
             ViewBag.IdAreaSeleccionada = id;
             return View();
+        }
+
+        [HttpGet]
+        public JsonResult DameListaIconos()
+        {
+            string texto = System.IO.File.ReadAllText(Server.MapPath("~/Content/font-awesome.min.css"));
+
+            var coincidencia = Regex.Matches(texto, "fa-[0-9a-z\\-]{1,}(?=:before)", RegexOptions.Multiline);
+
+            List<string> Opciones = new List<string>();
+
+            foreach (Match item in coincidencia)
+            {
+                Opciones.Add(item.Value);
+            }
+
+            return Json(new { ok = true, data = Opciones }, JsonRequestBehavior.AllowGet);
         }
     }
 }

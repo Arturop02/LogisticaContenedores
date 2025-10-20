@@ -700,7 +700,7 @@ function inicializarArea() {
                 <br />
                 <label>Seleccionar Enu</label>
                 <select id="enuEstructura" class="form-control" required>
-                    <option value=""> --Selecciona-- </option>
+                    <option value=""> --Selecciona-- </option>0
                     ${listarEnus}
                 </select>
                 <label>Color</label>
@@ -711,7 +711,7 @@ function inicializarArea() {
                     <option value="glyphicon-trash" data-content="<span class='glyphicon glyphicon-trash'></span>"></option>
                     <option value="glyphicon-road" data-content="<span class='glyphicon glyphicon-road'></span>"></option>
                     <option value="glyphicon-wrench" data-content="<span class='glyphicon glyphicon-wrench'></span>"></option>
-                    <option value="glyphicon-flash" data-content="<span class='glyphicon glyphicon-flash'></span>"></option>
+                    <option value="glyphicon-flash" data-content="<span class='glyphicon glyphicon-flash'></span>"></option>z
                 </select>
             </div>
         </form>`;
