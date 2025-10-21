@@ -43,15 +43,18 @@ namespace DibujandoPatio
             bundles.Add(new StyleBundle("~/bundles/jqgridcss").Include(
                       "~/Content/ui.jqgrid.min.css"));
 
-            bundles.Add(new StyleBundle("~/bundles/fontawesome").Include(
+            bundles.Add(new StyleBundle("~/bundles/fontawesomecss").Include(
                       "~/Content/font-awesome.min.css"));
 
-            //bundles.Add(new ScriptBundle("~/bundles/grid").Include(
-            //            "~/Scripts/grid.locale-es.js"));
+            bundles.Add(new StyleBundle("~/bundles/bootstrapselectcss").Include(
+                      "~/Content/bootstrap-select.min.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqgrid").Include(
                         "~/Scripts/grid.locale-es.js",
                         "~/Scripts/jquery.jqGrid.min.js"));   
+
+            bundles.Add(new ScriptBundle("~/bundles/bootstrapselect").Include(
+                        "~/Scripts/bootstrap-select.min.js"));
         }
     }
 }

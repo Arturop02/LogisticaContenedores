@@ -346,6 +346,40 @@ function inicializarArea() {
         });
     }
 
+    function BuscarIconos(filtro, pagina = 1, tamPagina = 15) {
+        $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
+            if (!res || !res.ok) return;
+
+            const container = $('#iconosContainer').empty();
+            res.data.forEach(icono => {
+                container.append(`
+                    <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
+                    <i class="fa ${icono}"></i>
+                    </button>`
+                );
+            });
+            const paginador = $('#paginador').empty();
+            for (let i = 1; i < res.totalPaginas; i++) {
+                const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
+                btn.on('click', () => BuscarIconos(filtro, i, tamPagina));
+                paginador.append(btn);
+                //paginador.append(`
+                //    <button class="btn btn-sm btn-light">${i}</button>
+                //`).children().last().on('click', () => BuscarIconos(filtro, i, tamPagina));
+            }
+
+            container.off('click').on('click', 'button', function () {
+                const icono = $(this).data('icono');
+                $('#iconoSeleccionado').val(icono);
+
+                container.find('button').removeClass('active btn-success');
+                this.addClass('active btn-success');
+            });
+
+        });
+        
+    }
+
     Lienzo = {
         Modo: enumModoLienzo.Isla,
         Escala: DameEscala(),
@@ -648,9 +682,9 @@ function inicializarArea() {
         listarTipoEstructuras = res.map(t => `<option value="${t.Id}" data-color="${t.Color}">${t.Descripcion}</option>`).join('');
     });
 
-    $.getJSON('/DetallesEnu/ListarEnus', function (res) {
-        listarEnus = res.map(e => `<option value="${e.Id}">${e.Descripcion}</option>`).join('');
-    });
+    //$.getJSON('/DetallesEnu/ListarEnus', function (res) {
+    //    listarEnus = res.map(e => `<option value="${e.Id}">${e.Descripcion}</option>`).join('');
+    //});
 
     $(`#lstAreas`).on('click', 'label.btn', function () {
         $(`#lstAreas .btn`).removeClass('active');
@@ -693,33 +727,10 @@ function inicializarArea() {
     });
 
     $('#agregarTipoEstructura').on('click', function () {
-        let formularioEstructura = `<form id="formTipoEstructura">
-            <div class="form-group">
-                <label>Descripcion</label>
-                    <input type="text" class="form-control" id="descripcionEstructura" required />
-                <br />
-                <label>Seleccionar Enu</label>
-                <select id="enuEstructura" class="form-control" required>
-                    <option value=""> --Selecciona-- </option>0
-                    ${listarEnus}
-                </select>
-                <label>Color</label>
-                <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
-                <label>Icono</label>
-                <select id="selectIconos" class="selectpicker">
-                    <option value="glyphicon-th-large" data-content="<i class='fa fa-address-book' aria-hidden='true'></i>"></option>
-                    <option value="glyphicon-trash" data-content="<span class='glyphicon glyphicon-trash'></span>"></option>
-                    <option value="glyphicon-road" data-content="<span class='glyphicon glyphicon-road'></span>"></option>
-                    <option value="glyphicon-wrench" data-content="<span class='glyphicon glyphicon-wrench'></span>"></option>
-                    <option value="glyphicon-flash" data-content="<span class='glyphicon glyphicon-flash'></span>"></option>z
-                </select>
-            </div>
-        </form>`;
-
         //"fa-.*?(?=:before)"gm
         bootbox.dialog({
             title: 'Agregar nuevo tipo de estructura',
-            message: formularioEstructura,
+            message: $('#formularioEstructuras').show(),
             buttons: {
                 cancelar: {
                     label: "Cancelar",
@@ -735,13 +746,13 @@ function inicializarArea() {
                         const descripcion = $(`#descripcionEstructura`).val();
                         const idEnu = $(`#enuEstructura`).val();
                         const color = $(`#colorEstructura`).val().replace('#', '');
-
-                        console.log(idEnu);
+                        const icono = $('#iconoSeleccionado').val();
 
                         var payload = {
                             Descripcion: descripcion,
                             DetalleTipoEstructura: { Id: idEnu },
                             Color: color,
+                            Icono: icono,
                         }
                         var url = '/Estructura/GuardarTipoEstructura';
 
@@ -764,9 +775,10 @@ function inicializarArea() {
                     }
                 }
             },
-            onShown: function () {
-                $('#selectIconos').selectpicker();
-            }
+        });
+        $(document).on('click', '#btnBuscarIconos', function () {
+            const filtro = $('#filtroIcono').val();
+            BuscarIconos(filtro);
         });
     });
 

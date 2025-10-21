@@ -106,6 +106,10 @@ namespace DibujandoPatio.Controllers
             var area = areaRN.DameTodosAlta();
             ViewBag.Areas = area;
 
+            DetalleEnuRN detalleEnuRN = new DetalleEnuRN();
+            var enus = detalleEnuRN.DameTodosAlta();
+            ViewBag.Enus = enus;
+
             ViewBag.IdAreaSeleccionada = id;
             return View(RutaBase + "DibujarIsla.cshtml");
         }

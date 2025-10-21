@@ -22,5 +22,6 @@ namespace BT.Patio
         //Datos extra de EstructuraBT
         public string Color { get; set; }
         public string Descripcion { get; set; }
+        public string Icono { get; set; }
     }
 }

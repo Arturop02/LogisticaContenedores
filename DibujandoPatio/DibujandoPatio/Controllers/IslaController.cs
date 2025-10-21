@@ -3,6 +3,7 @@ using RN.Patio;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
@@ -70,11 +71,13 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpGet]
-        public JsonResult DameListaIconos()
+        public JsonResult DameListaIconos(string busqueda = "", int pagina = 1, int tamPagina = 15)
         {
             string texto = System.IO.File.ReadAllText(Server.MapPath("~/Content/font-awesome.min.css"));
 
             var coincidencia = Regex.Matches(texto, "fa-[0-9a-z\\-]{1,}(?=:before)", RegexOptions.Multiline);
+
+            //var opciones = coincidencia.Cast<Match>().Select(m => m.Value).Distinct().ToList();
 
             List<string> Opciones = new List<string>();
 
@@ -83,7 +86,21 @@ namespace DibujandoPatio.Controllers
                 Opciones.Add(item.Value);
             }
 
-            return Json(new { ok = true, data = Opciones }, JsonRequestBehavior.AllowGet);
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                //opciones = opciones.Where(i => i.IndexOf(busqueda, StringComparison.OrdinalIgnoreCase)>=0).ToList();
+                Opciones = Opciones
+                    .Where(i => i.IndexOf(busqueda, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    
+            }
+
+            int totalResultados = Opciones.Count;
+            int totalPaginas = (int)Math.Ceiling((double)totalResultados / tamPagina);
+
+            var resultadosPaginados = Opciones.Skip((pagina - 1) * tamPagina).Take(tamPagina).ToList();
+
+            return Json(new { ok = true, paginaActual = pagina, totalPaginas, totalResultados,  data = resultadosPaginados }, JsonRequestBehavior.AllowGet);
         }
     }
 }

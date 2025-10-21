@@ -5,7 +5,14 @@
     ViewBag.Title = "Islas";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var areas = ViewBag.Areas as List<BT.AreaBT>;
+    var enus = ViewBag.Enus as List<BT.Patio.DetalleEnuBT>;
 }
+
+@*@model List<BT.Patio.EstructuraBT>
+@{ 
+    var enus = ViewBag.Enums as List<BT.Patio.DetalleEnuBT>;
+}*@
+
 
 <style type="text/css">
     #lstAreas > label.active {
@@ -101,16 +108,46 @@
         <table id="tablaDatos"></table>
     </div>
 </div>
+<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; display: none;">
+    <div id="formularioEstructuras" class="form-group">
+        <label>Descripcion</label>
+        <input type="text" class="form-control" id="descripcionEstructura" required />
+        <br />
+        <label>Seleccionar Enu</label>
+        <select id="enuEstructura" class="form-control" required>
+            <option value="">Selecciona</option>
+            @foreach(var e in enus)
+             {
+                <option value="@e.Id">@e.Descripcion</option>
+             }
+        </select>
+        <br />
+
+        <label>Color</label>
+        <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
+        <br />
+
+        <label>Icono</label>
+        <div>
+            <input type="text" id="filtroIcono" placeholder="Icono" />
+            <button type="button" class="btn btn-default" id="btnBuscarIconos">Buscar</button>
+        </div>
+        <div id="iconosContainer" class="btn-group" role="group" style="flex-wrap: wrap;"></div>
+        <div id="paginador" class="mt-2"></div>
+        <input type="hidden" id="iconoSeleccionado" />
+    </div>
+</div>
+
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 @section scripts{
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
+    @Styles.Render("~/bundles/bootstrapselectcss")
     @Styles.Render("~/bundles/jqgridcss")
     @Scripts.Render("~/bundles/jqgrid")
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
-    @Styles.Render("~/bundles/fontawesome")
+    @Scripts.Render("~/bundles/bootstrapselect")
+    @Styles.Render("~/bundles/fontawesomecss")
 
     <script src="~/Scripts/Isla/Isla.js"></script>
 
