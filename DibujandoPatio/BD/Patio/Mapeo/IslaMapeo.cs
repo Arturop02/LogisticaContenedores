@@ -17,6 +17,7 @@ namespace BD.Isla
             islaBT.Alto = (decimal)record["Alto"];
             islaBT.Observaciones = record["Observaciones"].ToString();
             islaBT.Color = record["Color"].ToString();
+            islaBT.Icono = record["Icono"].ToString();
             islaBT.Descripcion = record["Descripcion"].ToString();
             islaBT.Est_cve = record["Est_cve"].ToString().Trim()[0];
             return islaBT;

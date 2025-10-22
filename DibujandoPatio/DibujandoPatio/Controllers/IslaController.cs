@@ -71,7 +71,7 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpGet]
-        public JsonResult DameListaIconos(string busqueda = "", int pagina = 1, int tamPagina = 15)
+        public JsonResult DameListaIconos(string busqueda = "", int pagina = 1, int tamPagina = 12)
         {
             string texto = System.IO.File.ReadAllText(Server.MapPath("~/Content/font-awesome.min.css"));
 

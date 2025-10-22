@@ -56,10 +56,10 @@ function inicializarArea() {
         TextoSuperior.text(`${anchoMetros} m`);
         TextoDerecha.text(`${altoMetros} m`);
 
-        actualizarTexto(isla, TextoSuperior, TextoDerecha);
+        ActualizarTexto(isla, TextoSuperior, TextoDerecha);
     }
 
-    function actualizarTexto(nodo, TextoSuperior, TextoDerecha) {
+    function ActualizarTexto(nodo, TextoSuperior, TextoDerecha) {
         var NodoRectangulo = nodo.getParent().findOne('Rect');
         //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
 
@@ -103,7 +103,7 @@ function inicializarArea() {
         TextoDerecha.rotation(nodo.rotation());
     }
 
-    function ajustarTamanos(isla, escala) {
+    function AjustarTamanos(isla, escala) {
         const pasoHorizontal = 6.06;
         const pasoVertical = 2.44;
 
@@ -168,7 +168,46 @@ function inicializarArea() {
         $("#sidebar").addClass("active");
     }
 
-    function cargarIslas(idAreaSeleccionada) {
+    function ObtenerUnicodeDesdeClase(iconClass) {
+        // Crear un elemento temporal <i>
+        const elementoTemporal = document.createElement('i');
+        elementoTemporal.className = `fa ${iconClass}`;
+        elementoTemporal.style.fontFamily = 'FontAwesome';
+        elementoTemporal.style.display = 'inline-block';
+        elementoTemporal.style.visibility = 'hidden'; // no visible
+        elementoTemporal.style.position = 'absolute'; // fuera de flujo
+
+        // Insertar en el documento (necesario para poder leer el ::before)
+        document.body.appendChild(elementoTemporal);
+
+        // Obtener el contenido del pseudo-elemento ::before
+        const unicode = window.getComputedStyle(elementoTemporal, '::before')
+            .getPropertyValue('content')
+            .replace(/['"]/g, ''); // quitar comillas
+
+        // Eliminar el elemento temporal
+        document.body.removeChild(elementoTemporal);
+
+        return unicode;
+    }
+    function TamanoIcono(rectangulo) {
+        var tamIcono;
+
+        var promedio = (rectangulo.width() + rectangulo.height()) / 2;
+
+        if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
+            tamIcono = 20;
+        }
+
+        tamIcono = promedio * 0.4;
+
+        if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
+            tamIcono = 20;
+        }
+
+        return tamIcono
+    }
+    function CargarIslas(idAreaSeleccionada) {
         var idAreaActual = null;
         if (idAreaActual == idAreaSeleccionada) return;
 
@@ -181,13 +220,16 @@ function inicializarArea() {
 
             var area = res.data;
             area.Islas.forEach(i => {
+            
+                var grupoADibujar = new Konva.Group({
+                    x: i.X,
+                    y: i.Y,
+                    rotation: i.Orientacion,
+                });
 
                 var rectanguloIsla = new Konva.Rect({
                     name: i.Nombre,
                     text: i.Descripcion,
-                    rotation: i.Orientacion,
-                    x: i.X,
-                    y: i.Y,
                     width: i.Ancho,
                     height: i.Alto,
                     fill: `#${i.Color}`,
@@ -195,7 +237,25 @@ function inicializarArea() {
                     stroke: 'black',
                 });
 
-                rectanguloIsla.on('pointerclick', function () {
+                var uniCodeIcono;
+
+                if (i.Icono && i.Icono.trim() !== "") {
+                    uniCodeIcono = ObtenerUnicodeDesdeClase(i.Icono);
+                }
+
+                var icono = new Konva.Text({
+                    text: uniCodeIcono,
+                    fontFamily: 'FontAwesome',
+                    fontSize: TamanoIcono(rectanguloIsla),
+                    fill: 'white'
+                });
+
+                icono.x(rectanguloIsla.width() / 2 - icono.width() / 2);
+                icono.y(rectanguloIsla.height() / 2 - icono.height() / 2);
+
+                grupoADibujar.add(rectanguloIsla, icono);
+
+                grupoADibujar.on('pointerclick', function () {
                     DibujarDatosIsla(i);
                 });
 
@@ -244,7 +304,9 @@ function inicializarArea() {
                                                     if (result) {
                                                         rectanguloIsla.draggable(true);
                                                         rectanguloIsla.on('transform', function () {
-                                                            ajustarTamanos(rectanguloIsla, escala);
+                                                            AjustarTamanos(rectanguloIsla, escala);
+                                                            //icono.fontSize(TamanoIcono(rectanguloIsla));
+                                                            //icono.rotation(DameRotacion(rectanguloIsla));
                                                         });
 
                                                         var nuevosDatos = {
@@ -310,12 +372,6 @@ function inicializarArea() {
                                                     var payload = {
                                                         Id: i.Id,
                                                         Nombre: i.Nombre,
-                                                        Orientacion: i.Orientacion,
-                                                        X: i.X,
-                                                        Y: i.Y,
-                                                        Ancho: i.Ancho,
-                                                        Alto: i.Alto,
-                                                        Observaciones: i.Observaciones,
                                                     }
                                                     $.ajax({
                                                         url: '/Isla/BorrarIsla',
@@ -339,14 +395,15 @@ function inicializarArea() {
                         }
                     });
                 });
-                layer.add(rectanguloIsla);
+                //layer.add(rectanguloIsla);
+                layer.add(grupoADibujar);
 
             });
             layer.draw();
         });
     }
 
-    function BuscarIconos(filtro, pagina = 1, tamPagina = 15) {
+    function BuscarIconos(filtro, pagina = 1, tamPagina = 12) {
         $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
             if (!res || !res.ok) return;
 
@@ -354,7 +411,7 @@ function inicializarArea() {
             res.data.forEach(icono => {
                 container.append(`
                     <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
-                    <i class="fa ${icono}"></i>
+                    <i class="fa ${icono}" value="fa ${icono}"></i>
                     </button>`
                 );
             });
@@ -363,9 +420,6 @@ function inicializarArea() {
                 const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
                 btn.on('click', () => BuscarIconos(filtro, i, tamPagina));
                 paginador.append(btn);
-                //paginador.append(`
-                //    <button class="btn btn-sm btn-light">${i}</button>
-                //`).children().last().on('click', () => BuscarIconos(filtro, i, tamPagina));
             }
 
             container.off('click').on('click', 'button', function () {
@@ -373,11 +427,9 @@ function inicializarArea() {
                 $('#iconoSeleccionado').val(icono);
 
                 container.find('button').removeClass('active btn-success');
-                this.addClass('active btn-success');
+                $(this).addClass('active btn-success');
             });
-
-        });
-        
+        }); 
     }
 
     Lienzo = {
@@ -682,10 +734,6 @@ function inicializarArea() {
         listarTipoEstructuras = res.map(t => `<option value="${t.Id}" data-color="${t.Color}">${t.Descripcion}</option>`).join('');
     });
 
-    //$.getJSON('/DetallesEnu/ListarEnus', function (res) {
-    //    listarEnus = res.map(e => `<option value="${e.Id}">${e.Descripcion}</option>`).join('');
-    //});
-
     $(`#lstAreas`).on('click', 'label.btn', function () {
         $(`#lstAreas .btn`).removeClass('active');
         $(this).addClass('active');
@@ -723,7 +771,7 @@ function inicializarArea() {
 
         }); 
 
-        cargarIslas(id);
+        CargarIslas(id);
     });
 
     $('#agregarTipoEstructura').on('click', function () {
@@ -866,8 +914,8 @@ function inicializarArea() {
 
                         islaTemporal.on('transform dragmove', function () {
                             DameTamano(islaTemporal, layer);
-                            actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-                            ajustarTamanos(islaTemporal, escala);
+                            ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                            AjustarTamanos(islaTemporal, escala);
                             layer.batchDraw();
                         });
 
@@ -877,11 +925,11 @@ function inicializarArea() {
                             datosIsla.Orientacion = rotacion;
                         });
 
-                        actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                        ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
 
                         tr.on('transform dragmove', () => {
-                            actualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-                            ajustarTamanos(islaTemporal, escala);
+                            ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                            AjustarTamanos(islaTemporal, escala);
                             layer.batchDraw();
                         });
 
