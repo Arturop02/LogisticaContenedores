@@ -16,6 +16,7 @@
 
     body {
         overflow: hidden;
+        
     }
 
     #container {
@@ -33,39 +34,8 @@
         display: none;
     }
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        padding: 0px;
-        right: -400px;
-        width: 400px;
-        height: 100vh;
-        transition: right 0.3s ease;
-        overflow: hidden;
-        z-index: 1000;
-        background-color: #f4f4f4;
-        flex-direction: column;
-    }
-
-    .sidebar-header {
-        position: sticky;
-        top: 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between
-    }
-
-    .sidebar-content {
-        flex: 1;
-        overflow: auto;
-        padding: 10px;
-    }
-
-    .sidebar.active {
-        right: 0;
-    }
 </style>
-<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
+<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
     <div id="lstAreas" class="btn-group" data-toggle="buttons">
         @{
             int i = 0;
@@ -83,26 +53,16 @@
                        data-nombre="@a.Nombre"
                        autocomplete="off"
                        @checkedAtrr> @a.Nombre
-                </label>
-                i++;
-            }
+            </label>
+            i++;
+         }
     </div>
     <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
     <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Zona</button>
     <button id="agregarEnu" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>Nuevo Enu</button>
     <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
+    <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
     <button id="btnDibujar" class="btn btn-success"><i class="glyphicon glyphicon-plus" aria-hidden="true"></i></button>
-</div>
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>Datos de la isla</h2>
-        <button id="cerrarSidebar" class="btn btn-danger pull-right">
-            <i class="glyphicon glyphicon-remove"></i>
-        </button>
-    </div>
-    <div id="sidebar-content" class="sidebar-content">
-        <table id="tablaDatos"></table>
-    </div>
 </div>
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 

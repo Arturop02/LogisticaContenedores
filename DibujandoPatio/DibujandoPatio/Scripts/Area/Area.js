@@ -212,6 +212,26 @@ function inicializarArea() {
                 }
             });
         },
+        PantallaCompleta: function () {
+
+            if (!document.fullscreenElement) {
+                this.anchoOriginal = stage.width();
+                this.altoOriginal = stage.height();
+
+                document.body.requestFullscreen().then(() => {
+                    container.style.backgroundColor = "white";
+                    stage.width(window.innerWidth);
+                    stage.height(window.innerHeight);
+                    stage.draw();
+                }).catch(err => console.log("Error", err));
+            } else {
+                document.exitFullscreen().then(() => {
+                    stage.width(this.anchoOriginal);
+                    stage.height(this.altoOriginal);
+                    stage.draw();
+                }).catch(err => console.log("Error", err));
+            }
+        },
     };
 
     var enumTipoGrafico = {
@@ -505,6 +525,13 @@ function inicializarArea() {
                     stroke: 'black',
                 });
 
+                var textoNombreIsla = new Konva.Text({
+                    text: i.Nombre,
+                    fontSize: 12,
+                    x: (rectanguloIsla.width() / 2),
+                    y: rectanguloIsla.height(),
+                });
+
                 var uniCodeIcono;
 
                 if (i.Icono && i.Icono.trim() !== "") {
@@ -521,10 +548,54 @@ function inicializarArea() {
                 icono.x(rectanguloIsla.width() / 2 - icono.width() / 2);
                 icono.y(rectanguloIsla.height() / 2 - icono.height() / 2);
 
-                grupoADibujar.add(rectanguloIsla, icono);
+                var tooltipRect = new Konva.Rect({
+                    fill: '#313131',
+                    stroke: 'gray',
+                    strokeWidth: 1,
+                    visible: false,
+                    opacity: 1,
+                });
 
-                grupoADibujar.on('pointerclick', function () {
-                    DibujarDatosIsla(i);
+                var tooltip = new Konva.Text({
+                    text: i.Nombre,
+                    visible: false,
+                    fontSize: 12,
+                    fill: 'white',
+                    padding: 3,
+                });
+
+                grupoADibujar.add(rectanguloIsla, icono, textoNombreIsla);
+
+                //grupoADibujar.on('pointerclick', function () {
+                //    DibujarDatosIsla(i);
+                //});
+
+                grupoADibujar.on('pointerover', function () {
+
+                    pointerPos = stage.getPointerPosition();
+                    tooltip.position({
+                        x: pointerPos.x + 5,
+                        y: pointerPos.y + 5,
+                    });
+
+                    tooltip.visible(true);
+
+                    tooltipRect.position({
+                        x: tooltip.x() - 5,
+                        y: tooltip.y() - 5,
+                    });
+
+                    tooltipRect.width(tooltip.width() + 10);
+                    tooltipRect.height(tooltip.height() + 10);
+                    tooltipRect.visible(true);
+
+                    layer.batchDraw();
+                });
+
+                grupoADibujar.on('pointerleave', function () {
+                    tooltip.visible(false);
+                    tooltipRect.visible(false);
+                    layer.batchDraw();
                 });
 
                 grupoADibujar.on('pointerdblclick', function () {
@@ -661,8 +732,8 @@ function inicializarArea() {
                         }
                     });
                 });
-                //layer.add(rectanguloIsla);
                 layer.add(grupoADibujar);
+                layer.add(tooltipRect, tooltip);
 
             });
             layer.draw();
