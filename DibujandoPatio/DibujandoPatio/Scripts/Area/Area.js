@@ -87,6 +87,49 @@ function inicializarArea() {
         isla.scaleY(1);
     }
 
+    function MoverGrupoIsla(nodo, texto, icono) {
+        var nodoRect = nodo.getParent().findOne('Rect');
+
+        let anchoRect = nodoRect.getWidth();
+        let altoRect = nodoRect.getHeight();
+        var rotacion = DameRotacion(nodo);
+
+        var Centro = {
+            x: nodoRect.width() / 2,
+            y: nodoRect.height() / 2,
+        };
+
+
+        let r = (altoRect / 2) + texto.height();
+        var rad = (90 + rotacion) * Math.PI / 180;
+
+        var xTexto = Centro.x + r * Math.cos(rad);
+        var yTexto = Centro.y + r * Math.sin(rad);
+
+
+        texto.position({
+            x: xTexto,
+            y: yTexto,
+        });
+
+        texto.offsetX(texto.width() / 2);
+        texto.offsetY(texto.height() / 2);
+
+        icono.position({
+            x: Centro.x,
+            y: Centro.y,
+        });
+        icono.fontSize(TamanoIcono(nodoRect));
+
+        icono.offsetX(icono.width() / 2);
+        icono.offsetY(icono.height() / 2);
+
+        texto.rotation(rotacion);
+        icono.rotation(rotacion);
+
+    }
+
+
     function DibujarDatosIsla(isla) {
         const escala = DameEscala();
         var alto = (isla.Alto * escala).toFixed(2);
