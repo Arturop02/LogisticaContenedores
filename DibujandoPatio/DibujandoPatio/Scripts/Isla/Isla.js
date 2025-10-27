@@ -401,9 +401,6 @@ function inicializarArea() {
                                                         rectanguloIsla.on('transform', function () {
                                                             AjustarTamanos(rectanguloIsla, escala);
                                                             MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
-                                                            //MoverNombreIsla(rectanguloIsla);
-                                                            //icono.fontSize(TamanoIcono(rectanguloIsla));
-                                                            //icono.rotation(DameRotacion(rectanguloIsla));
                                                         });
 
                                                         nuevosDatos = {

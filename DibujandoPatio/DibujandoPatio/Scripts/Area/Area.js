@@ -129,7 +129,6 @@ function inicializarArea() {
 
     }
 
-
     function DibujarDatosIsla(isla) {
         const escala = DameEscala();
         var alto = (isla.Alto * escala).toFixed(2);
@@ -641,7 +640,7 @@ function inicializarArea() {
                     layer.batchDraw();
                 });
 
-                grupoADibujar.on('pointerdblclick', function () {
+                rectanguloIsla.on('pointerdblclick', function () {
                     bootbox.dialog({
                         title: `Modificar isla ${i.Nombre}`,
                         message: "Deseas editar o eliminar la isla",
@@ -687,6 +686,7 @@ function inicializarArea() {
                                                         rectanguloIsla.draggable(true);
                                                         rectanguloIsla.on('transform', function () {
                                                             AjustarTamanos(rectanguloIsla, escala);
+                                                            MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
                                                         });
 
                                                         var nuevosDatos = {
@@ -696,9 +696,9 @@ function inicializarArea() {
 
                                                         $('#guardarBtn').on('click', function () {
 
-                                                            const transform = stage.getAbsoluteTransform().copy().invert();
-                                                            const pos = transform.point(rectanguloIsla.getAbsolutePosition());
-                                                            var rotacion = DameRotacion(rectanguloIsla);
+                                                            const transform = rectanguloIsla.getAbsoluteTransform();
+                                                            const pos = transform.getTranslation();
+                                                            var rotacion = rectanguloIsla.getAbsoluteRotation();
 
                                                             var payload = {
                                                                 Id: i.Id,
@@ -835,7 +835,7 @@ function inicializarArea() {
         let esTouch = e.type.startsWith("touch");
 
         if (!esTouch) {
-            if (e.evt.crtlKey) {
+            if (e.evt.ctrlKey) {
                 Lienzo.HabilitarArrastrable(true);
                 return;
             }
