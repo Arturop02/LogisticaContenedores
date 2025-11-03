@@ -32,12 +32,6 @@ function inicializarArea() {
         return escala;
     }
 
-    function DameRotacion(nodo) {
-        var rotacion = nodo.rotation() % 360;
-        if (rotacion < 0) rotacion += 360;
-        return rotacion;
-    }
-
     function TamanoIsla(escala) {
         const anchoBahia = 6.06 / escala;
         const altoBahia = 2.44 / escala;
@@ -48,17 +42,17 @@ function inicializarArea() {
         return { ancho, alto };
     }
 
-    function DameTamano(isla, layer) {
-        if (!isla) return;
+    //function DameTamano(isla) {
+    //    if (!isla) return;
 
-        const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
-        const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
+    //    const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
+    //    const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
 
-        TextoSuperior.text(`${anchoMetros} m`);
-        TextoDerecha.text(`${altoMetros} m`);
+    //    TextoSuperior.text(`${anchoMetros} m`);
+    //    TextoDerecha.text(`${altoMetros} m`);
 
-        ActualizarTexto(isla, TextoSuperior, TextoDerecha);
-    }
+    //    /*ActualizarTexto(isla, TextoSuperior, TextoDerecha);*/
+    //}
 
     function TransformarGrupoIsla(nodo, texto, icono) {
         var grupo = nodo.getParent();
@@ -66,20 +60,16 @@ function inicializarArea() {
 
         if (!nodoRect) nodoRect = nodo.findOne('Rect');
 
-        let anchoRect = nodoRect.width() /*nodo.attrs.width*/;
-        let altoRect = nodoRect.height() /*nodo.attrs.height*/;
-        var rotacion = nodo.getAbsoluteRotation();
+        let altoRect = nodoRect.height();
+        var rotacion = nodoRect.DameRotacion();
 
-        var Centro = {
-            x: nodoRect.getAbsolutePosition().x + (anchoRect / 2),
-            y: nodoRect.getAbsolutePosition().y + (altoRect / 2),
-        };
+        var centroRectangulo = nodoRect.DameCentroAbsoluto();
+        
+        let radio = (altoRect / 2) + texto.textHeight;
+        var radianes = (90 + rotacion) * Math.PI / 180;
 
-        let r = (altoRect / 2) + texto.textHeight;
-        var rad = (90 + rotacion) * Math.PI / 180;
-
-        var xTexto = Centro.x + r * Math.cos(rad);
-        var yTexto = Centro.y + r * Math.sin(rad);
+        var xTexto = centroRectangulo.x + radio * Math.cos(radianes);
+        var yTexto = centroRectangulo.y + radio * Math.sin(radianes);
         
         texto.absolutePosition({
             x: xTexto,
@@ -89,8 +79,6 @@ function inicializarArea() {
         texto.offsetX(texto.width() / 2);
         texto.offsetY(texto.height() / 2);
         texto.rotation(rotacion);
-
-        var centroRectangulo = nodoRect.DameCentroAbsoluto();
 
         icono.absolutePosition({
             x: centroRectangulo.x,
@@ -104,55 +92,13 @@ function inicializarArea() {
         icono.rotation(rotacion);
     }
 
-    function MoverGrupoIsla(nodo, texto, icono) {
-        var nodoRect = nodo.getParent().findOne('Rect');
-
-        const pos = nodo.getAbsolutePosition();
-        let anchoRect = nodo.attrs.width;
-        let altoRect = nodo.attrs.height;
-        var rotacion = DameRotacion(nodo) + 180;
-
-        var Centro = {
-            x: pos.x + anchoRect / 2,
-            y: pos.y + altoRect / 2,
-        };
-
-        let r = (altoRect / 2) + texto.textHeight;
-        var rad = (90 + rotacion) * Math.PI / 180;
-
-        var xTexto = Centro.x + r * Math.cos(rad);
-        var yTexto = Centro.y + r * Math.sin(rad);
-
-        texto.absolutePosition({
-            x: xTexto,
-            y: yTexto,
-        });
-        texto.offsetX(texto.width() / 2);
-        texto.offsetY(texto.height() / 2);
-
-        var centroRectangulo = nodoRect.DameCentroAbsoluto();
-
-        icono.absolutePosition({
-            x: centroRectangulo.x,
-            y: centroRectangulo.y,
-        });
-
-        icono.fontSize(TamanoIcono(nodoRect));
-        icono.offsetX(icono.width() / 2);
-        icono.offsetY(icono.height() / 2);
-
-        //texto.rotation(nodo.rotation());
-        //icono.rotation(nodo.rotation());
-
-    }
-
     function ActualizarTexto(nodo, TextoSuperior, TextoDerecha) {
         var NodoRectangulo = nodo.getParent().findOne('Rect');
-        //var NodoRectangulo = nodo.parent.children.FirstOrDefault(c => c instanceof Konva.Rect);
-
+        var escala = DameEscala();
+        
         var x = 0;
         var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
-        var rotacion = DameRotacion(nodo) + 180;
+        var rotacion = NodoRectangulo.DameRotacion() + 180;
 
         let r = (nodo.height() / 2) + TextoSuperior.textHeight;
 
@@ -176,17 +122,17 @@ function inicializarArea() {
 
         TextoSuperior.x(Centro.x + x);
         TextoSuperior.y(Centro.y + y);
-
+        TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).ancho}`);
         TextoSuperior.offsetX(TextoSuperior.width() / 2);
         TextoSuperior.offsetY(TextoSuperior.height() / 2);
+        TextoSuperior.rotation(nodo.rotation());
+
 
         TextoDerecha.x(Derecha.x + xD);
         TextoDerecha.y(Derecha.y + yD);
-
+        TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).alto}`);
         TextoDerecha.offsetX(TextoDerecha.width() / 2);
         TextoDerecha.offsetY(TextoDerecha.height() / 2);
-
-        TextoSuperior.rotation(nodo.rotation());
         TextoDerecha.rotation(nodo.rotation());
     }
 
@@ -317,15 +263,12 @@ function inicializarArea() {
 
                 var rectanguloIsla = new Konva.Rect({
                     Id: i.Id,
-                    //x: i.X,
-                    //y: i.Y,
                     name: i.Nombre,
                     text: i.Descripcion,
                     width: i.Ancho,
                     height: i.Alto,
                     fill: `#${i.Color}`,
                     strokeWidth: 1,
-                    //rotation: i.Orientacion,
                     stroke: 'black',
                 });
                 
@@ -442,10 +385,10 @@ function inicializarArea() {
 
                                                     if (result) {
                                                         rectanguloIsla.draggable(true);
-                                                        rectanguloIsla.on('dragmove', function () {
-                                                            MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
-                                                        });
-                                                        rectanguloIsla.on('transform', function () {
+                                                        //rectanguloIsla.on('dragmove', function () {
+                                                        //    MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
+                                                        //});
+                                                        rectanguloIsla.on('transform dragmove', function () {
                                                             AjustarTamanos(rectanguloIsla, escala);
                                                             TransformarGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
                                                         });
@@ -1090,16 +1033,15 @@ function inicializarArea() {
                         TextoSuperior = new Konva.Text({
                             x: islaTemporal.width() / 2,
                             y: islaTemporal.height() / 2,
-                            text: '',
+                            text: `${islaTemporal.DameTamano(escala).ancho}m`,
                             fontSize: 12,
                             fill: 'black',
-
                         });
 
                         TextoDerecha = new Konva.Text({
                             x: islaTemporal.width() / 2,
                             y: islaTemporal.height() / 2,
-                            text: '',
+                            text: `${islaTemporal.DameTamano(escala).alto}m`,
                             fontSize: 12,
                             fill: 'black',
                         });
@@ -1110,15 +1052,16 @@ function inicializarArea() {
                         layer.add(grupoIslas, tr);
 
                         islaTemporal.on('transform dragmove', function () {
-                            DameTamano(islaTemporal, layer);
+                            islaTemporal.DameTamano(escala);
                             ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
                             AjustarTamanos(islaTemporal, escala);
                             layer.batchDraw();
                         });
 
                         islaTemporal.on('transformend', function () {
-                            DameTamano(islaTemporal, layer);
-                            var rotacion = DameRotacion(islaTemporal);
+                            islaTemporal.DameTamano(escala);
+                            ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
+                            var rotacion = islaTemporal.DameRotacion();
                             datosIsla.Orientacion = rotacion;
                         });
 
@@ -1130,7 +1073,7 @@ function inicializarArea() {
                             layer.batchDraw();
                         });
 
-                        DameTamano(islaTemporal, layer);
+                        islaTemporal.DameTamano(escala);
 
                         layer.batchDraw();
 
