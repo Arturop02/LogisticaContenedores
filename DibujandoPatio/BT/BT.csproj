@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Include="Patio\AreaBT.cs" />
     <Compile Include="BaseBT.cs" />
-    <Compile Include="BaseCatalogosBT.cs" />
     <Compile Include="Patio\BahiaBT.cs" />
     <Compile Include="Patio\ContenedorBT.cs" />
     <Compile Include="Patio\DetalleEnuBT.cs" />

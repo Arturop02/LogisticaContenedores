@@ -60,27 +60,31 @@ function inicializarArea() {
         ActualizarTexto(isla, TextoSuperior, TextoDerecha);
     }
 
-    function MoverGrupoIsla(nodo, texto, icono) {
+    function TransformarGrupoIsla(nodo, texto, icono) {
         var nodoRect = nodo.getParent().findOne('Rect');
+        if (!nodoRect) nodoRect = nodo.findOne('Rect');
 
-        let anchoRect = nodoRect.getWidth();
-        let altoRect = nodoRect.getHeight();
-        var rotacion = DameRotacion(nodo);
+        //const pos = nodo.getAbsolutePosition();
+        let anchoRect = nodoRect.width() /*nodo.attrs.width*/;
+        let altoRect = nodoRect.height() /*nodo.attrs.height*/;
+        var rotacion = nodo.getAbsoluteRotation();
 
         var Centro = {
-            x: nodoRect.width() / 2,
-            y: nodoRect.height() / 2,
+            x: nodoRect.getAbsolutePosition().x + anchoRect / 2,
+            y: nodoRect.getAbsolutePosition().y + altoRect / 2,
+            //x: pos.x + anchoRect / 2,
+            //y: pos.y + altoRect / 2,
         };
 
-
-        let r = (altoRect / 2) + texto.height();
+        let r = (altoRect / 2) + texto.textHeight;
         var rad = (90 + rotacion) * Math.PI / 180;
 
         var xTexto = Centro.x + r * Math.cos(rad);
         var yTexto = Centro.y + r * Math.sin(rad);
-
         
-        texto.position({
+        //texto.x(xTexto);
+        //texto.y(yTexto);
+        texto.absolutePosition({
             x: xTexto,
             y: yTexto,
         });
@@ -88,18 +92,60 @@ function inicializarArea() {
         texto.offsetX(texto.width() / 2);
         texto.offsetY(texto.height() / 2);
 
-        icono.position({
+        icono.absolutePosition({
             x: Centro.x,
             y: Centro.y,
         });
-        icono.fontSize(TamanoIcono(nodoRect));
 
+        //icono.x(Centro.x);
+        //icono.y(Centro.y);
+        icono.fontSize(TamanoIcono(nodoRect));
         icono.offsetX(icono.width() / 2);
         icono.offsetY(icono.height() / 2);
 
         texto.rotation(rotacion);
         icono.rotation(rotacion);
-        
+
+    }
+
+    function MoverGrupoIsla(nodo, texto, icono) {
+        var nodoRect = nodo.getParent().findOne('Rect');
+
+        const pos = nodo.getAbsolutePosition();
+        let anchoRect = nodo.attrs.width;
+        let altoRect = nodo.attrs.height;
+        var rotacion = DameRotacion(nodo) + 180;
+
+        var Centro = {
+            x: pos.x + anchoRect / 2,
+            y: pos.y + altoRect / 2,
+        };
+
+        let r = (altoRect / 2) + texto.textHeight;
+        var rad = (90 + rotacion) * Math.PI / 180;;
+
+        var xTexto = Centro.x + r * Math.cos(rad);
+        var yTexto = Centro.y + r * Math.sin(rad);
+
+        texto.absolutePosition({
+            x: xTexto,
+            y: yTexto,
+        });
+        texto.offsetX(texto.width() / 2);
+        texto.offsetY(texto.height() / 2);
+
+        icono.absolutePosition({
+            x: Centro.x,
+            y: Centro.y,
+        });
+
+        icono.fontSize(TamanoIcono(nodoRect));
+        icono.offsetX(icono.width() / 2);
+        icono.offsetY(icono.height() / 2);
+
+        //texto.rotation(nodo.rotation());
+        //icono.rotation(nodo.rotation());
+
     }
 
     function ActualizarTexto(nodo, TextoSuperior, TextoDerecha) {
@@ -250,6 +296,7 @@ function inicializarArea() {
 
         return tamIcono
     }
+
     function CargarIslas(idAreaSeleccionada) {
         var idAreaActual = null;
         if (idAreaActual == idAreaSeleccionada) return;
@@ -280,7 +327,7 @@ function inicializarArea() {
                     strokeWidth: 1,
                     stroke: 'black',
                 });
-
+                
                 var textoNombreIsla = new Konva.Text({
                     text: i.Nombre,
                     fontSize: 12,
@@ -322,10 +369,6 @@ function inicializarArea() {
 
                 grupoADibujar.add(rectanguloIsla, icono, textoNombreIsla);
                 
-                //grupoADibujar.on('pointerclick', function () {
-                //    DibujarDatosIsla(i);
-                //});
-
                 grupoADibujar.on('pointerover', function () {
 
                     pointerPos = stage.getPointerPosition();
@@ -398,11 +441,14 @@ function inicializarArea() {
 
                                                     if (result) {
                                                         rectanguloIsla.draggable(true);
-                                                        rectanguloIsla.on('transform', function () {
-                                                            AjustarTamanos(rectanguloIsla, escala);
+                                                        rectanguloIsla.on('dragmove', function () {
                                                             MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
                                                         });
-
+                                                        rectanguloIsla.on('transform', function () {
+                                                            AjustarTamanos(rectanguloIsla, escala);
+                                                            TransformarGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
+                                                        });
+                                                        
                                                         nuevosDatos = {
                                                             Nombre: $('#nombreIsla').val(),
                                                             Observaciones: $('#observacionesIsla').val(),

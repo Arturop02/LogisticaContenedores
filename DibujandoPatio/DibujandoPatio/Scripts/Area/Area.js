@@ -684,7 +684,7 @@ function inicializarArea() {
 
                                                     if (result) {
                                                         rectanguloIsla.draggable(true);
-                                                        rectanguloIsla.on('transform', function () {
+                                                        rectanguloIsla.on('transform dragmove', function () {
                                                             AjustarTamanos(rectanguloIsla, escala);
                                                             MoverGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
                                                         });
