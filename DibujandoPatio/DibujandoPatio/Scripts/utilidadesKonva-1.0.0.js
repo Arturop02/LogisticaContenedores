@@ -25,9 +25,9 @@ Konva.Rect.prototype.DamePosicionAbsolutaTexto = function () {
 };
 
 Konva.Rect.prototype.DameTamano = function (escala) {
-    /*const rectangulo = this.getClientRect();*/
-    const anchoMetros = (this.width() * this.scaleX() * escala).toFixed(2);
-    const altoMetros = (this.height() * this.scaleY() * escala).toFixed(2);
+    const rectangulo = this.getClientRect();
+    const anchoMetros = (rectangulo.width * rectangulo.scaleX * escala).toFixed(2);
+    const altoMetros = (rectangulo.height * rectangulo.scaleY * escala).toFixed(2);
 
     return { ancho: anchoMetros, alto: altoMetros };
 };

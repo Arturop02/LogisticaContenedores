@@ -951,8 +951,8 @@ function inicializarArea() {
     $(`#btnDibujar`).on('click', function () {
         layer.destroyChildren();
         layer.draw();
-        Lienzo.lstPunto = [];
-        Lienzo.PuntoActual = null;
+        Lienzo.lstPunto = []; //Declara un arrary
+        Lienzo.PuntoActual = null; //Punto de inicio es null
 
         Punto.OrdenActual = 0;
 
