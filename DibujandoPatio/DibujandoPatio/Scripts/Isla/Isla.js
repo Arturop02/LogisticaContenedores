@@ -590,6 +590,7 @@ function inicializarArea() {
         lstPunto: [],
         PuntoActual: null,
         IslaActual: null,
+        lstIslas: [],
         DamePosicion: function () {
             const transform = this.Stage.getAbsoluteTransform().copy();
             transform.invert();
@@ -1006,10 +1007,7 @@ function inicializarArea() {
 
     Punto.OrdenActual = 0;
     const escala = Lienzo.Escala;
-    //const tamano = TamanoIsla(
-    //    escala
-    //);
-
+    
 
     var tr = new Konva.Transformer({
         enabledAnchors: [
