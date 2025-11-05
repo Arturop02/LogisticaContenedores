@@ -566,13 +566,16 @@ function inicializarArea() {
                     strokeWidth: 1,
                     stroke: 'black',
                 });
+                rectanguloIsla.offsetX(rectanguloIsla.width() / 2);
+                rectanguloIsla.offsetY(rectanguloIsla.height() / 2);
 
                 var textoNombreIsla = new Konva.Text({
                     text: i.Nombre,
+                    align: 'center',
                     fontSize: 12,
-                    x: (rectanguloIsla.width() / 2),
-                    y: rectanguloIsla.height(),
                 });
+                textoNombreIsla.x(0 - textoNombreIsla.width() / 2);
+                textoNombreIsla.y(rectanguloIsla.height() / 2);
 
                 var uniCodeIcono;
 
@@ -582,13 +585,14 @@ function inicializarArea() {
 
                 var icono = new Konva.Text({
                     text: uniCodeIcono,
+                    align: 'center',
                     fontFamily: 'FontAwesome',
                     fontSize: TamanoIcono(rectanguloIsla),
                     fill: 'white'
                 });
 
-                icono.x(rectanguloIsla.width() / 2 - icono.width() / 2);
-                icono.y(rectanguloIsla.height() / 2 - icono.height() / 2);
+                icono.x(0 - icono.width() / 2);
+                icono.y(0 - icono.height() / 2);
 
                 var tooltipRect = new Konva.Rect({
                     fill: '#313131',

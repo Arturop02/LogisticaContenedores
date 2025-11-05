@@ -649,11 +649,23 @@ function inicializarArea() {
                 item.MoverArriba();
             });
         },
-        AgregarIsla: function (x, y) {
+        AgregarIsla: function (x, y, width, height, nombre, color, icono, orientacion) {
 
             var isla = new Isla();
             isla.Posicion.x = x;
             isla.Posicion.y = y;
+            isla.Ancho = width;
+            isla.Alto = height;
+            isla.Nombre = nombre;
+            isla.Color = color;
+
+            var uniCodeIcono;
+            if (icono && icono.trim() !== "") {
+                uniCodeIcono = ObtenerUnicodeDesdeClase(icono);
+            }
+
+            isla.Icono = uniCodeIcono;
+            isla.Orientacion = orientacion
 
             return isla;
         },
@@ -682,6 +694,12 @@ function inicializarArea() {
             isla.scaleX(1);
             isla.scaleY(1);
         },
+        //TamanoIconoIsla: function (isla) {
+        //    var tamIcono;
+        //    var promedio = (isla.width() + isla.height()) / 2;
+
+        //    return tamIcono;
+        //},
         HabilitarArrastrable: function (habilitar) {
             if (habilitar) {
                 this.Stage.draggable(true);
@@ -824,12 +842,12 @@ function inicializarArea() {
         this.Grafico = null;
         this.GraficoTexto = null;
         this.GraficoIcono = null;
+        this.lstIslas = [];
         this.Arrastrable = false;
         this.Posicion = { x: null, y: null };
-        this.Tamano = { ancho: null, alto: null };
         this.Orientacion = null;
-        //this.Ancho = null;
-        //this.Alto = null;
+        this.Ancho = null;
+        this.Alto = null;
         this.Id = null;
         this.Nombre = null;
         this.Descripcion = null;
@@ -851,38 +869,40 @@ function inicializarArea() {
 
         this.Dibujar = function () {
             var tamanoDefault = Lienzo.TamanoIsla();
+            
             var cfgGrafico = {
                 Id: this.Id,
                 name: this.Nombre,
                 text: this.Descripcion,
-                rotation: this.Orientacion,
-                x: this.Posicion.x,
-                y: this.Posicion.y,
-                width: tamanoDefault.ancho,
-                height: tamanoDefault.alto,
-                fill: this.Color,
+                width: this.Ancho /*|| tamanoDefault.ancho*/,
+                height: this.Alto /*|| tamanoDefault.alto*/,
+                fill: `#${this.Color}`,
+                strokeWidth: 1.2,
+                stroke: 'black'
             };
 
             var cfgGraficoIcono = {
-                x: this.Posicion.x + this.Ancho / 2,
-                y: this.Posicion.y * this.Alto / 2,
+                x: 0,
+                y: 0,
                 text: this.Icono,
-                fontSize: TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto,  }),
+                align: 'center',
+                fontFamily: 'FontAwesome',
                 fill: 'white',
             };
             
             var cfgGraficoTexto = {
-                x: this.Posicion.x + this.Ancho / 2,
-                y: this.Posicion.y + this.Alto,
+                x: 0,
+                y: this.Alto / 2 + 10,
                 text: this.Nombre,
-                fontSize: 15,
+                fontSize: 12,
                 fill: 'black',
             };
             
             if (this.Grafico == null) {
                 this.Grupo = new Konva.Group({
-                    x: 0,
-                    y: 0,
+                    x: this.Posicion.x,
+                    y: this.Posicion.y,
+                    rotation: this.Orientacion,
                     dragable: false,
                 });
 
@@ -891,21 +911,21 @@ function inicializarArea() {
                 this.Grafico.offsetY(this.Grafico.height() / 2);
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
+                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
                 this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
                 this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
-
+                
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
                 this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
                 this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
-
+                
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
                 layer.add(this.Grupo);
                 var isla = this;
 
-                this.Grafico.on('pointerdown', function () {
-                    //const pos = Lienzo.DamePosicion();
-
+                this.Grafico.on('pointerclick', function () {
+                    
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = this;
@@ -915,38 +935,38 @@ function inicializarArea() {
                     }
                 });
 
-                this.Grafico.on('pointerclick', function () {
-                    if (Lienzo.Estado === enumEstadoLienzo.Estado) {
-                        bootbox.confirm({
-                            message: '¿Desea editar una nueva zona?',
-                            buttons: {
-                                confirm: {
-                                    label: 'Editar',
-                                    className: 'btn-success',
-                                },
-                                cancel: {
-                                    label: 'Cancelar',
-                                    className: 'btn-danger'
-                                },
-                            },
-                            callback: (result) => {
-                                tr.nodes(isla);
-                                layer.draw();
-                                layer.add(tr);
-                                if (result) {
-                                    isla.Arrastrable = true;
+                //this.Grafico.on('pointerclick', function () {
+                //    if (Lienzo.Estado === enumEstadoLienzo.Estado) {
+                //        bootbox.confirm({
+                //            message: '¿Desea editar una nueva zona?',
+                //            buttons: {
+                //                confirm: {
+                //                    label: 'Editar',
+                //                    className: 'btn-success',
+                //                },
+                //                cancel: {
+                //                    label: 'Cancelar',
+                //                    className: 'btn-danger'
+                //                },
+                //            },
+                //            callback: (result) => {
+                //                tr.nodes(isla);
+                //                layer.draw();
+                //                layer.add(tr);
+                //                if (result) {
+                //                    isla.Arrastrable = true;
 
-                                    TransformarGrupoIsla(isla, isla.GraficoTexto, GraficoTexto);
+                //                    TransformarGrupoIsla(isla, isla.GraficoTexto, GraficoTexto);
 
-                                    isla.Dibujar();
-                                    Lienzo.AjustarTamanosIsla();
-                                    Lienzo.IslaActual = isla;
-                                    Lienzo.Estado = enumEstadoLienzo.Moviendo
-                                }
-                            },
-                        });
-                    }
-                });
+                //                    isla.Dibujar();
+                //                    Lienzo.AjustarTamanosIsla();
+                //                    Lienzo.IslaActual = isla;
+                //                    Lienzo.Estado = enumEstadoLienzo.Moviendo
+                //                }
+                //            },
+                //        });
+                //    }
+                //});
 
                 this.Grafico.on('pointerdblclick', function () {
                     if (Lienzo.Estado !== enumEstadoLienzo.Editando) {
@@ -964,11 +984,11 @@ function inicializarArea() {
                             },
                             callback: (result) => {
                                 var payload = {
-                                    Id: this.Id,
-                                    Nombre: this.Nombre,
+                                    Id: isla.Id,
+                                    Nombre: isla.Nombre,
                                 };
                                 if (result) {
-                                    this.Eliminar();
+                                    isla.Eliminar();
                                     $.ajax({
                                         url: '/Isla/BorrarIsla',
                                         method: 'POST',
@@ -976,7 +996,7 @@ function inicializarArea() {
                                         contentType: 'application/json; charset=utf-8',
                                         success: function (res) {
                                             if (res.ok) {
-                                                bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
+                                                bootbox.alert(`La isla ${isla.Nombre} ha sido eliminada`);
                                             } else {
                                                 bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
                                             }
@@ -1002,12 +1022,18 @@ function inicializarArea() {
                 this.GraficoIcono.absolutePosition(cfgGraficoIcono);
                 this.GraficoIcono.getLayer().batchDraw();
             }
+
+            this.lstIslas.forEach(function (item) {
+                item.Dibujar();
+            })
+
+            this.MoverArriba = function () {
+                this.Grafico.moveToTop();
+            }
         }
     }
 
     Punto.OrdenActual = 0;
-    const escala = Lienzo.Escala;
-    
 
     var tr = new Konva.Transformer({
         enabledAnchors: [
@@ -1167,9 +1193,8 @@ function inicializarArea() {
         $.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
             var area = res.data;
             area.Islas.forEach(i => {
-                Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y);
-                //Lienzo.IslaActual.Id = i.Id;
-                Lienzo.IslaActual.Dibujar();
+                Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y, i.Ancho, i.Alto, i.Nombre, i.Color, i.Icono, i.Orientacion);
+                Lienzo.IslaActual.Id = i.Id;
                 Lienzo.IslaActual.Dibujar();
             });
 
