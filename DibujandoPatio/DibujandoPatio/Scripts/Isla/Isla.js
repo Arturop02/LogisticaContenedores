@@ -849,6 +849,7 @@ function inicializarArea() {
         };
 
         this.Dibujar = function () {
+            var tamanoDefault = Lienzo.TamanoIsla();
             var cfgGrafico = {
                 Id: this.Id,
                 name: this.Nombre,
@@ -856,8 +857,8 @@ function inicializarArea() {
                 rotation: this.Orientacion,
                 x: this.Posicion.x,
                 y: this.Posicion.y,
-                width: Lienzo.TamanoIsla().ancho,
-                height: Lienzo.TamanoIsla().alto,
+                width: tamanoDefault.ancho,
+                height: tamanoDefault.alto,
                 fill: this.Color,
             };
 
@@ -865,7 +866,7 @@ function inicializarArea() {
                 x: this.Posicion.x + this.Ancho / 2,
                 y: this.Posicion.y * this.Alto / 2,
                 text: this.Icono,
-                fontSize: TamanoIcono(this.Grafico),
+                fontSize: TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto,  }),
                 fill: 'white',
             };
             
@@ -895,7 +896,7 @@ function inicializarArea() {
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
                 this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
                 this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
-                
+
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
                 layer.add(this.Grupo);
@@ -903,7 +904,7 @@ function inicializarArea() {
 
                 this.Grafico.on('pointerdown', function () {
                     //const pos = Lienzo.DamePosicion();
-                    
+
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = this;
@@ -985,6 +986,20 @@ function inicializarArea() {
                         });
                     }
                 });
+            }
+            else {
+                console.log(this);
+                this.Grafico.setAttrs(cfgGrafico);
+                this.Grafico.absolutePosition(cfgGrafico);
+                this.Grafico.getLayer().batchDraw();
+
+                this.GraficoTexto.setAttrs(cfgGraficoTexto);
+                this.GraficoTexto.absolutePosition(cfgGraficoTexto);
+                this.GraficoTexto.getLayer().batchDraw();
+
+                this.GraficoIcono.setAttrs(cfgGraficoIcono);
+                this.GraficoIcono.absolutePosition(cfgGraficoIcono);
+                this.GraficoIcono.getLayer().batchDraw();
             }
         }
     }
@@ -1156,6 +1171,7 @@ function inicializarArea() {
             area.Islas.forEach(i => {
                 Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y);
                 //Lienzo.IslaActual.Id = i.Id;
+                Lienzo.IslaActual.Dibujar();
                 Lienzo.IslaActual.Dibujar();
             });
 
