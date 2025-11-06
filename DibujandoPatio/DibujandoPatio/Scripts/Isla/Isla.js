@@ -37,6 +37,35 @@ function inicializarArea() {
         return escala;
     }
 
+    function throttle(func, limit) {
+        var inThrottle = false;
+        return function (...args) {
+            if (!inThrottle) {
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+                func.apply(this, args);
+            }
+        }
+    }
+
+    var tr = new Konva.Transformer({
+        enabledAnchors: [
+            'top-center',
+            'top-right',
+            'bottom-right',
+            'bottom-center',
+            'middle-right'
+        ],
+        rotateEnabled: true,
+        resizeEnabled: true,
+        boundBoxFunc: (oldBox, newBox) => {
+            if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
+                return oldBox;
+            }
+            return newBox;
+        }
+    });
+
     function BuscarIconos(filtro, pagina = 1, tamPagina = 12) {
         $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
             if (!res || !res.ok) return;
@@ -649,24 +678,39 @@ function inicializarArea() {
                 item.MoverArriba();
             });
         },
-        AgregarIsla: function (x, y, width, height, nombre, color, icono, orientacion) {
+        CrearIslaTemporal: function (x, y) {
+            if (this.IslaActual) {
+                this.IslaActual.Eliminar();
+                this.IslaActual = null;
+            }
+
+            const isla = new Isla();
+            isla.Posicion.x = x;
+            isla.Posicion.y = y;
+            isla.Alto = Lienzo.TamanoIsla().alto;
+            isla.Ancho = Lienzo.TamanoIsla().ancho;
+
+            isla.Dibujar();
+            IslaActual = isla;
+        },
+        AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
 
             var isla = new Isla();
             isla.Posicion.x = x;
             isla.Posicion.y = y;
-            isla.Ancho = width;
-            isla.Alto = height;
+            isla.Ancho = ancho;
+            isla.Alto = alto;
+            isla.Orientacion = orientacion;
             isla.Nombre = nombre;
             isla.Color = color;
-
+            
             var uniCodeIcono;
             if (icono && icono.trim() !== "") {
                 uniCodeIcono = ObtenerUnicodeDesdeClase(icono);
             }
 
             isla.Icono = uniCodeIcono;
-            isla.Orientacion = orientacion
-
+            
             return isla;
         },
         TamanoIsla: function () {
@@ -694,12 +738,6 @@ function inicializarArea() {
             isla.scaleX(1);
             isla.scaleY(1);
         },
-        //TamanoIconoIsla: function (isla) {
-        //    var tamIcono;
-        //    var promedio = (isla.width() + isla.height()) / 2;
-
-        //    return tamIcono;
-        //},
         HabilitarArrastrable: function (habilitar) {
             if (habilitar) {
                 this.Stage.draggable(true);
@@ -749,6 +787,12 @@ function inicializarArea() {
         Punto: 'Punto',
         Rectangulo: 'Rectangulo',
     };
+
+    //var enumEstadoGrafico = {
+    //    AltaCambio: 'pointerdown',
+    //    Borrado: 'pointerdblclick',
+
+    //};
 
     function Linea(puntoInicial, puntoFinal) {
         this.Tipo = enumTipoGrafico.Linea;
@@ -842,12 +886,14 @@ function inicializarArea() {
         this.Grafico = null;
         this.GraficoTexto = null;
         this.GraficoIcono = null;
+        this.GraficoTrasnformer = null;
         this.lstIslas = [];
-        this.Arrastrable = false;
+
         this.Posicion = { x: null, y: null };
         this.Orientacion = null;
         this.Ancho = null;
         this.Alto = null;
+
         this.Id = null;
         this.Nombre = null;
         this.Descripcion = null;
@@ -858,6 +904,7 @@ function inicializarArea() {
             this.Grafico?.destroy();
             this.GraficoIcono.destroy();
             this.GraficoTexto.destroy();
+            this.GraficoTrasnformer?.destroy();
 
             var temp = [];
             temp.forEach(function (item) {
@@ -878,7 +925,7 @@ function inicializarArea() {
                 height: this.Alto /*|| tamanoDefault.alto*/,
                 fill: `#${this.Color}`,
                 strokeWidth: 1.2,
-                stroke: 'black'
+                stroke: 'black',
             };
 
             var cfgGraficoIcono = {
@@ -897,13 +944,34 @@ function inicializarArea() {
                 fontSize: 12,
                 fill: 'black',
             };
+
+            var cfgTransformer = {
+                nodes: [],
+                enabledAnchors: [
+                    'top-center',
+                    'top-right',
+                    'bottom-right',
+                    'bottom-center',
+                    'middle-right'
+                ],
+                rotateEnabled: true,
+                resizeEnabled: true,
+                //draggable: true,
+                visible: false,
+                boundBoxFunc: (oldBox, newBox) => {
+                    if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
+                        return oldBox;
+                    }
+                    return newBox;
+                }
+            }
             
             if (this.Grafico == null) {
                 this.Grupo = new Konva.Group({
                     x: this.Posicion.x,
                     y: this.Posicion.y,
                     rotation: this.Orientacion,
-                    dragable: false,
+                    draggable: false,
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
@@ -918,22 +986,36 @@ function inicializarArea() {
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
                 this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
                 this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
-                
-                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
+
+                this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
+            
+
+                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto, this.GraficoTrasnformer);
 
                 layer.add(this.Grupo);
                 var isla = this;
 
-                this.Grafico.on('pointerclick', function () {
+                this.Grafico.on('pointerdown', throttle((e) => {
+//                    e.cancelBubble = true;
                     
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                        Lienzo.IslaActual = this;
-                    } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+                        Lienzo.IslaActual = isla;
+
+                        isla.GraficoTrasnformer.nodes([this.Grafico]);
+                        isla.GraficoTrasnformer.visible(true);
+                        isla.Grafico.draggable(true);
+                        //isla.Grafico.on('transform dragmove', function () {
+                        //    TransformarGrupoIsla(this.Grafico, this.GraficoIcono, this.GraficoIcono)
+                        //});
+                        layer.draw();
+
+                    }else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
                         Lienzo.Estado = enumEstadoLienzo.Editando;
                         Lienzo.IslaActual = null;
                     }
-                });
+                }, 300));
 
                 //this.Grafico.on('pointerclick', function () {
                 //    if (Lienzo.Estado === enumEstadoLienzo.Estado) {
@@ -1035,24 +1117,6 @@ function inicializarArea() {
 
     Punto.OrdenActual = 0;
 
-    var tr = new Konva.Transformer({
-        enabledAnchors: [
-            'top-center',
-            'top-right',
-            'bottom-right',
-            'bottom-center',
-            'middle-right'
-        ],
-        rotateEnabled: true,
-        resizeEnabled: true,
-        boundBoxFunc: (oldBox, newBox) => {
-            if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
-                return oldBox;
-            }
-            return newBox;
-        }
-    });
-
     var container = document.getElementById('container');
 
     stage = new Konva.Stage({
@@ -1109,8 +1173,23 @@ function inicializarArea() {
     });
 
     stage.on('pointerdown touchstart', function (e) {
-        const boton = e.evt.button;
-        let esTouch = e.type.startsWith("touch");
+
+        var esStage = e.target === stage;
+        var esNodo = e.target instanceof Konva.Node && e.target !== stage
+        var boton = e.evt.button;
+        var esTouch = e.type.startsWith("touch");
+
+        if (esNodo) {
+            return;
+        }
+
+        if (esStage) {
+            if (Lienzo.IslaActual?.GraficoTrasnformer) {
+                Lienzo.IslaActual.GraficoTrasnformer.visible(false);
+            }
+            Lienzo.IslaActual = null;
+            layer.draw();
+        }
 
         if (!esTouch) {
             if (e.evt.crtlKey) {
@@ -1126,12 +1205,32 @@ function inicializarArea() {
 
         if (boton === enumBotton.ClickDerecho) {
             Lienzo.HabilitarArrastrable(true);
-        } else if (boton === enumBotton.ClickIzquierdo) {
+        } else if (Lienzo.Estado === enumEstadoLienzo.Agregando && boton === enumBotton.ClickIzquierdo) {
+            
             const posicion = Lienzo.DamePosicion();
-            Lienzo.IslaActual = Lienzo.AgregarIsla(posicion.x, posicion.y);
+            var nuevaIsla = Lienzo.CrearIslaTemporal(posicion.x, posicion.y);
+            
+            //if (nuevaIsla?.GraficoTrasnformer) {
+            //    nuevaIsla.GraficoTrasnformer.visible(false);
+            //}
+
+            Lienzo.IslaActual = nuevaIsla;
+            layer.draw();
         }
+
     });
-    
+
+    //stage.on('click', (e) => {
+    //    if (e.target === stage) {
+    //        if (Lienzo.IslaActual?.GraficoTrasnformer) {
+    //            Lienzo.IslaActual.GraficoTrasnformer.visible(false);
+    //        }
+
+    //        Lienzo.IslaActual = null;
+    //        layer.draw();
+    //    }
+    //});
+
     stage.on('pointerup touchend', function (e) {
 
         let esTouch = e.type.startsWith("touch");
