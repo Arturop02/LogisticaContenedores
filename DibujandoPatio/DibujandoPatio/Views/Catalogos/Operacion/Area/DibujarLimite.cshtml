@@ -16,7 +16,6 @@
 
     body {
         overflow: hidden;
-        
     }
 
     #container {
@@ -33,48 +32,101 @@
     body > nav.navbar {
         display: none;
     }
-
 </style>
-<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
-    <div id="lstAreas" class="btn-group" data-toggle="buttons">
-        @{
-            int i = 0;
-        }
+<div id="app">
+    <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
+        <div id="lstAreas" class="btn-group">
+            @foreach (var a in areas)
+            {
+                <label class="btn btn-primary"
+                       :class="{active: areaId == @a.Id}"
+                       v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
+                       autocomplete="off">
+                    @a.Nombre
+                </label>
+            }
+        </div>
+        <button class="btn btn-success pull-right"
+                :disabled="!puedeGuardar"
+                v-on:click="guardar">
+            <i class="glyphicon glyphicon-ok"></i>Guardar
+        </button>
+        <button class="btn btn-warning"
+                :disabled="!areaSeleccionada"
+                v-on:click="agregarZona">
+            <i class="glyphicon glyphicon-pencil"></i>Agregar Zona
+        </button>
+        <button class="btn btn-default"
+                v-on:click="nuevoEnu">
+            <i class="glyphicon glyphicon-plus"></i>Nuevo Enu
+        </button>
+        <button class="btn btn-success"
+                v-on:click="iniciarDibujo">
+            <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
+        </button>
+        <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
+        <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 
-        @foreach (var a in areas)
-        {
-            var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
-            var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
-            <label class="btn btn-primary @activo">
-                <input type="radio"
-                       name="area"
-                       id="Area_@(a.Id)"
-                       data-id="@a.Id"
-                       data-nombre="@a.Nombre"
-                       autocomplete="off"
-                       @checkedAtrr> @a.Nombre
-            </label>
-            i++;
-         }
     </div>
-    <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
-    <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Zona</button>
-    <button id="agregarEnu" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>Nuevo Enu</button>
-    <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
-    <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
-    <button id="btnDibujar" class="btn btn-success"><i class="glyphicon glyphicon-plus" aria-hidden="true"></i></button>
+    <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
+
+    <div id="modalGuardado" v-show="mostrarModalArea" class="mi-modal-overlay" style="display:none">
+        <div class="mi-modal">
+            <label for="selectPatio">Selecciona el patio:</label>
+            <select @*v-model="nuevaArea.patioId"*@ id="selectPatio" class="form-control">
+                <option value="">-- Selecciona --</option>
+                @foreach (var p in patios)
+                {
+                    <option value="@p.Id">@p.Nombre</option>
+                }
+            </select>
+            <label class="mt-2">Nombre del area::</label>
+            <input @*v-model="nuevaArea.nombre"*@ id="nombreArea" type="text" class="form-control" placeholder="Ingresa el nombre del área nueva" />
+        </div>
+    </div>
 </div>
-<div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
+
+@*<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
+        <div id="lstAreas" class="btn-group" data-toggle="buttons">
+            @{
+                int i = 0;
+            }
+
+            @foreach (var a in areas)
+            {
+                var activo = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "active" : "";
+                var checkedAtrr = (ViewBag.IdAreaSeleccionada != null && ViewBag.IdAreaSeleccionada == a.Id) ? "checked" : "";
+                <label class="btn btn-primary @activo">
+                    <input type="radio"
+                           name="area"
+                           id="Area_@(a.Id)"
+                           data-id="@a.Id"
+                           data-nombre="@a.Nombre"
+                           autocomplete="off"
+                           @checkedAtrr> @a.Nombre
+                </label>
+                i++;
+             }
+        </div>
+        <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
+        <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Zona</button>
+        <button id="agregarEnu" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>Nuevo Enu</button>
+        <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
+        <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
+        <button id="btnDibujar" class="btn btn-success"><i class="glyphicon glyphicon-plus" aria-hidden="true"></i></button>
+    </div>
+    <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>*@
 
 @section scripts{
+    <script src="~/Scripts/Area/Area.js"></script>
+    @Scripts.Render("~/bundles/vue")
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
     @Styles.Render("~/bundles/jqgridcss")
     @Scripts.Render("~/bundles/jqgrid")
     @Styles.Render("~/bundles/fontawesomecss")
 
-    <script src="~/Scripts/Area/Area.js"></script>
-    <script>
+<script>
         var objSer = {
             Url: {
                 Isla: {
@@ -82,18 +134,103 @@
                 },
                 Area: {
                     ObtenerAreaPorId: '@Url.Action("Index", "Area", new { id = "" })',
-                },
-                Area: {
                     DibujarIsla: '@Url.Action("DibujarIsla", "Area", new {id="__id__"})',
-                }
+                },
+                //Area: {
+
+                //}
             }
         };
         $(document).ready(function () {
             inicializarArea();
-            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');;
+            //var inputSeleccionado = $('#lstAreas input[name="area"]:checked');;
 
-            if (inputSeleccionado.length) {
-                inputSeleccionado.closest('label').trigger('click');
+            //if (inputSeleccionado.length) {
+            //    inputSeleccionado.closest('label').trigger('click');
+            //}
+        });
+</script>
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    areaId: null,
+                    areaNombre: "",
+                    puedeGuardar: false,
+                    mostrarModalArea: false,
+                    nuevaArea: {
+                        patioId: null,
+                        nombre: ""
+                    },
+                    dibujando: false
+                }
+            },
+            methods: {
+                seleccionarArea(id, nombre) {
+                    this.areaId = id;
+                    this.areaNombre = nombre;
+                    this.puedeGuardar = true;
+
+                    window.seleccionarArea(id, nombre);
+                },
+                agregarZona() {
+                    window.agregarZona();
+                },
+                iniciarDibujo() {
+                    this.areaId = null;
+                    this.areaNombre = "";
+                    this.puedeGuardar = true;
+                    window.iniciarDibujo();
+                },
+                //abrirModalArea() {
+                //    this.nuevaArea = { patioId: null, nombre="" };
+                //    this.mostrarModalArea = true;
+                //},
+                guardar() {
+                    if (this.areaId) {
+                        window.guardar(this.areaId, this.nombreArea);
+                    }
+
+                    var contenido = document.getElementById("modalGuardado").cloneNode(true);
+                    contenido.style.display = "block";
+
+                    bootbox.dialog({
+                        title: 'Confirmar Guardado',
+                        message: contenido,
+                        buttons: {
+                            cancel: {
+                                label: 'Cancelar',
+                                className: 'btn-danger'
+                            },
+                            confirm: {
+                                label: 'Guardar',
+                                className: 'btn-success',
+                                callback: () => {
+                                    const modal = $('.bootbox-body'); 
+
+                                    const idPatio = modal.find('#selectPatio').val();
+                                    const nombreArea = modal.find('#nombreArea').val().trim();
+
+                                    if (!idPatio || !nombreArea) {
+                                        bootbox.alert("Por favor, rellena todos los campos.");
+                                        return false;
+                                    }
+                                    window.guardar(null, nombreArea, idPatio);
+                                }
+                            },
+                        },
+                    });
+                    //window.guardar(this.areaId, this.areaNombre);
+                },
+                nuevoEnu() {
+                    window.agregarEnu();
+                },
+            },
+            computed: {
+                areaSeleccionada() {
+                    return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
+                }
             }
         });
     </script>

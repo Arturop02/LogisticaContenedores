@@ -317,6 +317,8 @@
     <Content Include="Scripts\Patio\Patio.js" />
     <Content Include="Scripts\sat-5.37.0.js" />
     <Content Include="Content\ui.jqgrid.min.css" />
+    <Content Include="Scripts\vue.js" />
+    <Content Include="Scripts\vue.min.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

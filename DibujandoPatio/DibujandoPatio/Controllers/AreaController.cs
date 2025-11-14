@@ -95,6 +95,10 @@ namespace DibujandoPatio.Controllers
             var area = areaRN.DameTodosAlta();
             ViewBag.Areas = area;
 
+            PatioRN patioRN = new PatioRN();
+            var patios = patioRN.DameTodosAlta();
+            ViewBag.Patios = patios;
+
             ViewBag.IdAreaSeleccionada = Id;
             return View(RutaBase + "DibujarLimite.cshtml");
         }
@@ -109,6 +113,11 @@ namespace DibujandoPatio.Controllers
             DetalleEnuRN detalleEnuRN = new DetalleEnuRN();
             var enus = detalleEnuRN.DameTodosAlta();
             ViewBag.Enus = enus;
+
+
+            EstructuraRN estructuraRN = new EstructuraRN();
+            var estructuras = estructuraRN.DameTodosAlta();
+            ViewBag.Estructuras = estructuras;
 
             ViewBag.IdAreaSeleccionada = id;
             return View(RutaBase + "DibujarIsla.cshtml");

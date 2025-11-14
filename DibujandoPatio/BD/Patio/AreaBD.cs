@@ -5,10 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using BT.Patio;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BD.Patio
 {
@@ -28,8 +24,7 @@ namespace BD.Patio
                         cmd.Parameters.AgregarConValorNull("@Id", areaBT.Id, output: true);
                         cmd.Parameters.AgregarConValorNull("@Nombre", areaBT.Nombre);
                         cmd.Parameters.AgregarConValorNull("@IdPatio", areaBT.Patio?.Id);
-                        //cmd.Parameters.AgregarConValorNull("@est_cve", areaBT.Est_cve);
-
+                        
                         cmd.Parameters.AgregarConValorNull("@Accion", ((char)accion).ToString());
 
                         conex.Open();

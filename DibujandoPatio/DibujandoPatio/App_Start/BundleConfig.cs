@@ -57,6 +57,9 @@ namespace DibujandoPatio
 
             bundles.Add(new ScriptBundle("~/bundles/bootstrapselect").Include(
                         "~/Scripts/bootstrap-select.min.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/vue").Include(
+                        "~/Scripts/vue.js"));
         }
     }
 }

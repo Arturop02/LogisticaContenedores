@@ -21,8 +21,8 @@ var enumEstadoLienzo = {
 };
 
 var enumBotton = {
-    ClickIzquierdo: 0,
-    ClickDerecho: 2
+    Click: 0,
+    Arrastre: 2
 }
 
 var enumEstado = {
@@ -47,24 +47,6 @@ function inicializarArea() {
             }
         }
     }
-
-    var tr = new Konva.Transformer({
-        enabledAnchors: [
-            'top-center',
-            'top-right',
-            'bottom-right',
-            'bottom-center',
-            'middle-right'
-        ],
-        rotateEnabled: true,
-        resizeEnabled: true,
-        boundBoxFunc: (oldBox, newBox) => {
-            if (newBox.width < tamano.ancho || newBox.height < tamano.alto) {
-                return oldBox;
-            }
-            return newBox;
-        }
-    });
 
     function BuscarIconos(filtro, pagina = 1, tamPagina = 12) {
         $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
@@ -94,119 +76,6 @@ function inicializarArea() {
             });
         });
     }
-
-    function GuardarAltaCambio(isla, datos) {
-        if (!isla) {
-            botboox.alert("No existe una isla para guarar");
-            return;
-        }
-
-        let rotacion = isla.getAbsoluteRotation();
-        let transform = isla.getAbsoluteTransform();
-        let posicionAbsoluta = transform.getTranslation();
-
-        datosIsla = {
-            Id: isla.getAttr('Id'),
-            Nombre: isla.Nombre || datos.Nombre,
-            Orientacion: rotacion,
-            X: posicionAbsoluta.x,
-            Y: posicionAbsoluta.y,
-            Ancho: isla.width() * isla.scaleX(),
-            Alto: isla.height() * isla.scaleY(),
-            Observaciones: isla.Observaciones || datos.Observaciones,
-            Area: { Id: idAreaSeleccionada },
-            Estructura: datos.Estructura,
-        };
-
-        if (datosIsla.Id) {
-            console.log("En if ", datosIsla.Id);
-            let url = '/Isla/EditarIsla';
-            var data = JSON.stringify(datosIsla);
-
-            $.ajax({
-                url: url,
-                method: 'POST',
-                data: data,
-                contentType: 'application/json; charset=utf-8',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert(`La isla ${datosIsla.Nombre} ha sido editada`);
-                    } else {
-                        bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${datosIsla.Nombre}`);
-                    }
-                }
-            });
-        } else {
-            console.log("En else ", datosIsla.Id > 0);
-            var data = JSON.stringify(datosIsla);
-            $.ajax({
-                url: '/Isla/GuardarIsla',
-                method: 'POST',
-                data: data,
-                contentType: 'application/json',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert("Isla guardada con exito");
-                        isla = null;
-                        $(`#guardarIsla`).addClass('d-none');
-                        layer.draw();
-                    } else {
-                        bootbox.alert("Error al guardar isla");
-                    }
-                }
-            });
-
-        }
-
-    }
-
-    //Rectangulo = {
-    //    Estado: null,
-    //    DamePosicion: function () {
-    //        const transform = this.Stage.getAbsoluteTransform().copy();
-    //        transform.invert();
-    //        const posicion = transform.point(this.Stage.getPointerPosition());
-    //        posicion.x = posicion.x.toFixed(6) * 1;
-    //        posicion.y = posicion.y.toFixed(6) * 1;
-    //        return posicion;
-    //    },
-    //    TamanoIsla: function (escala) {
-    //        const anchoBahia = 6.06 / escala;
-    //        altoBahia = 2.44 / escala;
-
-    //        var ancho = 2 * anchoBahia;
-    //        var alto = altoBahia;
-    //        return { ancho, alto };
-    //    },
-    //    DameTamano: function (escala) {
-    //        const isla = this.getClientRect;
-    //        const anchoMetros = (isla.width * isla.scaleX * escala).toFixed(2);
-    //        const altoMetros = (isla.height * isla.scaleY * escala).toFixed(2);
-    //        return { ancho: anchoMetros, alto: altoMetros };
-    //    },
-    //};
-
-    //function TamanoIsla(escala) {
-    //    const anchoBahia = 6.06 / escala;
-    //    const altoBahia = 2.44 / escala;
-
-    //    var ancho = 2 * anchoBahia;
-    //    var alto = altoBahia;
-
-    //    return { ancho, alto };
-    //}
-
-    //function DameTamano(isla) {
-    //    if (!isla) return;
-
-    //    const anchoMetros = (isla.width() * isla.scaleX() * escala).toFixed(2);
-    //    const altoMetros = (isla.height() * isla.scaleY() * escala).toFixed(2);
-
-    //    TextoSuperior.text(`${anchoMetros} m`);
-    //    TextoDerecha.text(`${altoMetros} m`);
-
-    //    /*ActualizarTexto(isla, TextoSuperior, TextoDerecha);*/
-    //}
 
     function TransformarGrupoIsla(nodo, texto, icono) {
         var grupo = nodo.getParent();
@@ -395,223 +264,6 @@ function inicializarArea() {
         return tamIcono
     }
 
-    function CargarIslas(idAreaSeleccionada) {
-        var idAreaActual = null;
-        if (idAreaActual == idAreaSeleccionada) return;
-
-        idAreaActual = idAreaSeleccionada;
-        layer.destroyChildren();
-        layer.draw();
-
-        $.getJSON('/Area/ObtenerIslasPorAreaId', { id: idAreaSeleccionada }, function (res) {
-            if (!res.ok || !res.data);
-
-            var area = res.data;
-            area.Islas.forEach(i => {
-            
-                var grupoADibujar = new Konva.Group({
-                    x: i.X,
-                    y: i.Y,
-                    rotation: i.Orientacion,
-                });
-
-                var rectanguloIsla = new Konva.Rect({
-                    Id: i.Id,
-                    name: i.Nombre,
-                    text: i.Descripcion,
-                    width: i.Ancho,
-                    height: i.Alto,
-                    fill: `#${i.Color}`,
-                    strokeWidth: 1,
-                    stroke: 'black',
-                });
-                
-                var textoNombreIsla = new Konva.Text({
-                    text: i.Nombre,
-                    fontSize: 12,
-                    x: (rectanguloIsla.width() / 2),
-                    y: rectanguloIsla.height(),
-                });
-
-                var uniCodeIcono;
-
-                if (i.Icono && i.Icono.trim() !== "") {
-                    uniCodeIcono = ObtenerUnicodeDesdeClase(i.Icono);
-                }
-
-                var icono = new Konva.Text({
-                    text: uniCodeIcono,
-                    fontFamily: 'FontAwesome',
-                    fontSize: TamanoIcono(rectanguloIsla),
-                    fill: 'white'
-                });
-
-                icono.x(rectanguloIsla.width() / 2 - icono.width() / 2);
-                icono.y(rectanguloIsla.height() / 2 - icono.height() / 2);
-
-                var tooltipRect = new Konva.Rect({
-                    fill: '#313131',
-                    stroke: 'gray',
-                    strokeWidth: 1,
-                    visible: false,
-                    opacity: 1,
-                });
-
-                var tooltip = new Konva.Text({
-                    text: i.Nombre,
-                    visible: false,
-                    fontSize: 12,
-                    fill: 'white',
-                    padding: 3,
-                });
-
-                grupoADibujar.add(rectanguloIsla, icono, textoNombreIsla);
-                
-                grupoADibujar.on('pointerover', function () {
-
-                    pointerPos = stage.getPointerPosition();
-                    tooltip.position({
-                        x: pointerPos.x + 5,
-                        y: pointerPos.y + 5,
-                    });
-
-                    tooltip.visible(true);
-
-                    tooltipRect.position({
-                        x: tooltip.x() - 5,
-                        y: tooltip.y() - 5,
-                    });
-
-                    tooltipRect.width(tooltip.width() + 10);
-                    tooltipRect.height(tooltip.height() + 10);
-                    tooltipRect.visible(true);
-
-                    layer.batchDraw();
-                });
-
-                grupoADibujar.on('pointerleave', function () {
-                    tooltip.visible(false);
-                    tooltipRect.visible(false);
-                    layer.batchDraw();
-                });
-
-                rectanguloIsla.on('pointerdblclick', function () {
-                    bootbox.dialog({
-                        title: `Modificar isla ${i.Nombre}`,
-                        message: "Deseas editar o eliminar la isla",
-                        buttons: {
-                            btnSalir: {
-                                label: "Cancelar",
-                                className: "btn btn-primary",
-                                cancel: true,
-                            },
-                            btnEditar: {
-                                label: "Editar",
-                                className: "btn btn-success",
-                                callback: function () {
-                                    bootbox.dialog({
-                                        title: "Editar Isla",
-                                        message: `<form id="formIsla">
-                                                        <div class="form-group">
-                                                            <label>Nombre de la Isla</label>
-                                                            <input type="text" class="form-control" id="nombreIsla" required />
-                                                            <label>Observaciones</label>
-                                                            <input type="text" class="form-control" id="observacionesIsla"/>
-                                                        </div>
-                                                      </form>`
-                                        ,
-                                        buttons: {
-                                            cancelar: {
-                                                label: "Cancelar",
-                                                className: "btn-danger",
-                                                callback: function () {
-                                                    return;
-                                                }
-                                            },
-                                            next: {
-                                                label: "Siguiente",
-                                                className: "btn btn-primary",
-                                                callback: function (result) {
-                                                    tr.nodes([rectanguloIsla]);
-                                                    layer.draw();
-                                                    layer.add(tr);
-                                                    const escala = DameEscala();
-
-                                                    if (result) {
-                                                        rectanguloIsla.draggable(true);
-
-                                                        rectanguloIsla.on('transform dragmove', function () {
-                                                            AjustarTamanos(rectanguloIsla, escala);
-                                                            TransformarGrupoIsla(rectanguloIsla, textoNombreIsla, icono);
-                                                        });
-                                                        
-                                                        nuevosDatos = {
-                                                            Nombre: $('#nombreIsla').val(),
-                                                            Observaciones: $('#observacionesIsla').val(),
-                                                            Estructura: i.idEstructura,
-                                                        }
-
-                                                        $('#guardarBtn').on('click', function () {
-                                                            GuardarAltaCambio(rectanguloIsla, nuevosDatos);
-                                                        });
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            },
-                            btnEliminar: {
-                                label: "Eliminar",
-                                className: "btn btn-danger",
-                                callback: function () {
-                                    bootbox.dialog({
-                                        title: 'Confirmar borrado',
-                                        message: `Estas de acuerdo en eliminar la isla ${i.Nombre}`,
-                                        buttons: {
-                                            btnCancelar: {
-                                                label: "Cancelar",
-                                                className: "btn btn-primary",
-                                                cancel: true,
-                                            },
-                                            btnConfirmarEliminacion: {
-                                                label: "Eliminar",
-                                                className: "btn btn-danger",
-                                                callback: function () {
-                                                    var payload = {
-                                                        Id: i.Id,
-                                                        Nombre: i.Nombre,
-                                                    }
-                                                    $.ajax({
-                                                        url: '/Isla/BorrarIsla',
-                                                        method: 'POST',
-                                                        data: JSON.stringify(payload),
-                                                        contentType: 'application/json; charset=utf-8',
-                                                        success: function (res) {
-                                                            if (res.ok) {
-                                                                bootbox.alert(`La isla ${i.Nombre} ha sido eliminada`);
-                                                            } else {
-                                                                bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${i.Nombre}`);
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    });
-                });
-                layer.add(grupoADibujar);
-                layer.add(tooltipRect, tooltip);
-
-            });
-            layer.draw();
-        });
-    }
-
     Lienzo = {
         Modo: enumModoLienzo.Isla,
         Escala: DameEscala(),
@@ -678,41 +330,6 @@ function inicializarArea() {
                 item.MoverArriba();
             });
         },
-        CrearIslaTemporal: function (x, y) {
-            if (this.IslaActual) {
-                this.IslaActual.Eliminar();
-                this.IslaActual = null;
-            }
-
-            const isla = new Isla();
-            isla.Posicion.x = x;
-            isla.Posicion.y = y;
-            isla.Alto = Lienzo.TamanoIsla().alto;
-            isla.Ancho = Lienzo.TamanoIsla().ancho;
-
-            isla.Dibujar();
-            IslaActual = isla;
-        },
-        AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
-
-            var isla = new Isla();
-            isla.Posicion.x = x;
-            isla.Posicion.y = y;
-            isla.Ancho = ancho;
-            isla.Alto = alto;
-            isla.Orientacion = orientacion;
-            isla.Nombre = nombre;
-            isla.Color = color;
-            
-            var uniCodeIcono;
-            if (icono && icono.trim() !== "") {
-                uniCodeIcono = ObtenerUnicodeDesdeClase(icono);
-            }
-
-            isla.Icono = uniCodeIcono;
-            
-            return isla;
-        },
         TamanoIsla: function () {
             const escala = Lienzo.Escala;
             const anchoBahia = 6.06 / escala;
@@ -737,6 +354,48 @@ function inicializarArea() {
 
             isla.scaleX(1);
             isla.scaleY(1);
+        },
+        CrearIslaTemporal: function (x, y) {
+            
+            const isla = new Isla();
+            isla.Posicion.x = x;
+            isla.Posicion.y = y;
+            isla.Alto = Lienzo.TamanoIsla().alto;
+            isla.Ancho = Lienzo.TamanoIsla().ancho;
+
+            isla.Dibujar();
+
+            if (isla.GraficoTrasnformer) {
+                isla.GraficoTrasnformer.visible(true);
+                isla.GraficoTrasnformer.nodes([isla.Grafico]);
+                isla.Grafico.draggable(true);
+                layer.batchDraw();
+            }
+
+            IslaActual = isla;
+            Lienzo.Estado = enumEstadoLienzo.Moviendo;
+
+            return isla;
+        },
+        AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
+
+            var isla = new Isla();
+            isla.Posicion.x = x;
+            isla.Posicion.y = y;
+            isla.Ancho = ancho;
+            isla.Alto = alto;
+            isla.Orientacion = orientacion;
+            isla.Nombre = nombre;
+            isla.Color = color;
+            
+            var uniCodeIcono;
+            if (icono && icono.trim() !== "") {
+                uniCodeIcono = ObtenerUnicodeDesdeClase(icono);
+            }
+
+            isla.Icono = uniCodeIcono;
+            
+            return isla;
         },
         HabilitarArrastrable: function (habilitar) {
             if (habilitar) {
@@ -787,12 +446,6 @@ function inicializarArea() {
         Punto: 'Punto',
         Rectangulo: 'Rectangulo',
     };
-
-    //var enumEstadoGrafico = {
-    //    AltaCambio: 'pointerdown',
-    //    Borrado: 'pointerdblclick',
-
-    //};
 
     function Linea(puntoInicial, puntoFinal) {
         this.Tipo = enumTipoGrafico.Linea;
@@ -956,7 +609,6 @@ function inicializarArea() {
                 ],
                 rotateEnabled: true,
                 resizeEnabled: true,
-                //draggable: true,
                 visible: false,
                 boundBoxFunc: (oldBox, newBox) => {
                     if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
@@ -989,26 +641,21 @@ function inicializarArea() {
 
                 this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
             
-
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto, this.GraficoTrasnformer);
 
                 layer.add(this.Grupo);
                 var isla = this;
 
-                this.Grafico.on('pointerdown', throttle((e) => {
-//                    e.cancelBubble = true;
-                    
+                isla.Grafico.on('pointerdown', throttle((e) => {
+//                  
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
 
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = isla;
 
-                        isla.GraficoTrasnformer.nodes([this.Grafico]);
+                        isla.GraficoTrasnformer.nodes([isla.Grafico]);
                         isla.GraficoTrasnformer.visible(true);
                         isla.Grafico.draggable(true);
-                        //isla.Grafico.on('transform dragmove', function () {
-                        //    TransformarGrupoIsla(this.Grafico, this.GraficoIcono, this.GraficoIcono)
-                        //});
                         layer.draw();
 
                     }else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
@@ -1016,39 +663,6 @@ function inicializarArea() {
                         Lienzo.IslaActual = null;
                     }
                 }, 300));
-
-                //this.Grafico.on('pointerclick', function () {
-                //    if (Lienzo.Estado === enumEstadoLienzo.Estado) {
-                //        bootbox.confirm({
-                //            message: '¿Desea editar una nueva zona?',
-                //            buttons: {
-                //                confirm: {
-                //                    label: 'Editar',
-                //                    className: 'btn-success',
-                //                },
-                //                cancel: {
-                //                    label: 'Cancelar',
-                //                    className: 'btn-danger'
-                //                },
-                //            },
-                //            callback: (result) => {
-                //                tr.nodes(isla);
-                //                layer.draw();
-                //                layer.add(tr);
-                //                if (result) {
-                //                    isla.Arrastrable = true;
-
-                //                    TransformarGrupoIsla(isla, isla.GraficoTexto, GraficoTexto);
-
-                //                    isla.Dibujar();
-                //                    Lienzo.AjustarTamanosIsla();
-                //                    Lienzo.IslaActual = isla;
-                //                    Lienzo.Estado = enumEstadoLienzo.Moviendo
-                //                }
-                //            },
-                //        });
-                //    }
-                //});
 
                 this.Grafico.on('pointerdblclick', function () {
                     if (Lienzo.Estado !== enumEstadoLienzo.Editando) {
@@ -1091,17 +705,16 @@ function inicializarArea() {
                 });
             }
             else {
-                console.log(this);
                 this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.absolutePosition(cfgGrafico);
+                this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
                 this.Grafico.getLayer().batchDraw();
 
                 this.GraficoTexto.setAttrs(cfgGraficoTexto);
-                this.GraficoTexto.absolutePosition(cfgGraficoTexto);
+                this.GraficoTexto.absolutePosition({ x: cfgGraficoTexto.x, y: cfgGraficoTexto.y });
                 this.GraficoTexto.getLayer().batchDraw();
 
                 this.GraficoIcono.setAttrs(cfgGraficoIcono);
-                this.GraficoIcono.absolutePosition(cfgGraficoIcono);
+                this.GraficoIcono.absolutePosition({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
                 this.GraficoIcono.getLayer().batchDraw();
             }
 
@@ -1140,6 +753,9 @@ function inicializarArea() {
     Lienzo.Estado = enumEstadoLienzo.Agregando;
     Lienzo.BloquearArea(true);
 
+    console.log("Estado:", Lienzo.Estado);
+    console.log("IslaActual:", Lienzo.IslaActual);
+
     if (idAreaSeleccionada != null && idAreaSeleccionada != "") {
         Lienzo.Modo = enumModoLienzo.Isla
         Lienzo.Estado = enumEstadoLienzo.Agregando;
@@ -1177,59 +793,50 @@ function inicializarArea() {
         var esStage = e.target === stage;
         var esNodo = e.target instanceof Konva.Node && e.target !== stage
         var boton = e.evt.button;
-        var esTouch = e.type.startsWith("touch");
-
-        if (esNodo) {
-            return;
-        }
+        //var esTouch = e.type.startsWith("touch");
 
         if (esStage) {
             if (Lienzo.IslaActual?.GraficoTrasnformer) {
+                Lienzo.IslaActual.GraficoTrasnformer.nodes([]);
                 Lienzo.IslaActual.GraficoTrasnformer.visible(false);
             }
-            Lienzo.IslaActual = null;
             layer.draw();
         }
 
-        if (!esTouch) {
-            if (e.evt.crtlKey) {
-                Lienzo.HabilitarArrastrable(true);
-                return;
-            }
-        }
+        //if (!esTouch) {
+        //    if (e.evt.crtlKey) {
+        //        Lienzo.HabilitarArrastrable(true);
+        //        return;
+        //    }
+        //}
 
-        if (esTouch && e.evt.touches.length === 2) {
-            Lienzo.HabilitarArrastrable(true);
-            return;
-        }
+        //if (esTouch && e.evt.touches.length === 2) {
+        //    Lienzo.HabilitarArrastrable(true);
+        //    return;
+        //}
 
-        if (boton === enumBotton.ClickDerecho) {
+        if (boton === enumBotton.Arrastre) {
             Lienzo.HabilitarArrastrable(true);
-        } else if (Lienzo.Estado === enumEstadoLienzo.Agregando && boton === enumBotton.ClickIzquierdo) {
-            
+        } else if (Lienzo.Estado === enumEstadoLienzo.Agregando && boton === enumBotton.Click) {
+
             const posicion = Lienzo.DamePosicion();
             var nuevaIsla = Lienzo.CrearIslaTemporal(posicion.x, posicion.y);
-            
-            //if (nuevaIsla?.GraficoTrasnformer) {
-            //    nuevaIsla.GraficoTrasnformer.visible(false);
-            //}
 
             Lienzo.IslaActual = nuevaIsla;
-            layer.draw();
+            Lienzo.Estado = enumEstadoLienzo.Moviendo;
         }
 
     });
 
-    //stage.on('click', (e) => {
-    //    if (e.target === stage) {
-    //        if (Lienzo.IslaActual?.GraficoTrasnformer) {
-    //            Lienzo.IslaActual.GraficoTrasnformer.visible(false);
-    //        }
+    stage.on('pointermove', function (e) {
+        if (Lienzo.Estado === enumEstadoLienzo.Moviendo && Lienzo.IslaActual != null) {
+            const pos = Lienzo.DamePosicion();
 
-    //        Lienzo.IslaActual = null;
-    //        layer.draw();
-    //    }
-    //});
+            Lienzo.IslaActual.Posicion.x = pos.x;
+            Lienzo.IslaActual.Posicion.y = pos.y;
+            layer.batchDraw();
+        }
+    });
 
     stage.on('pointerup touchend', function (e) {
 
@@ -1245,24 +852,13 @@ function inicializarArea() {
         if (esTouch && e.evt.touches.length < 2) {
             Lienzo.HabilitarArrastrable(false);
         }
+
+        
     });
 
-    $.getJSON('/Estructura/ListarTiposEstructura', function (res) {
-        listarTipoEstructuras = res.map(t => `<option value="${t.Id}" data-color="${t.Color}">${t.Descripcion}</option>`).join('');
-    });
-
-    $(`#lstAreas`).on('click', 'label.btn', function () {
-        $(`#lstAreas .btn`).removeClass('active');
-        $(this).addClass('active');
-
-        let input = $(this).find('input[name="area"]');
-        let id = input.data('id');
+    window.seleccionarArea = function (id, nombre) {
         
         idAreaSeleccionada = id;
-
-        $('#guardarBtn').data('idpatio', id)
-            .prop('disabled', !id);
-
         if (!id) return;
 
         layer.destroyChildren();
@@ -1287,7 +883,7 @@ function inicializarArea() {
             Lienzo.Estado = enumEstadoLienzo.Editando;
             Lienzo.BloquearArea(false);
 
-        }); 
+        });
 
         $.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
             var area = res.data;
@@ -1301,191 +897,107 @@ function inicializarArea() {
             Lienzo.Estado = enumEstadoLienzo.Editando;
             Lienzo.BloquearArea(false);
         });
+    }
 
-        //CargarIslas(id);
-    });
+    window.agregarEstructura = function (descripcion, idEnu, color, icono) {
 
-    $('#agregarTipoEstructura').on('click', function () {
-        bootbox.dialog({
-            title: 'Agregar nuevo tipo de estructura',
-            message: $('#formularioEstructuras').show(),
-            buttons: {
-                cancelar: {
-                    label: "Cancelar",
-                    className: "btn-danger",
-                    callback: function () {
-                        return;
-                    }
-                },
-                confirm: {
-                    label: "Guardar",
-                    className: "btn-success",
-                    callback: function () {
-                        const descripcion = $(`#descripcionEstructura`).val();
-                        const idEnu = $(`#enuEstructura`).val();
-                        const color = $(`#colorEstructura`).val().replace('#', '');
-                        const icono = $('#iconoSeleccionado').val();
+        var payload = {
+            Descripcion: descripcion,
+            DetalleTipoEstructura: { Id: idEnu },
+            Color: color,
+            Icono: icono,
+        }
+        var url = '/Estructura/GuardarTipoEstructura';
 
-                        var payload = {
-                            Descripcion: descripcion,
-                            DetalleTipoEstructura: { Id: idEnu },
-                            Color: color,
-                            Icono: icono,
-                        }
-                        var url = '/Estructura/GuardarTipoEstructura';
+        $.ajax({
+            method: 'POST',
+            url: url,
+            data: JSON.stringify(payload),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                if (res.ok) {
+                    bootbox.alert('Tipo de estructura guardada con exito')
+                } else {
+                    bootbox.alert('Error al guardar el tipo de estructura');
+                }
+            }
+        });
+    }
 
-                        console.log(payload);
+    window.crearZona = function () {
 
-                        $.ajax({
-                            method: 'POST',
-                            url: url,
-                            data: JSON.stringify(payload),
-                            contentType: 'application/json; charset=utf-8',
-                            success: function (res) {
-                                if (res.ok) {
-                                    bootbox.alert('Tipo de estructura guardada con exito')
-                                } else {
-                                    bootbox.alert('Error al guardar el tipo de estructura');
-                                }
-                            }
-                        });
+        Lienzo.Estado = enumEstadoLienzo.Agregando;
+        bootbox.alert("Da click para crear una zona");
+        console.log("Isla Actual: ", Lienzo.IslaActual);
+    }
 
+    window.guardar = function (datos) {
+
+        if (!Lienzo.IslaActual) {
+            bootbox.alert("No existe una isla para guardar");
+            return;
+        }
+        
+        var isla = Lienzo.IslaActual;
+
+        let rotacion = isla.Grafico.getAbsoluteRotation();
+        let transform = isla.Grupo.getAbsoluteTransform();
+        let posicionAbsoluta = transform.getTranslation();
+
+        datosIsla = {
+            Id: isla.Id || 0,
+            Nombre: isla.Nombre || datos.Nombre,
+            Orientacion: rotacion,
+            X: posicionAbsoluta.x,
+            Y: posicionAbsoluta.y,
+            Ancho: isla.Grafico.width() * isla.Grafico.scaleX(),
+            Alto: isla.Grafico.height() * isla.Grafico.scaleY(),
+            Observaciones: isla.Observaciones || datos.Observaciones,
+            Area: { Id: idAreaSeleccionada },
+            Estructura: { Id: isla.Estructura || datos.idEstructura },
+        };
+
+        if (datosIsla.Id) {
+            console.log("En if ", datosIsla.Id);
+            let url = '/Isla/EditarIsla';
+            var data = JSON.stringify(datosIsla);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: data,
+                contentType: 'application/json; charset=utf-8',
+                success: function (res) {
+                    if (res.ok) {
+                        bootbox.alert(`La isla ${datosIsla.Nombre} ha sido editada`);
+                        Lienzo.Estado = enumEstadoLienzo.Editando;
+                        Lienzo.IslaActual = null;
+                    } else {
+                        bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${datosIsla.Nombre}`);
                     }
                 }
-            },
-        });
-        $(document).on('click', '#btnBuscarIconos', function () {
-            const filtro = $('#filtroIcono').val();
-            BuscarIconos(filtro);
-        });
-    });
+            });
+        } else {
+            console.log("En else ", datosIsla.Id > 0);
+            var data = JSON.stringify(datosIsla);
+            $.ajax({
+                url: '/Isla/GuardarIsla',
+                method: 'POST',
+                data: data,
+                contentType: 'application/json',
+                success: function (res) {
+                    if (res.ok) {
+                        bootbox.alert("Isla guardada con exito");
+                        Lienzo.Estado = enumEstadoLienzo.Editando;
+                        Lienzo.IslaActual = null;
+                        $(`#guardarIsla`).addClass('d-none');
+                        layer.draw();
+                    } else {
+                        bootbox.alert("Error al guardar isla");
+                    }
+                }
+            });
 
-
-    //$(`#crearZona`).on(`click`, function () {
-    //    bootbox.dialog({
-    //        title: "Crear Zona",
-    //        message: `<form id="formIsla">
-    //                <div class="form-group">
-    //                    <label>Nombre de la Zona</label>
-    //                    <input type="text" class="form-control" id="nombreIsla" required />
-    //                    <br />
-    //                    <label>Tipo de estructura</label>
-    //                    <select id="tipoEstructura" class="form-control" required />
-    //                        <option value=""> --Selecciona-- </option>
-    //                        ${listarTipoEstructuras}
-    //                    </select>
-    //                    <br />
-    //                    <label>Observaciones</label>
-    //                    <input type="text" class="form-control" id="observacionesIsla"/>
-    //                </div>
-    //            </form>`
-    //        ,
-    //        buttons: {
-    //            cancelar: {
-    //                label: "Cancelar",
-    //                className: "btn-danger",
-    //                callback: function () {
-    //                    return;
-    //                }
-    //            },
-    //            next: {
-    //                label: "Siguiente",
-    //                className: "btn-primary",
-    //                callback: function () {
-    //                    const idEstructura = $(`#tipoEstructura`).val();
-    //                    nuevosDatos = {
-    //                        Nombre: $(`#nombreIsla`).val(),
-    //                        Estructura: { Id: idEstructura },
-    //                        Observaciones: $(`#observacionesIsla`).val(),
-    //                    };
-    //                    if (!nuevosDatos.Nombre) {
-    //                        bootbox.alert("Por favor nombra la isla");
-    //                        return false;
-    //                    }
-
-    //                    var grupoIslas = new Konva.Group({
-    //                        x: 50,
-    //                        y: 50,
-    //                        draggable: true
-    //                    });
-
-    //                    islaTemporal = new Konva.Rect({
-    //                        x: 0,
-    //                        y: 0,
-    //                        width: tamano.ancho,
-    //                        height: tamano.alto,
-    //                        stroke: 'blue',
-    //                        fill:  idEstructura.Color,
-    //                        strokeWidth: 2,
-    //                        name: 'isla'
-    //                    });
-
-    //                    TextoSuperior = new Konva.Text({
-    //                        x: islaTemporal.width() / 2,
-    //                        y: islaTemporal.height() / 2,
-    //                        text: `${islaTemporal.DameTamano(escala).ancho}m`,
-    //                        fontSize: 12,
-    //                        fill: 'black',
-    //                    });
-
-    //                    TextoDerecha = new Konva.Text({
-    //                        x: islaTemporal.width() / 2,
-    //                        y: islaTemporal.height() / 2,
-    //                        text: `${islaTemporal.DameTamano(escala).alto}m`,
-    //                        fontSize: 12,
-    //                        fill: 'black',
-    //                    });
-
-    //                    tr.nodes([islaTemporal]);
-
-    //                    grupoIslas.add(islaTemporal, TextoSuperior, TextoDerecha);
-    //                    layer.add(grupoIslas, tr);
-
-    //                    islaTemporal.on('transform dragmove', function () {
-    //                        islaTemporal.DameTamano(escala);
-    //                        ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-    //                        AjustarTamanos(islaTemporal, escala);
-    //                        layer.batchDraw();
-    //                    });
-
-    //                    islaTemporal.on('transformend', function () {
-    //                        islaTemporal.DameTamano(escala);
-    //                        ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-    //                        var rotacion = islaTemporal.DameRotacion();
-    //                        datosIsla.Orientacion = rotacion;
-    //                    });
-
-    //                    ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-
-    //                    tr.on('transform dragmove', () => {
-    //                        ActualizarTexto(islaTemporal, TextoSuperior, TextoDerecha);
-    //                        AjustarTamanos(islaTemporal, escala);
-    //                        layer.batchDraw();
-    //                    });
-
-    //                    islaTemporal.DameTamano(escala);
-
-    //                    layer.batchDraw();
-
-    //                    layer.draw();
-
-    //                    $(`#guardarBtn`).removeClass('d-none');
-
-    //                    $(`#guardarBtn`).on('click', function () {
-    //                        GuardarAltaCambio(islaTemporal, nuevosDatos);
-    //                    });
-
-
-    //                    return true;
-
-    //                }
-    //            }
-    //        }
-    //    });
-    //});
-
-    $('#cerrarSidebar').on('click', function () {
-        $('#sidebar').removeClass("active");
-    });
-
+        }
+    }
 }

@@ -6,6 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var areas = ViewBag.Areas as List<BT.AreaBT>;
     var enus = ViewBag.Enus as List<BT.Patio.DetalleEnuBT>;
+    var estructuras = ViewBag.Estructuras as List<BT.Patio.EstructuraBT>;
 }
 
 
@@ -67,76 +68,95 @@
         right: 0;
     }
 </style>
-<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
-    <div id="lstAreas" class="btn-group" data-toggle="buttons">
-        @{
-            int i = 0;
-        }
 
-        @foreach (var a in areas)
-        {
-            <label class="btn btn-primary @(i==0 ? "active" : "")">
-                <input type="radio"
-                       name="area"
-                       id="Area_@(a.Id)"
-                       data-id="@a.Id"
-                       autocomplete="off"
-                       @(i == 0 ? "checked" : "")> @a.Nombre
+<div id="app">
+    <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
+        <div id="lstAreas" class="btn-group">
+            @foreach (var a in areas)
+            {
+                <label class="btn btn-primary"
+                       :class="{active: areaId == @a.Id}"
+                       v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
+                       autocomplete="off">
+                    @a.Nombre
                 </label>
-                i++;
             }
-
-    </div>
-    <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
-    <button id="crearZona" class="btn btn-success"><i class="glyphicon glyphicon-plus"></i>Agregar</button>
-    <button type="button" class="btn btn-warning" id="agregarTipoEstructura"><i class="glyphicon glyphicon-plus"></i>Agregar Tipo Estructura</button>
-    <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
-    <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
-</div>
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <h2>Datos de la isla</h2>
-        <button id="cerrarSidebar" class="btn btn-danger pull-right">
-            <i class="glyphicon glyphicon-remove"></i>
-        </button>
-    </div>
-    <div id="sidebar-content" class="sidebar-content">
-        <table id="tablaDatos"></table>
-    </div>
-</div>
-<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; display: none;">
-    <div id="formularioEstructuras" class="form-group">
-        <label>Descripcion</label>
-        <input type="text" class="form-control" id="descripcionEstructura" required />
-        <br />
-        <label>Seleccionar Enu</label>
-        <select id="enuEstructura" class="form-control" required>
-            <option value="">Selecciona</option>
-            @foreach(var e in enus)
-             {
-                <option value="@e.Id">@e.Descripcion</option>
-             }
-        </select>
-        <br />
-
-        <label>Color</label>
-        <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
-        <br />
-
-        <label>Icono</label>
-        <div>
-            <input type="text" id="filtroIcono" placeholder="Icono" />
-            <button type="button" class="btn btn-default" id="btnBuscarIconos">Buscar</button>
         </div>
-        <div id="iconosContainer" class="btn-group" role="group" style="flex-wrap: wrap;"></div>
-        <div id="paginador" class="mt-2"></div>
-        <input type="hidden" id="iconoSeleccionado" />
+        <button class="btn btn-success pull-right"
+                :disabled="!puedeGuardar"
+                v-on:click="guardar">
+            <i class="glyphicon glyphicon-ok"></i>Guardar
+        </button>
+        <button id="crearZona"
+                class="btn btn-success"
+                v-on:click="crearZona">
+            <i class="glyphicon glyphicon-plus"></i>Crear Zona
+        </button>
+        <button class="btn btn-warning"
+                id="agregarTipoEstructura"
+                v-on:click="agregarEstructura">
+            <i class="glyphicon glyphicon-plus"></i>Agregar Tipo Estructura
+        </button>
+        <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
+        <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
+
+    </div>
+    <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
+    <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; display: none;">
+        <div id="formularioEstructuras" class="form-group">
+            <label>Descripcion</label>
+            <input type="text" class="form-control" id="descripcionEstructura" required />
+            <br />
+            <label>Seleccionar Enu</label>
+            <select id="enuEstructura" class="form-control" required>
+                <option value="">Selecciona</option>
+                @foreach (var e in enus)
+                {
+                    <option value="@e.Id">@e.Descripcion</option>
+                }
+            </select>
+            <br />
+
+            <label>Color</label>
+            <input type="color" class="form-control" id="colorEstructura" value="#ff0000" required />
+            <br />
+
+            <label>Icono</label>
+            <div>
+                <input type="text" id="filtroIcono" placeholder="Icono" v-model="filtroIcono"/>
+                <button type="button" class="btn btn-default" id="btnBuscarIconos">Buscar</button>
+            </div>
+            <div id="iconosContainer" class="btn-group" role="group" style="flex-wrap: wrap;"></div>
+            <div id="paginador" class="mt-2"></div>
+            <input type="hidden" id="iconoSeleccionado" />
+        </div>
+    </div>
+    <div id="formZona" display="none">
+        <form id="formIsla">
+            <div class="form-group">
+                <label>Nombre de la Zona</label>
+                <input type="text" class="form-control" id="nombreIsla" required />
+                <br />
+
+                <label>Tipo de estructura</label>
+                <select id="tipoEstructura" class="form-control" required>
+                    <option value="">--Selecciona--</option>
+                    @foreach(var e in estructuras)
+                    {
+                        <option value="@e.Id">@e.Descripcion</option>
+                    }
+                </select>
+                <br />
+
+                <label>Observaciones</label>
+                <input type="text" class="form-control" id="observacionesIsla" />
+            </div>
+        </form>
     </div>
 </div>
-
-<div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
-
 @section scripts{
+    <script src="~/Scripts/Isla/Isla.js"></script>
+    @Scripts.Render("~/bundles/vue")
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
     @Styles.Render("~/bundles/bootstrapselectcss")
@@ -145,8 +165,6 @@
     @Scripts.Render("~/bundles/bootstrapselect")
     @Styles.Render("~/bundles/fontawesomecss")
 
-    <script src="~/Scripts/Isla/Isla.js"></script>
-
     <script>
             idAreaSeleccionada = '@ViewBag.IdAreaSeleccionada';
     </script>
@@ -154,6 +172,184 @@
     <script>
         $(document).ready(function () {
             inicializarArea();
+        });
+    </script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    areaId: null,
+                    areaNombre: "",
+                    puedeGuardar: false,
+                    mostrarModalArea: false,
+                    nuevaArea: {
+                        patioId: null,
+                        nombre: ""
+                    },
+                    dibujando: false,
+                    iconos: [],
+                    datos: {
+                        Nombre: "",
+                        idEstructura: null,
+                        Observaciones: "",
+                    },
+                    filtroIcono: '',
+                    paginaActual: 1,
+                    totalPaginas: 0,
+                    iconoSeleccionado: "",
+                    modoGuardado: "",
+                }
+            },
+            methods: {
+                seleccionarArea(id, nombre) {
+                    this.areaId = id;
+                    this.areaNombre = nombre;
+                    this.puedeGuardar = true;
+
+                    window.seleccionarArea(id, nombre);
+                },
+                iniciarDibujo() {
+                    this.areaId = null;
+                    this.areaNombre = "";
+                    this.puedeGuardar = true;
+                    window.iniciarDibujo();
+                },
+                crearZona() {
+                    this.modoGuardado = "Crear"
+                    window.crearZona();
+                },
+                guardar() {
+                    if (this.modoGuardado === "Crear") {
+                        const formZona = document.getElementById("formZona").cloneNode(true);
+                        formZona.style.display = "block";
+
+                        bootbox.dialog({
+                            title: 'Crear zona',
+                            message: formZona,
+                            buttons: {
+                                cancel: {
+                                    label: 'Cancelar',
+                                    className: 'btn-danger'
+                                },
+                                confirm: {
+                                    label: 'Guardar',
+                                    className: 'btn-success',
+                                    callback: () => {
+                                        const modal = $('.bootbox-body');
+
+                                        const nombreIsla = modal.find('#nombreIsla').val();
+                                        const estructuraId = parseInt(modal.find('#tipoEstructura').val());
+                                        const observaciones = modal.find('#observacionesIsla').val();
+
+                                        if (!nombreIsla) {
+                                            bootbox.alert("Por favor nombra la isla");
+                                            return false;
+                                        }
+
+                                        this.datos = {
+                                            Nombre: nombreIsla,
+                                            idEstructura: estructuraId,
+                                            Observaciones: observaciones
+                                        };
+
+                                        window.guardar(this.datos);
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        window.guardar(this.datos)
+                    }
+                },
+                //guardarEdicion() {
+                //    window.editar();
+                //},
+                buscarIconos(filtro, scope = null, pagina = 1, tamPagina = 12) {
+                    $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, (res) => {
+                        if (!res || !res.ok) return;
+
+                        const container = $(scope).find('#iconosContainer').empty();
+                        const paginador = $(scope).find('#paginador').empty();
+
+                        res.data.forEach(icono => {
+                            container.append(`
+                                <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
+                                <i class="fa ${icono}" value="fa ${icono}"></i>
+                                </button>`
+                            );
+                        });
+
+                        
+                        for (let i = 1; i < res.totalPaginas; i++) {
+                            const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
+                            btn.on('click', () => this.buscarIconos(filtro, scope, i, tamPagina));
+                            paginador.append(btn);
+                        }
+
+                        container.off('click').on('click', 'button', function () {
+                            const icono = $(this).data('icono');
+                            $(scope).find('#iconoSeleccionado').val(icono);
+
+                            container.find('button').removeClass('active btn-success');
+                            $(this).addClass('active btn-success');
+                        });
+                    });
+                },
+                agregarEstructura() {
+                    const contenido = document.getElementById("formularioEstructuras");
+                    if (!contenido) {
+                        console.error("No existe #formularioEstructuras en el HTML");
+                        return;
+                    }
+
+                    const clon = contenido.cloneNode(true);
+                    clon.style.display = "block";
+
+                    bootbox.dialog({
+                        title: 'Agregar nuevo tipo de estructura',
+                        message: clon,
+                        buttons: {
+                            cancelar: {
+                                label: "Cancelar",
+                                className: "btn-danger",
+                                callback: function () {
+                                    return;
+                                }
+                            },
+                            confirm: {
+                                label: "Guardar",
+                                className: "btn-success",
+                                callback: () => {
+                                    const modal = $('.bootbox-body');
+
+                                    const descripcion = modal.find(`#descripcionEstructura`).val();
+                                    const idEnu = modal.find(`#enuEstructura`).val();
+                                    const color = modal.find(`#colorEstructura`).val().replace('#', '');
+                                    const icono = clon.querySelector('#iconoSeleccionado').value;
+
+                                    window.agregarEstructura(descripcion, idEnu, color, icono);
+                                }
+                            }
+                        },
+                    });
+                    
+                    setTimeout(() => {
+                        const btnBuscar = clon.querySelector("#btnBuscarIconos");
+                        const inputFiltro = clon.querySelector("#filtroIcono");
+
+                        if (btnBuscar) {
+                            btnBuscar.onclick = () => this.buscarIconos(inputFiltro.value, clon);
+                        }
+                    }, 100);
+                },
+            },
+            computed: {
+                areaSeleccionada() {
+                    return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
+                },
+            },
         });
     </script>
 
