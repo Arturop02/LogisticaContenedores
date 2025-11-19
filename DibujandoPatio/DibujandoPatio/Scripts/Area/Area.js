@@ -584,13 +584,15 @@ function inicializarArea() {
                 }
             }
 
+            var cfgGrupo = {
+                x: this.Posicion.x,
+                y: this.Posicion.y,
+                rotation: this.Orientacion,
+                draggable: false,
+            };
+
             if (this.Grafico == null) {
-                this.Grupo = new Konva.Group({
-                    x: this.Posicion.x,
-                    y: this.Posicion.y,
-                    rotation: this.Orientacion,
-                    draggable: false,
-                });
+                this.Grupo = new Konva.Group(cfgGrupo);
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
                 this.Grafico.offsetX(this.Grafico.width() / 2);

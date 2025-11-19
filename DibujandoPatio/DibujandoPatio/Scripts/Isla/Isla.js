@@ -365,15 +365,15 @@ function inicializarArea() {
 
             isla.Dibujar();
 
-            if (isla.GraficoTrasnformer) {
-                isla.GraficoTrasnformer.visible(true);
-                isla.GraficoTrasnformer.nodes([isla.Grafico]);
-                isla.Grafico.draggable(true);
-                layer.batchDraw();
-            }
-
             IslaActual = isla;
             Lienzo.Estado = enumEstadoLienzo.Moviendo;
+
+            if (isla.GraficoTrasnformer) {
+                isla.GraficoTrasnformer.nodes([isla.Grafico]);
+                isla.GraficoTrasnformer.visible(true);
+                isla.Grupo.draggable(true);
+                layer.draw();
+            }
 
             return isla;
         },
@@ -572,6 +572,9 @@ function inicializarArea() {
             
             var cfgGrafico = {
                 Id: this.Id,
+                x: 0,
+                y: 0,
+                //rotation: this.Orientacion,
                 name: this.Nombre,
                 text: this.Descripcion,
                 width: this.Ancho /*|| tamanoDefault.ancho*/,
@@ -614,6 +617,7 @@ function inicializarArea() {
                     if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
                         return oldBox;
                     }
+
                     return newBox;
                 }
             }
@@ -641,13 +645,12 @@ function inicializarArea() {
 
                 this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
             
-                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto, this.GraficoTrasnformer);
+                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
-                layer.add(this.Grupo);
+                layer.add(this.Grupo, this.GraficoTrasnformer);
                 var isla = this;
 
-                isla.Grafico.on('pointerdown', throttle((e) => {
-//                  
+                isla.Grafico.on('pointerdown', throttle((e) => {              
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
 
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
@@ -655,7 +658,7 @@ function inicializarArea() {
 
                         isla.GraficoTrasnformer.nodes([isla.Grafico]);
                         isla.GraficoTrasnformer.visible(true);
-                        isla.Grafico.draggable(true);
+                        isla.Grupo.draggable(true);
                         layer.draw();
 
                     }else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
@@ -664,7 +667,7 @@ function inicializarArea() {
                     }
                 }, 300));
 
-                this.Grafico.on('pointerdblclick', function () {
+                isla.Grafico.on('pointerdblclick', function () {
                     if (Lienzo.Estado !== enumEstadoLienzo.Editando) {
                         bootbox.confirm({
                             message: '¿Deseas eliminar la isla?',
@@ -703,10 +706,20 @@ function inicializarArea() {
                         });
                     }
                 });
+
+                isla.Grafico.on('dragend transformend', function () {
+                    Lienzo.IslaActual = isla;
+                    isla.Posicion.x = isla.Grupo.x();
+                    isla.Posicion.y = isla.Grupo.y();
+                    isla.Orientacion = isla.Grafico.getAbsoluteRotation();
+                    
+                    console.log("datos isla ", isla);
+                });
             }
             else {
                 this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
+                this.Grafico.absolutePosition({ x: this.Grupo.x, y: this.Grupo.y });
+                //this.Grafico.absoluteRotation(this.Grupo.rotation);
                 this.Grafico.getLayer().batchDraw();
 
                 this.GraficoTexto.setAttrs(cfgGraficoTexto);
@@ -752,9 +765,6 @@ function inicializarArea() {
 
     Lienzo.Estado = enumEstadoLienzo.Agregando;
     Lienzo.BloquearArea(true);
-
-    console.log("Estado:", Lienzo.Estado);
-    console.log("IslaActual:", Lienzo.IslaActual);
 
     if (idAreaSeleccionada != null && idAreaSeleccionada != "") {
         Lienzo.Modo = enumModoLienzo.Isla
@@ -824,19 +834,27 @@ function inicializarArea() {
 
             Lienzo.IslaActual = nuevaIsla;
             Lienzo.Estado = enumEstadoLienzo.Moviendo;
+
+            console.log("Estado:", Lienzo.Estado);
+            console.log("IslaActual:", Lienzo.IslaActual);
+
         }
 
     });
 
-    stage.on('pointermove', function (e) {
-        if (Lienzo.Estado === enumEstadoLienzo.Moviendo && Lienzo.IslaActual != null) {
-            const pos = Lienzo.DamePosicion();
+    //stage.on('pointermove', function (e) {
+    //    if (Lienzo.Estado === enumEstadoLienzo.Moviendo && Lienzo.IslaActual != null) {
+    //        //const isla = Lienzo.IslaActual;
+    //        const pos = Lienzo.DamePosicion();
 
-            Lienzo.IslaActual.Posicion.x = pos.x;
-            Lienzo.IslaActual.Posicion.y = pos.y;
-            layer.batchDraw();
-        }
-    });
+    //        Lienzo.IslaActual.Grupo.position({ x: pos.x, y: pos.y });
+
+    //        Lienzo.IslaActual.Posicion.x = pos.x;
+    //        Lienzo.IslaActual.Posicion.y = pos.y;
+
+    //        Lienzo.IslaActual.Dibujar();
+    //    }
+    //});
 
     stage.on('pointerup touchend', function (e) {
 
@@ -940,16 +958,16 @@ function inicializarArea() {
         
         var isla = Lienzo.IslaActual;
 
-        let rotacion = isla.Grafico.getAbsoluteRotation();
-        let transform = isla.Grupo.getAbsoluteTransform();
-        let posicionAbsoluta = transform.getTranslation();
+        let rotacion = isla.Grupo.getAbsoluteRotation();
+        //let transform = isla.Grupo.getAbsoluteTransform();
+        //let posicionAbsoluta = transform.getTranslation();
 
         datosIsla = {
             Id: isla.Id || 0,
             Nombre: isla.Nombre || datos.Nombre,
-            Orientacion: rotacion,
-            X: posicionAbsoluta.x,
-            Y: posicionAbsoluta.y,
+            Orientacion: isla.Orientacion,//isla.Grupo.rotation() || isla.Grafico.rotation(),
+            X: isla.Grupo.x(),
+            Y: isla.Grupo.y(),
             Ancho: isla.Grafico.width() * isla.Grafico.scaleX(),
             Alto: isla.Grafico.height() * isla.Grafico.scaleY(),
             Observaciones: isla.Observaciones || datos.Observaciones,
