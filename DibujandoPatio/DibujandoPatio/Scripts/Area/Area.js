@@ -873,7 +873,7 @@ function inicializarArea() {
 
     }
 
-    window.seleccionarArea = function (id, nombre) {
+    window.seleccionarArea = function (id) {
 
         idAreaSeleccionada = id;
         if (!id) return;
@@ -920,16 +920,9 @@ function inicializarArea() {
         window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', idAreaSeleccionada);
     }
 
-    window.guardar = function (id = null, nombre="", idPatio = null) {
+    window.guardarAsync = function (area) {
         Lienzo.Cerrar();
-        $(`#lstAreas .btn`).removeClass('active');
-        if (id) {
-            $(`#lstAreas label[data-id="${id}"]`).addClass('active');
-        }
-        
-        //Arreglo de vertices que guarda el orden en el que fueron creados los puntos al recorrer
-        //el array puntos con un for
-        const vertices = Lienzo.lstPunto.map(p => ({
+        area.Vertices = Lienzo.lstPunto.map(p => ({
             Id: p.Id,
             X: p.Posicion.x,
             Y: p.Posicion.y,
@@ -937,59 +930,33 @@ function inicializarArea() {
             Activo: p.Activo
         }));
 
-        let url, payload;
-
-        if (id) {
+        let url;
+        if (area.Id == 0)
+            url = '/Area/GuardarArea';
+        else
             url = '/Area/EditarArea';
-            payload = {
-                Id: id,
-                Nombre: nombre,
-                Vertices: vertices
-            }
 
+        return new Promise((resolve, reject) => {
             $.ajax({
                 url: url,
                 method: 'POST',
-                data: JSON.stringify(payload),
+                data: JSON.stringify(area),
                 contentType: 'application/json; charset=utf-8',
                 success: function (res) {
-                    //console.log("respuesta del server", res);
                     if (res.ok) {
                         bootbox.alert("Editado correctamente");
                         dibujando = false;
                         $('#guardarBtn').prop('disabled', true);
+                        resolve(res.Area);
                     } else {
                         bootbox.alert("Ha ocurrido un problema");
                     }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    reject(errorThrown);
                 }
             });
-
-        } else {
-
-            url = '/Area/GuardarArea';
-            payload = {
-                Nombre: nombre,
-                Patio: { Id: idPatio },
-                Vertices: vertices
-            }
-
-            $.ajax({
-                url: url,
-                method: 'POST',
-                data: JSON.stringify(payload),
-                contentType: 'application/json; charset=UTF-8',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert("Guardado correctamente");
-                        dibujando = false;
-                        $('#guardarBtn').prop('disabled', true);
-                    } else {
-                        bootbox.alert("Ha ocurrido un problema");
-                    }
-                }
-            });
-
-        }
+        });       
     }
 
     window.agregarEnu = function () {
