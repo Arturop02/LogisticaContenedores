@@ -112,7 +112,7 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpGet]
-        public ActionResult DibujarIsla(int? id)
+        public ActionResult DibujarIsla(int? Id)
         {
             AreaRN areaRN = new AreaRN();
             var area = areaRN.DameTodosAlta();
@@ -127,7 +127,13 @@ namespace DibujandoPatio.Controllers
             var estructuras = estructuraRN.DameTodosAlta();
             ViewBag.Estructuras = estructuras;
 
-            ViewBag.IdAreaSeleccionada = id;
+            if (Id != null)
+            {
+                var areaSeleccionada = areaRN.BuscarPorId(Id.Value);
+                ViewBag.AreaSeleccionada = Newtonsoft.Json.JsonConvert.SerializeObject(areaSeleccionada);
+            }
+
+            //ViewBag.IdAreaSeleccionada = id;
             return View(RutaBase + "DibujarIsla.cshtml");
         }
 

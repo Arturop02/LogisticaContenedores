@@ -36,6 +36,18 @@
         display: none;
     }
 
+    #notifications {
+        cursor: pointer;
+        position: fixed;
+        top: 20px;
+        left: 40vw;
+        z-index: 9999;
+        text-align: center;
+        margin-bottom: 22px;
+        margin-right: 15px;
+        max-width: 300px;
+    }
+
     .sidebar {
         position: fixed;
         top: 0;
@@ -74,17 +86,19 @@
         <div id="lstAreas" class="btn-group">
             @foreach (var a in areas)
             {
-                <label class="btn btn-primary"
-                       :class="{active: areaId == @a.Id}"
-                       v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
-                       autocomplete="off">
-                    @a.Nombre
-                </label>
+                <a href="@Url.Action("DibujarIsla", new {Id=a.Id})">
+                    <label class="btn btn-primary"
+                           :class="{active: areaId == @a.Id}"
+                           @*v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
+                           autocomplete="off"*@>
+                        @a.Nombre
+                    </label>
+                </a>
+
             }
         </div>
         <button class="btn btn-success pull-right"
-                :disabled="!puedeGuardar"
-                v-on:click="guardar">
+                v-on:click="guardarTodo">
             <i class="glyphicon glyphicon-ok"></i>Guardar
         </button>
         <button id="crearZona"
@@ -101,6 +115,7 @@
         <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 
     </div>
+    <div id="notifications"></div>
     <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; display: none;">
         <div id="formularioEstructuras" class="form-group">
@@ -123,7 +138,7 @@
 
             <label>Icono</label>
             <div>
-                <input type="text" id="filtroIcono" placeholder="Icono" v-model="filtroIcono"/>
+                <input type="text" id="filtroIcono" placeholder="Icono" v-model="filtroIcono" />
                 <button type="button" class="btn btn-default" id="btnBuscarIconos">Buscar</button>
             </div>
             <div id="iconosContainer" class="btn-group" role="group" style="flex-wrap: wrap;"></div>
@@ -141,7 +156,7 @@
                 <label>Tipo de estructura</label>
                 <select id="tipoEstructura" class="form-control" required>
                     <option value="">--Selecciona--</option>
-                    @foreach(var e in estructuras)
+                    @foreach (var e in estructuras)
                     {
                         <option value="@e.Id">@e.Descripcion</option>
                     }
@@ -164,37 +179,48 @@
     @Scripts.Render("~/bundles/jqgrid")
     @Scripts.Render("~/bundles/bootstrapselect")
     @Styles.Render("~/bundles/fontawesomecss")
+    @Scripts.Render("~/bundles/notify")
 
     <script>
-            idAreaSeleccionada = '@ViewBag.IdAreaSeleccionada';
+    var objSer = {
+        Url: {
+            Isla: {
+                Index: '@Url.Action("Index", "Isla", new { id = ""})',
+            },
+            Area: {
+                DibujarIsla: '@Url.Action("DibujarIsla", "Area", new {id="__id__"})',
+            },
+        },
+        Dato: {
+            AreaSeleccionada:@(ViewBag.AreaSeleccionada==null?"null": Html.Raw(ViewBag.AreaSeleccionada))
+        },
+    };
+
+    $(document).ready(function () {
+        inicializarArea();
+
+        if (objSer.Dato.AreaSeleccionada != null)
+            vueIsla.Area = objSer.Dato.AreaSeleccionada;
+    });
+
     </script>
 
-    <script>
-        $(document).ready(function () {
-            inicializarArea();
-        });
-    </script>
 
     <script>
-        new Vue({
+        var vueIsla = new Vue({
             el: '#app',
             data() {
                 return {
-                    areaId: null,
-                    areaNombre: "",
-                    puedeGuardar: false,
-                    mostrarModalArea: false,
-                    nuevaArea: {
-                        patioId: null,
-                        nombre: ""
-                    },
-                    dibujando: false,
-                    iconos: [],
-                    datos: {
+                    Area: null,
+                    Isla: {
                         Nombre: "",
                         idEstructura: null,
                         Observaciones: "",
                     },
+                    cambiosARealizar: [],
+                    areaId: null,
+                    areaNombre: "",
+                    iconos: [],
                     filtroIcono: '',
                     paginaActual: 1,
                     totalPaginas: 0,
@@ -202,41 +228,41 @@
                     modoGuardado: "",
                 }
             },
+            watch: {
+                Area: {
+                    handler(newValue, oldValue) {
+                        if (newValue != null)
+                            seleccionarArea(newValue.Id, newValue.Nombre);
+                    },
+                    deep: true
+                }
+            },
             methods: {
                 seleccionarArea(id, nombre) {
                     this.areaId = id;
                     this.areaNombre = nombre;
-                    this.puedeGuardar = true;
 
                     window.seleccionarArea(id, nombre);
                 },
-                iniciarDibujo() {
-                    this.areaId = null;
-                    this.areaNombre = "";
-                    this.puedeGuardar = true;
-                    window.iniciarDibujo();
-                },
-                crearZona() {
-                    this.modoGuardado = "Crear"
-                    window.crearZona();
-                },
-                guardar() {
-                    if (this.modoGuardado === "Crear") {
-                        const formZona = document.getElementById("formZona").cloneNode(true);
+                ConfirmacionCrearAsync() {
+                    return new Promise((resolve, reject) => {
+                        var formZona = document.getElementById("formZona").cloneNode(true);
                         formZona.style.display = "block";
-
                         bootbox.dialog({
                             title: 'Crear zona',
                             message: formZona,
                             buttons: {
                                 cancel: {
                                     label: 'Cancelar',
-                                    className: 'btn-danger'
+                                    className: 'btn-danger',
+                                    callback: (val) => {
+                                        resolve({ Confirmado: false });
+                                    }
                                 },
                                 confirm: {
-                                    label: 'Guardar',
+                                    label: 'Confirmar',
                                     className: 'btn-success',
-                                    callback: () => {
+                                    callback: (val) => {
                                         const modal = $('.bootbox-body');
 
                                         const nombreIsla = modal.find('#nombreIsla').val();
@@ -248,24 +274,140 @@
                                             return false;
                                         }
 
-                                        this.datos = {
-                                            Nombre: nombreIsla,
-                                            idEstructura: estructuraId,
-                                            Observaciones: observaciones
-                                        };
+                                        resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
 
-                                        window.guardar(this.datos);
+                                        window.crearZona();
                                     }
                                 }
                             }
                         });
-                    } else {
-                        window.guardar(this.datos)
+                    })
+                },
+                ConfirmacionActualizarAsync(isla) {
+                    bootbox.confirm({
+                        message: 'Deseas actualizar los datos de la zona',
+                        buttons: {
+                            confirm: {
+                                label: "Actualizar datos",
+                                className: "btn-success",
+                            },
+                            cancel: {
+                                label: "Conservar datos actuales",
+                                className: "btn-default",
+                            },
+                        },
+                        callback: (result) => {
+                            if (!result) return;
+
+                            return new Promise((resolve, reject) => {
+                                var formZona = document.getElementById("formZona").cloneNode(true);
+                                formZona.style.display = "block";
+                                bootbox.dialog({
+                                    title: 'Editar zona',
+                                    message: formZona,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancelar',
+                                            className: 'btn-danger',
+                                            callback: (val) => {
+                                                resolve({ Confirmado: false });
+                                            }
+                                        },
+                                        confirm: {
+                                            label: 'Confirmar',
+                                            className: 'btn-success',
+                                            callback: (val) => {
+                                                const modal = $('.bootbox-body');
+
+                                                const nombreIsla = modal.find('#nombreIsla').val();
+                                                const estructuraId = parseInt(modal.find('#tipoEstructura').val());
+                                                const observaciones = modal.find('#observacionesIsla').val();
+
+                                                if (!nombreIsla) {
+                                                    bootbox.alert("Por favor nombra la isla");
+                                                    return false;
+                                                }
+
+                                                resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
+                                                //window.actualizarDatosIsla(this.Isla);
+                                                window.editarZona();
+                                            }
+                                        }
+                                    }
+                                });
+                            })
+                        }
+                    });
+                },
+                crearZona() {
+                    try {
+                        var preguntar = this.ConfirmacionCrearAsync();
+
+                        if (preguntar.Confirmado) {
+                            this.Isla.Nombre = preguntar.Nombre;
+                            this.Isla.Estructura = preguntar.IdEstructura;
+                            this.Isla.Observaciones = preguntar.Observaciones;
+                        }
+                    }
+                    catch (e) {
+                        console.log(e);
                     }
                 },
-                //guardarEdicion() {
-                //    window.editar();
+                async editarZona() {
+                    try {
+                        var preguntar = await this.ConfirmacionActualizarAsync();
+
+                        if (preguntar.Confirmado) {
+                            this.Isla.Nombre = preguntar.Nombre;
+                            this.Isla.Estructura = preguntar.IdEstructura;
+                            this.Isla.Observaciones = preguntar.Observaciones;
+
+                            window.actualizarDatosIsla(this.Isla);
+                        }
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
+                },
+                //AgregarCambioPendiente(isla, cambio) {
+                //    var tipo = this.modoGuardado;
+                //    var copia = JSON.parse(JSON.stringify(isla));
+                //    this.cambiosPendientes.push({
+                //        isla: copia,
+                //        cambio: tipo,
+                //    });
                 //},
+                async guardar() {
+                    
+                    //if (this.modoGuardado === "Crear") {
+                    //    try {
+                    //        var preguntar = await this.ConfirmacionGuardarAsync();
+
+                    //        if (preguntar.Confirmado) {
+                    //            this.Isla.Nombre = preguntar.Nombre;
+                    //            this.Isla.Estructura = preguntar.IdEstructura;
+                    //            this.Isla.Observaciones = preguntar.Observaciones;
+
+                    //            this.Isla = await window.guardarAsync(this.Isla);
+                    //        }
+                    //    }
+                    //    catch (e) {
+                    //        console.log(e);
+                    //    }
+                    //} else {
+                    //
+                    //}
+
+                    //if (this.modoGuardado === "Crear") {
+                    //    await
+                    //} else {
+                    //    window.guardar(this.datos)
+                    //}
+                },
+                guardarTodo() {
+                    //window.guardarAsync(this.Isla);
+                    window.guardarTodoAsync();
+                },
                 buscarIconos(filtro, scope = null, pagina = 1, tamPagina = 12) {
                     $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, (res) => {
                         if (!res || !res.ok) return;
@@ -275,13 +417,13 @@
 
                         res.data.forEach(icono => {
                             container.append(`
-                                <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
-                                <i class="fa ${icono}" value="fa ${icono}"></i>
-                                </button>`
+                                    <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
+                                    <i class="fa ${icono}" value="fa ${icono}"></i>
+                                    </button>`
                             );
                         });
 
-                        
+
                         for (let i = 1; i < res.totalPaginas; i++) {
                             const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
                             btn.on('click', () => this.buscarIconos(filtro, scope, i, tamPagina));
@@ -334,7 +476,7 @@
                             }
                         },
                     });
-                    
+
                     setTimeout(() => {
                         const btnBuscar = clon.querySelector("#btnBuscarIconos");
                         const inputFiltro = clon.querySelector("#filtroIcono");
@@ -350,7 +492,9 @@
                     return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
                 },
             },
+            mounted(){
+                window.recibirDatosAActualizar = this.ConfirmacionActualizarAsync;
+            },
         });
     </script>
-
 }

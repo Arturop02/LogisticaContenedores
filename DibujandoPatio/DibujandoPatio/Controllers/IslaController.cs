@@ -38,6 +38,32 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpPost]
+        public JsonResult GuardarMultiplesIslas(List<IslaBT> listadoIslas)
+        {
+            try
+            {
+                IslaRN islaRN = new IslaRN();
+                foreach(var isla in listadoIslas)
+                {
+                    if(isla.Id == 0)
+                    {
+                        var islaAgregada = islaRN.Agregar(isla);
+                    }
+                    else
+                    {
+                        var islaEditada = islaRN.Cambio(isla);
+                    }
+                }
+                return Json(new { ok = true });
+
+            }
+            catch(Exception ex)
+            {
+                return Json(new { ok = false });
+            }
+        }
+
+        [HttpPost]
         public JsonResult BorrarIsla(IslaBT islaBT)
         {
             try

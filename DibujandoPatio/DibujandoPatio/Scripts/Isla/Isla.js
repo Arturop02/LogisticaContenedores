@@ -6,7 +6,8 @@ var TextoDerecha = null;
 var datosIsla = {};
 var nuevosDatos = {};
 var listarTipoEstructuras = [];
-var listarEnus = []
+var listarEnus = [];
+var listaIslasGuardar = [];
 
 var enumModoLienzo = {
     Area: 'Area',
@@ -362,6 +363,8 @@ function inicializarArea() {
             isla.Posicion.y = y;
             isla.Alto = Lienzo.TamanoIsla().alto;
             isla.Ancho = Lienzo.TamanoIsla().ancho;
+            isla.Nueva = true;
+            isla.Modificada = false;
 
             isla.Dibujar();
 
@@ -375,6 +378,7 @@ function inicializarArea() {
                 layer.draw();
             }
 
+            listaIslasGuardar.push(IslaActual);
             return isla;
         },
         AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
@@ -394,7 +398,10 @@ function inicializarArea() {
             }
 
             isla.Icono = uniCodeIcono;
-            
+
+            isla.Nueva = false;
+            isla.Modificada = false;
+
             return isla;
         },
         HabilitarArrastrable: function (habilitar) {
@@ -553,6 +560,21 @@ function inicializarArea() {
         this.Color = null;
         this.Icono = null;
 
+        this.Nueva = null;
+        this.Modificada = null;
+        this.datosOriginales = {
+            Id: this.Id,
+            x: this.Posicion.x,
+            y: this.Posicion.y,
+            ancho: this.Ancho,
+            alto: this.Alto,
+            orientacion: this.Orientacion,
+            nombre: this.Nombre,
+            color: this.Color,
+            descripcion: this.Descripcion,
+            Icono: this.Icono,
+        };
+
         this.Eliminar = function () {
             this.Grafico?.destroy();
             this.GraficoIcono.destroy();
@@ -574,12 +596,11 @@ function inicializarArea() {
                 Id: this.Id,
                 x: 0,
                 y: 0,
-                //rotation: this.Orientacion,
                 name: this.Nombre,
                 text: this.Descripcion,
                 width: this.Ancho /*|| tamanoDefault.ancho*/,
                 height: this.Alto /*|| tamanoDefault.alto*/,
-                fill: `#${this.Color}`,
+                fill: this.Color ? `#${this.Color}` : "#88b7d5",
                 strokeWidth: 1.2,
                 stroke: 'black',
             };
@@ -617,7 +638,6 @@ function inicializarArea() {
                     if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
                         return oldBox;
                     }
-
                     return newBox;
                 }
             }
@@ -652,9 +672,10 @@ function inicializarArea() {
 
                 isla.Grafico.on('pointerdown', throttle((e) => {              
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-
+                        //window.actualizarDatosIsla(this);
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = isla;
+                        window.recibirDatosAActualizar(Lienzo.IslaActual);
 
                         isla.GraficoTrasnformer.nodes([isla.Grafico]);
                         isla.GraficoTrasnformer.visible(true);
@@ -664,6 +685,7 @@ function inicializarArea() {
                     }else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
                         Lienzo.Estado = enumEstadoLienzo.Editando;
                         Lienzo.IslaActual = null;
+
                     }
                 }, 300));
 
@@ -712,8 +734,9 @@ function inicializarArea() {
                     isla.Posicion.x = isla.Grupo.x();
                     isla.Posicion.y = isla.Grupo.y();
                     isla.Orientacion = isla.Grafico.getAbsoluteRotation();
+
+                    isla.Modificada = true;
                     
-                    console.log("datos isla ", isla);
                 });
             }
             else {
@@ -765,15 +788,6 @@ function inicializarArea() {
 
     Lienzo.Estado = enumEstadoLienzo.Agregando;
     Lienzo.BloquearArea(true);
-
-    if (idAreaSeleccionada != null && idAreaSeleccionada != "") {
-        Lienzo.Modo = enumModoLienzo.Isla
-        Lienzo.Estado = enumEstadoLienzo.Agregando;
-        Lienzo.BloquearArea(true);
-        let $radio = $(`#lstAreas input[data-id="${idAreaSeleccionada}"]`);
-        $radio.closest("label.btn").trigger('click');
-        $radio.prop('checked', true).trigger('change');
-    }
 
     //Evento que permite el zoom al girar la rueda del raton
     stage.on('wheel', (e) => {
@@ -834,6 +848,9 @@ function inicializarArea() {
 
             Lienzo.IslaActual = nuevaIsla;
             Lienzo.Estado = enumEstadoLienzo.Moviendo;
+            Lienzo.IslaActual.Estado = enumEstado.Moviendo;
+
+            listaIslasGuardar.push(Lienzo.IslaActual);
 
             console.log("Estado:", Lienzo.Estado);
             console.log("IslaActual:", Lienzo.IslaActual);
@@ -874,7 +891,7 @@ function inicializarArea() {
         
     });
 
-    window.seleccionarArea = function (id, nombre) {
+    window.seleccionarArea = function (id) {
         
         idAreaSeleccionada = id;
         if (!id) return;
@@ -944,78 +961,144 @@ function inicializarArea() {
 
     window.crearZona = function () {
 
+        Notify("Da click para crear una zona", null, null, "success");
         Lienzo.Estado = enumEstadoLienzo.Agregando;
-        bootbox.alert("Da click para crear una zona");
-        console.log("Isla Actual: ", Lienzo.IslaActual);
+        
     }
 
-    window.guardar = function (datos) {
+    window.editarZona = function () {
+        Notify("Los datos seran actualizados", null, null, "success");
+        Lienzo.Estado = enumEstadoLienzo.Moviendo;
+    }
 
-        if (!Lienzo.IslaActual) {
-            bootbox.alert("No existe una isla para guardar");
-            return;
-        }
-        
+    window.agregarIslasAGuardar = function (isla) {
+        var registrada = listaIslasGuardar.some(x =>
+            x.Id === isla.Id || x === isla
+        );
+
+        if (!registrada) listaIslasGuardar.push(isla);
+
+        console.log("ListaActualizada", listaIslasGuardar);
+    }
+
+    window.actualizarDatosIsla = function (datos) {
         var isla = Lienzo.IslaActual;
 
-        let rotacion = isla.Grupo.getAbsoluteRotation();
-        //let transform = isla.Grupo.getAbsoluteTransform();
-        //let posicionAbsoluta = transform.getTranslation();
+        console.log(isla);
 
-        datosIsla = {
-            Id: isla.Id || 0,
-            Nombre: isla.Nombre || datos.Nombre,
-            Orientacion: isla.Orientacion,//isla.Grupo.rotation() || isla.Grafico.rotation(),
-            X: isla.Grupo.x(),
-            Y: isla.Grupo.y(),
-            Ancho: isla.Grafico.width() * isla.Grafico.scaleX(),
-            Alto: isla.Grafico.height() * isla.Grafico.scaleY(),
-            Observaciones: isla.Observaciones || datos.Observaciones,
-            Area: { Id: idAreaSeleccionada },
-            Estructura: { Id: isla.Estructura || datos.idEstructura },
-        };
+        isla.Nombre = datos.Nombre;
+        isla.Estructura = datos.IdEstructura;
+        isla.Observaciones = datos.Observaciones;
 
-        if (datosIsla.Id) {
-            console.log("En if ", datosIsla.Id);
-            let url = '/Isla/EditarIsla';
-            var data = JSON.stringify(datosIsla);
+        isla.Modificada = true;
+
+        window.agregarIslasAGuardar(isla);
+    };
+
+    //window.guardarAsync = function (datos) {
+
+    //    if (!Lienzo.IslaActual) {
+    //        bootbox.alert("No existe una isla para guardar");
+    //        return;
+    //    }
+
+    //    var isla = Lienzo.IslaActual;
+
+    //    datosIsla = {
+    //        Id: isla.Id || 0,
+    //        Nombre: datos?.Nombre ?? isla.Nombre,
+    //        Orientacion: isla.Orientacion,//isla.Grupo.rotation() || isla.Grafico.rotation(),
+    //        X: isla.Grupo.x(),
+    //        Y: isla.Grupo.y(),
+    //        Ancho: isla.Grafico.width() * isla.Grafico.scaleX(),
+    //        Alto: isla.Grafico.height() * isla.Grafico.scaleY(),
+    //        Observaciones: datos?.Observaciones ?? isla.Observaciones,
+    //        Area: { Id: idAreaSeleccionada },
+    //        Estructura: { Id: datos?.IdEstructura ?? isla.Estructura },
+    //    };
+
+    //    window.agregarIslasAGuardar(datosIsla);
+
+    //    return datosIsla;
+
+    //    //var url;
+
+    //    //if (isla.Id == 0) 
+    //    //    url = '/Isla/GuardarIsla';
+    //    //else
+    //    //    url = '/Isla/EditarIsla';
+
+    //    //return new Promise((resolve, reject) => {
+    //    //    $.ajax({
+    //    //        url: url,
+    //    //        method: 'POST',
+    //    //        data: JSON.stringify(datosIsla),
+    //    //        contentType: 'application/json; charset=utf-8',
+    //    //        success: function (res) {
+    //    //            if (res.ok) {
+    //    //                bootbox.alert(`La isla ${datosIsla.Nombre} ha sido editada`);
+    //    //                Lienzo.Estado = enumEstadoLienzo.Editando;
+    //    //                Lienzo.IslaActual = null;
+    //    //            } else {
+    //    //                bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${datosIsla.Nombre}`);
+    //    //            }
+    //    //        },
+    //    //        error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //    //            reject(errorThrown);
+    //    //        }
+    //    //    });
+    //    //});
+
+    //}
+
+    window.guardarTodoAsync = async function () {
+        //if (listaIslasGuardar.length < 0) {
+        //    bootbox.alert("No existe isla para guardar");
+        //}
+
+        var aEnviar = listaIslasGuardar
+            .filter(x => x.Nueva || x.Modificada)
+            .map(x => ({
+                Id: x.Id ?? 0,
+                Nombre: x.Nombre,
+                X: x.Posicion.x,
+                Y: x.Posicion.y,
+                Orientacion: x.Orientacion,
+                Ancho: x.Ancho,
+                Alto: x.Alto,
+                Observaciones: x.Observaciones,
+                Area: { Id: idAreaSeleccionada },
+                Estructura: { Id: x.Estructura },
+            }));
+
+        return new Promise((resolve, reject) => {
+            console.log("ENVIANDO:", JSON.stringify(listaIslasGuardar, null, 2));
 
             $.ajax({
-                url: url,
+                url: '/Isla/GuardarMultiplesIslas',
                 method: 'POST',
-                data: data,
+                data: JSON.stringify(aEnviar),
                 contentType: 'application/json; charset=utf-8',
                 success: function (res) {
                     if (res.ok) {
-                        bootbox.alert(`La isla ${datosIsla.Nombre} ha sido editada`);
-                        Lienzo.Estado = enumEstadoLienzo.Editando;
-                        Lienzo.IslaActual = null;
+                        bootbox.alert("Cambios realizados");
+                        listaIslasGuardar = [];
+                        Lienzo.lstIslas.forEach(i => {
+                            i.Nueva = false;
+                            i.Modificada = false;
+                        });
+                        resolve(res);
                     } else {
-                        bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${datosIsla.Nombre}`);
+                        bootbox.alert("Ha ocurrido un error");
+                        reject(res);
                     }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    reject(errorThrown);
                 }
-            });
-        } else {
-            console.log("En else ", datosIsla.Id > 0);
-            var data = JSON.stringify(datosIsla);
-            $.ajax({
-                url: '/Isla/GuardarIsla',
-                method: 'POST',
-                data: data,
-                contentType: 'application/json',
-                success: function (res) {
-                    if (res.ok) {
-                        bootbox.alert("Isla guardada con exito");
-                        Lienzo.Estado = enumEstadoLienzo.Editando;
-                        Lienzo.IslaActual = null;
-                        $(`#guardarIsla`).addClass('d-none');
-                        layer.draw();
-                    } else {
-                        bootbox.alert("Error al guardar isla");
-                    }
-                }
-            });
-
-        }
+            })
+        });
     }
+
+    
 }
