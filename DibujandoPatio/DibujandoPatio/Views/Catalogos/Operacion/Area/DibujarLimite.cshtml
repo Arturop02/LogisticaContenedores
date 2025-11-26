@@ -32,6 +32,19 @@
     body > nav.navbar {
         display: none;
     }
+
+    #notifications {
+        cursor: pointer;
+        position: fixed;
+        top: 20px;
+        left: 40vw;
+        z-index: 9999;
+        text-align: center;
+        margin-bottom: 22px;
+        margin-right: 15px;
+        max-width: 300px;
+    }
+
 </style>
 <div id="app">
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
@@ -40,9 +53,7 @@
             {
                 <a href="@Url.Action("DibujarLimite",new {Id=a.Id})">
                     <label class="btn btn-primary"
-                           :class="{active: Area?.Id == @a.Id}"
-                           @*v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
-                           autocomplete="off"*@>
+                           :class="{active: Area?.Id == @a.Id}">
                         @a.Nombre
                     </label>
                 </a>
@@ -53,12 +64,10 @@
             <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>Nueva Area
         </button>
         <button class="btn btn-success pull-right"
-                @*:disabled="!puedeGuardar"*@
                 v-on:click="guardar">
             <i class="glyphicon glyphicon-ok"></i>Guardar
         </button>
         <button class="btn btn-warning"
-                @*:disabled="!areaSeleccionada"*@
                 v-on:click="agregarZona">
             <i class="glyphicon glyphicon-pencil"></i>Agregar Zona
         </button>
@@ -83,21 +92,23 @@
                 }
             </select>
             <label class="mt-2">Nombre del area::</label>
-            <input @*v-model="nuevaArea.nombre"*@ id="nombreArea" type="text" class="form-control" placeholder="Ingresa el nombre del área nueva" />
+            <input id="nombreArea" type="text" class="form-control" placeholder="Ingresa el nombre del área nueva" />
         </div>
     </div>
+
+    <div id="notifications"></div>
 </div>
 
 
 @section scripts{
     <script src="~/Scripts/Area/Area.js"></script>
     @Scripts.Render("~/bundles/vue")
-    @Scripts.Render("~/bundles/notify")
     @Scripts.Render("~/bundles/konva")
     @Scripts.Render("~/bundles/linq")
     @Styles.Render("~/bundles/jqgridcss")
     @Scripts.Render("~/bundles/jqgrid")
     @Styles.Render("~/bundles/fontawesomecss")
+    @Scripts.Render("~/bundles/notify")
 
     <script>
         var objSer = {

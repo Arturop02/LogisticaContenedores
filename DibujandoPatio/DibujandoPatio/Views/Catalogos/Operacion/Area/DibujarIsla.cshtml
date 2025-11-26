@@ -103,7 +103,7 @@
         </button>
         <button id="crearZona"
                 class="btn btn-success"
-                v-on:click="crearZona">
+                v-on:click="ConfirmacionCrearAsync">
             <i class="glyphicon glyphicon-plus"></i>Crear Zona
         </button>
         <button class="btn btn-warning"
@@ -244,7 +244,7 @@
 
                     window.seleccionarArea(id, nombre);
                 },
-                ConfirmacionCrearAsync() {
+                async ConfirmacionCrearAsync() {
                     return new Promise((resolve, reject) => {
                         var formZona = document.getElementById("formZona").cloneNode(true);
                         formZona.style.display = "block";
@@ -270,20 +270,27 @@
                                         const observaciones = modal.find('#observacionesIsla').val();
 
                                         if (!nombreIsla) {
-                                            bootbox.alert("Por favor nombra la isla");
+                                            bootbox.alert("Por favor nombra la zona");
                                             return false;
                                         }
 
-                                        resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
+                                        var datos = {
+                                            Confirmado: true,
+                                            Nombre: nombreIsla,
+                                            IdEstructura: estructuraId,
+                                            Observaciones: observaciones
+                                        }
+                                        //resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
 
-                                        window.crearZona();
+                                        window.crearZona(datos);
+                                        resolve(datos);
                                     }
                                 }
                             }
                         });
                     })
                 },
-                ConfirmacionActualizarAsync(isla) {
+                async ConfirmacionActualizarAsync(isla) {
                     bootbox.confirm({
                         message: 'Deseas actualizar los datos de la zona',
                         buttons: {
@@ -327,10 +334,16 @@
                                                     bootbox.alert("Por favor nombra la isla");
                                                     return false;
                                                 }
+                                                var datos = {
+                                                    Confirmado: true,
+                                                    Nombre: nombreIsla,
+                                                    IdEstructura: estructuraId,
+                                                    Observaciones: observaciones
+                                                }
+                                                //resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
 
-                                                resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
-                                                //window.actualizarDatosIsla(this.Isla);
-                                                window.editarZona();
+                                                window.editarZona(datos);
+                                                resolve(datos);
                                             }
                                         }
                                     }
@@ -339,74 +352,42 @@
                         }
                     });
                 },
-                crearZona() {
-                    try {
-                        var preguntar = this.ConfirmacionCrearAsync();
+                //crearZona() {
+                //    //try {
+                //        var preguntar = this.ConfirmacionCrearAsync();
 
-                        if (preguntar.Confirmado) {
-                            this.Isla.Nombre = preguntar.Nombre;
-                            this.Isla.Estructura = preguntar.IdEstructura;
-                            this.Isla.Observaciones = preguntar.Observaciones;
-                        }
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
-                },
-                async editarZona() {
-                    try {
-                        var preguntar = await this.ConfirmacionActualizarAsync();
+                //    //    if (preguntar.Confirmado) {
 
-                        if (preguntar.Confirmado) {
-                            this.Isla.Nombre = preguntar.Nombre;
-                            this.Isla.Estructura = preguntar.IdEstructura;
-                            this.Isla.Observaciones = preguntar.Observaciones;
+                //    //        this.
+                //    //        Isla.Nombre = preguntar.Nombre;
+                //    //        this.Isla.Estructura = preguntar.IdEstructura;
+                //    //        this.Isla.Observaciones = preguntar.Observaciones;
 
-                            window.actualizarDatosIsla(this.Isla);
-                        }
-                    }
-                    catch (e) {
-                        console.log(e);
-                    }
-                },
-                //AgregarCambioPendiente(isla, cambio) {
-                //    var tipo = this.modoGuardado;
-                //    var copia = JSON.parse(JSON.stringify(isla));
-                //    this.cambiosPendientes.push({
-                //        isla: copia,
-                //        cambio: tipo,
-                //    });
+                //    //        window.agregarIslasAGuardar(this.Isla);
+                //    //    }
+                //    //}
+                //    //catch (e) {
+                //    //    console.log(e);
+                //    //}
                 //},
-                async guardar() {
-                    
-                    //if (this.modoGuardado === "Crear") {
-                    //    try {
-                    //        var preguntar = await this.ConfirmacionGuardarAsync();
+                //editarZona() {
+                //    /*try {*/
+                //        var preguntar = this.ConfirmacionActualizarAsync();
 
-                    //        if (preguntar.Confirmado) {
-                    //            this.Isla.Nombre = preguntar.Nombre;
-                    //            this.Isla.Estructura = preguntar.IdEstructura;
-                    //            this.Isla.Observaciones = preguntar.Observaciones;
+                //        //if (preguntar.Confirmado) {
+                //        //    this.Isla.Nombre = preguntar.Nombre;
+                //        //    this.Isla.Estructura = { Id: preguntar.IdEstructura };
+                //        //    this.Isla.Observaciones = preguntar.Observaciones;
 
-                    //            this.Isla = await window.guardarAsync(this.Isla);
-                    //        }
-                    //    }
-                    //    catch (e) {
-                    //        console.log(e);
-                    //    }
-                    //} else {
-                    //
-                    //}
-
-                    //if (this.modoGuardado === "Crear") {
-                    //    await
-                    //} else {
-                    //    window.guardar(this.datos)
-                    //}
-                },
-                guardarTodo() {
-                    //window.guardarAsync(this.Isla);
-                    window.guardarTodoAsync();
+                //        //    //window.actualizarDatosIsla(this.Isla);
+                //        //}
+                //    //}
+                //    //catch (e) {
+                //    //    console.log(e);
+                //    //}
+                //},
+                async guardarTodo() {
+                    await window.guardarTodoAsync();
                 },
                 buscarIconos(filtro, scope = null, pagina = 1, tamPagina = 12) {
                     $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, (res) => {

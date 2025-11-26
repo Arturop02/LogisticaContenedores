@@ -664,8 +664,9 @@ function inicializarArea() {
                                         contentType: 'application/json; charset=utf-8',
                                         success: function (res) {
                                             if (res.ok) {
-                                                bootbox.alert(`La isla ${isla.Nombre} ha sido eliminada`);
+                                                Notify(`La zona ${isla.Nombre} ha sido eliminada`, null, null, "danger");
                                             } else {
+                                                //Notify(`Ha ocurrido un error al intentar eliminar la zona ${isla.Nombre}`, null, null, "danger");
                                                 bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${isla.Nombre}`);
                                             }
                                         }
@@ -677,7 +678,6 @@ function inicializarArea() {
                 });
             }
             else {
-                console.log(this);
                 this.Grafico.setAttrs(cfgGrafico);
                 this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
                 this.Grafico.getLayer().batchDraw();
@@ -737,7 +737,6 @@ function inicializarArea() {
         if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
             tamIcono = 20;
         }
-
         return tamIcono
     }
     
@@ -944,7 +943,7 @@ function inicializarArea() {
                 contentType: 'application/json; charset=utf-8',
                 success: function (res) {
                     if (res.ok) {
-                        bootbox.alert("Editado correctamente");
+                        Notify(`Editado correctamente`, null, null, "success");
                         dibujando = false;
                         $('#guardarBtn').prop('disabled', true);
                         resolve(res.Area);
@@ -992,9 +991,10 @@ function inicializarArea() {
                             contentType: 'application/json; charset=UTF-8',
                             success: function (res) {
                                 if (res.ok) {
-                                    bootbox.alert("Guardado correctamente");
+                                    Notify(`Guardado correctamente`, null, null, "success");
+                                    //bootbox.alert("Guardado correctamente");
                                     dibujando = false;
-                                    $('#guardarBtn').prop('disabled', true);
+//                                    $('#guardarBtn').prop('disabled', true);
                                 } else {
                                     bootbox.alert("Ha ocurrido un problema");
                                 }
