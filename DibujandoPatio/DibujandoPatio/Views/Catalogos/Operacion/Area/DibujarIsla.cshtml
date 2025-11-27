@@ -207,6 +207,29 @@
 
 
     <script>
+        function MensajeAsync(configuracion) {
+            return new Promise((resolve, reject) => {
+                var buttons = {};
+
+                configuracion.Boton.forEach((item, index) => {
+                    buttons['btn_' + index] = {
+                        label: item.Etiqueta || '',
+                        className: item.Clase || '',
+                        callback: function () {
+                            resolve(item);
+                        }
+                    }
+                });
+
+                bootbox.dialog({
+                    title: configuracion.Titulo || '',
+                    message: configuracion.Cuerpo || '',
+                    size: 'large',
+                    buttons: buttons
+                });
+            });
+        }
+
         var vueIsla = new Vue({
             el: '#app',
             data() {
