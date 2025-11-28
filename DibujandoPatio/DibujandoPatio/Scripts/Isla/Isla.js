@@ -49,181 +49,181 @@ function inicializarArea() {
         }
     }
 
-    function BuscarIconos(filtro, pagina = 1, tamPagina = 12) {
-        $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
-            if (!res || !res.ok) return;
+    //function BuscarIconos(filtro, pagina = 1, tamPagina = 12) {
+    //    $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, function (res) {
+    //        if (!res || !res.ok) return;
 
-            const container = $('#iconosContainer').empty();
-            res.data.forEach(icono => {
-                container.append(`
-                    <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
-                    <i class="fa ${icono}" value="fa ${icono}"></i>
-                    </button>`
-                );
-            });
-            const paginador = $('#paginador').empty();
-            for (let i = 1; i < res.totalPaginas; i++) {
-                const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
-                btn.on('click', () => BuscarIconos(filtro, i, tamPagina));
-                paginador.append(btn);
-            }
+    //        const container = $('#iconosContainer').empty();
+    //        res.data.forEach(icono => {
+    //            container.append(`
+    //                <button type="button" class="btn btn-outline-secondary" data-icono="${icono}" title="${icono}">
+    //                <i class="fa ${icono}" value="fa ${icono}"></i>
+    //                </button>`
+    //            );
+    //        });
+    //        const paginador = $('#paginador').empty();
+    //        for (let i = 1; i < res.totalPaginas; i++) {
+    //            const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
+    //            btn.on('click', () => BuscarIconos(filtro, i, tamPagina));
+    //            paginador.append(btn);
+    //        }
 
-            container.off('click').on('click', 'button', function () {
-                const icono = $(this).data('icono');
-                $('#iconoSeleccionado').val(icono);
+    //        container.off('click').on('click', 'button', function () {
+    //            const icono = $(this).data('icono');
+    //            $('#iconoSeleccionado').val(icono);
 
-                container.find('button').removeClass('active btn-success');
-                $(this).addClass('active btn-success');
-            });
-        });
-    }
+    //            container.find('button').removeClass('active btn-success');
+    //            $(this).addClass('active btn-success');
+    //        });
+    //    });
+    //}
 
-    function TransformarGrupoIsla(nodo, texto, icono) {
-        var grupo = nodo.getParent();
-        var nodoRect = grupo.findOne('Rect');
+    //function TransformarGrupoIsla(nodo, texto, icono) {
+    //    var grupo = nodo.getParent();
+    //    var nodoRect = grupo.findOne('Rect');
 
-        if (!nodoRect) nodoRect = nodo.findOne('Rect');
+    //    if (!nodoRect) nodoRect = nodo.findOne('Rect');
 
-        let altoRect = nodoRect.height();
-        var rotacion = nodoRect.DameRotacion();
+    //    let altoRect = nodoRect.height();
+    //    var rotacion = nodoRect.DameRotacion();
 
-        var centroRectangulo = nodoRect.DameCentroAbsoluto();
+    //    var centroRectangulo = nodoRect.DameCentroAbsoluto();
         
-        let radio = (altoRect / 2) + texto.textHeight;
-        var radianes = (90 + rotacion) * Math.PI / 180;
+    //    let radio = (altoRect / 2) + texto.textHeight;
+    //    var radianes = (90 + rotacion) * Math.PI / 180;
 
-        var xTexto = centroRectangulo.x + radio * Math.cos(radianes);
-        var yTexto = centroRectangulo.y + radio * Math.sin(radianes);
+    //    var xTexto = centroRectangulo.x + radio * Math.cos(radianes);
+    //    var yTexto = centroRectangulo.y + radio * Math.sin(radianes);
         
-        texto.absolutePosition({
-            x: xTexto,
-            y: yTexto,
-        });
+    //    texto.absolutePosition({
+    //        x: xTexto,
+    //        y: yTexto,
+    //    });
 
-        texto.offsetX(texto.width() / 2);
-        texto.offsetY(texto.height() / 2);
-        texto.rotation(rotacion);
+    //    texto.offsetX(texto.width() / 2);
+    //    texto.offsetY(texto.height() / 2);
+    //    texto.rotation(rotacion);
 
-        icono.absolutePosition({
-            x: centroRectangulo.x,
-            y: centroRectangulo.y,
-        });
+    //    icono.absolutePosition({
+    //        x: centroRectangulo.x,
+    //        y: centroRectangulo.y,
+    //    });
 
-        icono.fontSize(TamanoIcono(nodoRect));
-        icono.offsetX(icono.width() / 2);
-        icono.offsetY(icono.height() / 2);
+    //    icono.fontSize(TamanoIcono(nodoRect));
+    //    icono.offsetX(icono.width() / 2);
+    //    icono.offsetY(icono.height() / 2);
                 
-        icono.rotation(rotacion);
-    }
+    //    icono.rotation(rotacion);
+    //}
 
-    function ActualizarTexto(nodo, TextoSuperior, TextoDerecha) {
-        var NodoRectangulo = nodo.getParent().findOne('Rect');
-        var escala = DameEscala();
+    //function ActualizarTexto(nodo, TextoSuperior, TextoDerecha) {
+    //    var NodoRectangulo = nodo.getParent().findOne('Rect');
+    //    var escala = DameEscala();
         
-        var x = 0;
-        var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
-        var rotacion = NodoRectangulo.DameRotacion() + 180;
+    //    var x = 0;
+    //    var y = (NodoRectangulo.attrs.height / 2) + (TextoSuperior.textHeight);
+    //    var rotacion = NodoRectangulo.DameRotacion() + 180;
 
-        let r = (nodo.height() / 2) + TextoSuperior.textHeight;
+    //    let r = (nodo.height() / 2) + TextoSuperior.textHeight;
 
-        var rad = (90 + rotacion) * Math.PI / 180;
-        x = r * Math.cos(rad);
-        y = r * Math.sin(rad);
+    //    var rad = (90 + rotacion) * Math.PI / 180;
+    //    x = r * Math.cos(rad);
+    //    y = r * Math.sin(rad);
 
-        let rD = (nodo.width() / 2) + TextoDerecha.textWidth;
-        var radD = (180 + rotacion) * Math.PI / 180;
-        var xD = rD * Math.cos(radD);
-        var yD = rD * Math.sin(radD);
+    //    let rD = (nodo.width() / 2) + TextoDerecha.textWidth;
+    //    var radD = (180 + rotacion) * Math.PI / 180;
+    //    var xD = rD * Math.cos(radD);
+    //    var yD = rD * Math.sin(radD);
 
-        var Centro = {
-            x: (NodoRectangulo.attrs.width / 2),
-            y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight - 6),
-        };
-        var Derecha = {
-            x: (NodoRectangulo.attrs.width / 2) - TextoDerecha.textWidth + 24,
-            y: (NodoRectangulo.attrs.height / 2),
-        }
+    //    var Centro = {
+    //        x: (NodoRectangulo.attrs.width / 2),
+    //        y: (NodoRectangulo.attrs.height / 2) - (TextoSuperior.textHeight - 6),
+    //    };
+    //    var Derecha = {
+    //        x: (NodoRectangulo.attrs.width / 2) - TextoDerecha.textWidth + 24,
+    //        y: (NodoRectangulo.attrs.height / 2),
+    //    }
 
-        TextoSuperior.x(Centro.x + x);
-        TextoSuperior.y(Centro.y + y);
-        TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).ancho}`);
-        TextoSuperior.offsetX(TextoSuperior.width() / 2);
-        TextoSuperior.offsetY(TextoSuperior.height() / 2);
-        TextoSuperior.rotation(nodo.rotation());
+    //    TextoSuperior.x(Centro.x + x);
+    //    TextoSuperior.y(Centro.y + y);
+    //    TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).ancho}`);
+    //    TextoSuperior.offsetX(TextoSuperior.width() / 2);
+    //    TextoSuperior.offsetY(TextoSuperior.height() / 2);
+    //    TextoSuperior.rotation(nodo.rotation());
 
 
-        TextoDerecha.x(Derecha.x + xD);
-        TextoDerecha.y(Derecha.y + yD);
-        TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).alto}`);
-        TextoDerecha.offsetX(TextoDerecha.width() / 2);
-        TextoDerecha.offsetY(TextoDerecha.height() / 2);
-        TextoDerecha.rotation(nodo.rotation());
-    }
+    //    TextoDerecha.x(Derecha.x + xD);
+    //    TextoDerecha.y(Derecha.y + yD);
+    //    TextoSuperior.text(`${NodoRectangulo.DameTamano(escala).alto}`);
+    //    TextoDerecha.offsetX(TextoDerecha.width() / 2);
+    //    TextoDerecha.offsetY(TextoDerecha.height() / 2);
+    //    TextoDerecha.rotation(nodo.rotation());
+    //}
 
-    function AjustarTamanos(isla, escala) {
-        const pasoHorizontal = 6.06;
-        const pasoVertical = 2.44;
+    //function AjustarTamanos(isla, escala) {
+    //    const pasoHorizontal = 6.06;
+    //    const pasoVertical = 2.44;
 
-        let anchoMetros = Math.round((isla.width() * isla.scaleX() * escala) / pasoHorizontal) * pasoHorizontal;
-        let altoMetros = Math.round((isla.height() * isla.scaleY() * escala) / pasoVertical) * pasoVertical;
+    //    let anchoMetros = Math.round((isla.width() * isla.scaleX() * escala) / pasoHorizontal) * pasoHorizontal;
+    //    let altoMetros = Math.round((isla.height() * isla.scaleY() * escala) / pasoVertical) * pasoVertical;
 
-        isla.width(anchoMetros / escala);
-        isla.height(altoMetros / escala);
+    //    isla.width(anchoMetros / escala);
+    //    isla.height(altoMetros / escala);
 
-        isla.scaleX(1);
-        isla.scaleY(1);
-    }
+    //    isla.scaleX(1);
+    //    isla.scaleY(1);
+    //}
 
-    function DibujarDatosIsla(isla) {
-        const escala = DameEscala();
-        var alto = (isla.Alto * escala).toFixed(2);
-        var ancho = (isla.Ancho * escala).toFixed(2);
+    //function DibujarDatosIsla(isla) {
+    //    const escala = DameEscala();
+    //    var alto = (isla.Alto * escala).toFixed(2);
+    //    var ancho = (isla.Ancho * escala).toFixed(2);
 
-        const datosIsla = [isla];
+    //    const datosIsla = [isla];
 
-        const tabla = $('#tablaDatos');
+    //    const tabla = $('#tablaDatos');
 
-        if (tabla.data('initialized')) {
-            $('#tablaDatos').jqGrid('clearGridData');
-            $('#tablaDatos').jqGrid('setGridParam', { data: datosIsla }).trigger('reloadGrid');
-        } else if (tabla) {
-            $('#tablaDatos').jqGrid({
-                datatype: 'local',
-                data: datosIsla,
-                styleUI: 'Bootstrap',
-                //responsive: true,
-                shrinkToFit: false,
-                autowidth: true,
-                //toppager: true,
-                rowList: [30, 40, 50],
-                search: true,
-                sortname: 'Documentacion',
-                sortorder: 'asc',
-                viewsortcols: [true, 'vertical', true],
-                pager: "#jqGridServiciosPager",
-                colModel: [
-                    { label: "Nombre", name: "Nombre", width: 48, sortable: false, formatter:fnFormatNombreIsla },
-                    { label: "Tipo de Estructura", name: "Descripcion", width: 100, sortable: false },
-                    { label: "Ancho", name: "Ancho", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
-                    { label: "Alto", name: "Alto", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
-                    { label: "Observaciones", name: "Observaciones", width: 107, sortable: false },
-                ],
-                viewrecords: true,
-                height: "auto",
-                rowNum: 10,
-            });
+    //    if (tabla.data('initialized')) {
+    //        $('#tablaDatos').jqGrid('clearGridData');
+    //        $('#tablaDatos').jqGrid('setGridParam', { data: datosIsla }).trigger('reloadGrid');
+    //    } else if (tabla) {
+    //        $('#tablaDatos').jqGrid({
+    //            datatype: 'local',
+    //            data: datosIsla,
+    //            styleUI: 'Bootstrap',
+    //            //responsive: true,
+    //            shrinkToFit: false,
+    //            autowidth: true,
+    //            //toppager: true,
+    //            rowList: [30, 40, 50],
+    //            search: true,
+    //            sortname: 'Documentacion',
+    //            sortorder: 'asc',
+    //            viewsortcols: [true, 'vertical', true],
+    //            pager: "#jqGridServiciosPager",
+    //            colModel: [
+    //                { label: "Nombre", name: "Nombre", width: 48, sortable: false, formatter:fnFormatNombreIsla },
+    //                { label: "Tipo de Estructura", name: "Descripcion", width: 100, sortable: false },
+    //                { label: "Ancho", name: "Ancho", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
+    //                { label: "Alto", name: "Alto", width: 65, align: "center", sortable: false, formatter: 'currency', formatoptions: { decimalSeparator: '.', thousandsSeparator: ',', suffix: 'm', decimalPlaces: 2, defaultValue: '0.00' } },
+    //                { label: "Observaciones", name: "Observaciones", width: 107, sortable: false },
+    //            ],
+    //            viewrecords: true,
+    //            height: "auto",
+    //            rowNum: 10,
+    //        });
 
-            function fnFormatNombreIsla(cellValue, options, rowObject) {
-                console.log(arguments);
+    //        function fnFormatNombreIsla(cellValue, options, rowObject) {
+    //            console.log(arguments);
 
-                return cellValue.toUpperCase();
-            }
+    //            return cellValue.toUpperCase();
+    //        }
 
-            tabla.data('initialized', true);
-            $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
-        }
-        $("#sidebar").addClass("active");
-    }
+    //        tabla.data('initialized', true);
+    //        $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
+    //    }
+    //    $("#sidebar").addClass("active");
+    //}
 
     function ObtenerUnicodeDesdeClase(iconClass) {
         // Crear un elemento temporal <i>
@@ -374,8 +374,6 @@ function inicializarArea() {
                 isla.Grupo.draggable(true);
                 layer.draw();
             }
-
-            //listaIslasGuardar.push(JSON.parse(JSON.stringify(IslaActual)));
             return isla;
         },
         AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
@@ -559,19 +557,7 @@ function inicializarArea() {
 
         this.Nueva = null;
         this.Modificada = null;
-        this.datosOriginales = {
-            Id: this.Id,
-            x: this.Posicion.x,
-            y: this.Posicion.y,
-            ancho: this.Ancho,
-            alto: this.Alto,
-            orientacion: this.Orientacion,
-            nombre: this.Nombre,
-            color: this.Color,
-            descripcion: this.Descripcion,
-            Icono: this.Icono,
-        };
-
+        
         this.Eliminar = function () {
             this.Grafico?.destroy();
             this.GraficoIcono.destroy();
@@ -595,8 +581,8 @@ function inicializarArea() {
                 y: 0,
                 name: this.Nombre,
                 text: this.Descripcion,
-                width: this.Ancho /*|| tamanoDefault.ancho*/,
-                height: this.Alto /*|| tamanoDefault.alto*/,
+                width: this.Ancho,
+                height: this.Alto,
                 fill: this.Color ? `#${this.Color}` : "#88b7d5",
                 strokeWidth: 1.2,
                 stroke: 'black',
@@ -669,7 +655,6 @@ function inicializarArea() {
 
                 isla.Grafico.on('pointerdown', throttle((e) => {              
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                        //window.actualizarDatosIsla(this);
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = isla;
                         window.recibirDatosAActualizar(Lienzo.IslaActual);
@@ -727,7 +712,22 @@ function inicializarArea() {
                     }
                 });
 
-                isla.Grafico.on('dragend transformend', function () {
+                isla.Grupo.on('dragend', function () {
+                    
+                    Lienzo.IslaActual = isla;
+                    isla.Posicion.x = isla.Grupo.x();
+                    isla.Posicion.y = isla.Grupo.y();
+                    isla.Orientacion = isla.Grafico.getAbsoluteRotation();
+                    isla.Ancho = isla.Grafico.width() * isla.Grafico.scaleX();
+                    isla.Alto = isla.Grafico.height() * isla.Grafico.scaleY();
+
+                    isla.Modificada = true;
+
+                    window.agregarIslasAGuardar(isla);
+                });
+
+                isla.Grafico.on('transformend', function () {
+
                     Lienzo.IslaActual = isla;
                     isla.Posicion.x = isla.Grupo.x();
                     isla.Posicion.y = isla.Grupo.y();
@@ -744,7 +744,6 @@ function inicializarArea() {
             else {
                 this.Grafico.setAttrs(cfgGrafico);
                 this.Grafico.absolutePosition({ x: this.Grupo.x, y: this.Grupo.y });
-                //this.Grafico.absoluteRotation(this.Grupo.rotation);
                 this.Grafico.getLayer().batchDraw();
 
                 this.GraficoTexto.setAttrs(cfgGraficoTexto);
@@ -859,29 +858,11 @@ function inicializarArea() {
 
                 datosIsla = null;
             }
-            
-           //listaIslasGuardar.push(Lienzo.IslaActual);
-
             console.log("Estado:", Lienzo.Estado);
             console.log("IslaActual:", Lienzo.IslaActual);
-
         }
 
     });
-
-    //stage.on('pointermove', function (e) {
-    //    if (Lienzo.Estado === enumEstadoLienzo.Moviendo && Lienzo.IslaActual != null) {
-    //        //const isla = Lienzo.IslaActual;
-    //        const pos = Lienzo.DamePosicion();
-
-    //        Lienzo.IslaActual.Grupo.position({ x: pos.x, y: pos.y });
-
-    //        Lienzo.IslaActual.Posicion.x = pos.x;
-    //        Lienzo.IslaActual.Posicion.y = pos.y;
-
-    //        Lienzo.IslaActual.Dibujar();
-    //    }
-    //});
 
     stage.on('pointerup touchend', function (e) {
 
@@ -968,22 +949,21 @@ function inicializarArea() {
         });
     }
 
-    window.crearZona = function (datos) {
-
+    window.crearZona = async function (datos) {
         Lienzo.Estado = enumEstadoLienzo.Agregando;
-
         datosIsla = datos;
-        
         Notify("Da click para crear una zona", null, null, "success");
-        
     }
 
-    window.editarZona = function (datos) {
+    window.editarZona = async function (datos) {
+        //Lienzo.Estado = enumEstadoLienzo.Moviendo;
+        //datosIsla = datos;
+        Lienzo.IslaActual.Modificada = true;
+        Lienzo.IslaActual.Nombre = datos.Nombre;
+        Lienzo.IslaActual.Estructura = datos.IdEstructura;
+        Lienzo.IslaActual.Observaciones = datos.Observaciones;
 
-        Lienzo.Estado = enumEstadoLienzo.Moviendo;
-        datosIsla = datos;
         Notify("Los datos seran actualizados", null, null, "success");
-        
     }
 
     window.agregarIslasAGuardar = function (isla) {

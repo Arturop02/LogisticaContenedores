@@ -88,7 +88,7 @@
             {
                 <a href="@Url.Action("DibujarIsla", new {Id=a.Id})">
                     <label class="btn btn-primary"
-                           :class="{active: areaId == @a.Id}"
+                           :class="{active: Area.Id == @a.Id}"
                            @*v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
                            autocomplete="off"*@>
                         @a.Nombre
@@ -115,7 +115,9 @@
         <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
 
     </div>
+    
     <div id="notifications"></div>
+
     <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; display: none;">
         <div id="formularioEstructuras" class="form-group">
@@ -138,7 +140,7 @@
 
             <label>Icono</label>
             <div>
-                <input type="text" id="filtroIcono" placeholder="Icono" v-model="filtroIcono" />
+                <input type="text" id="filtroIcono" placeholder="Icono" v-model="Paginado.filtroIcono" />
                 <button type="button" class="btn btn-default" id="btnBuscarIconos">Buscar</button>
             </div>
             <div id="iconosContainer" class="btn-group" role="group" style="flex-wrap: wrap;"></div>
@@ -146,6 +148,7 @@
             <input type="hidden" id="iconoSeleccionado" />
         </div>
     </div>
+
     <div id="formZona" display="none">
         <form id="formIsla">
             <div class="form-group">
@@ -168,6 +171,7 @@
             </div>
         </form>
     </div>
+
 </div>
 @section scripts{
     <script src="~/Scripts/Isla/Isla.js"></script>
@@ -207,7 +211,7 @@
 
 
     <script>
-        function MensajeAsync(configuracion) {
+        async function MensajeAsync(configuracion) {
             return new Promise((resolve, reject) => {
                 var buttons = {};
 
@@ -234,21 +238,23 @@
             el: '#app',
             data() {
                 return {
-                    Area: null,
+                    Area: {
+                        Id: 0,
+                        Nombre: '',
+                    },
                     Isla: {
+                        Confirmado: false,
                         Nombre: "",
-                        idEstructura: null,
+                        IdEstructura: null,
                         Observaciones: "",
                     },
-                    cambiosARealizar: [],
-                    areaId: null,
-                    areaNombre: "",
                     iconos: [],
-                    filtroIcono: '',
-                    paginaActual: 1,
-                    totalPaginas: 0,
-                    iconoSeleccionado: "",
-                    modoGuardado: "",
+                    Paginado: {
+                        filtroIcono: '',
+                        //paginaActual: 1,
+                        //totalPaginas: 0,
+                        iconoSeleccionado: ''
+                    },
                 }
             },
             watch: {
@@ -262,153 +268,94 @@
             },
             methods: {
                 seleccionarArea(id, nombre) {
-                    this.areaId = id;
-                    this.areaNombre = nombre;
+                    this.Area.Id = id;
+                    this.Area.Nombre = nombre;
 
                     window.seleccionarArea(id, nombre);
                 },
                 async ConfirmacionCrearAsync() {
-                    return new Promise((resolve, reject) => {
-                        var formZona = document.getElementById("formZona").cloneNode(true);
-                        formZona.style.display = "block";
-                        bootbox.dialog({
-                            title: 'Crear zona',
-                            message: formZona,
-                            buttons: {
-                                cancel: {
-                                    label: 'Cancelar',
-                                    className: 'btn-danger',
-                                    callback: (val) => {
-                                        resolve({ Confirmado: false });
-                                    }
-                                },
-                                confirm: {
-                                    label: 'Confirmar',
-                                    className: 'btn-success',
-                                    callback: (val) => {
-                                        const modal = $('.bootbox-body');
+                    var formZona = document.getElementById("formZona").cloneNode(true);
+                    formZona.style.display = "block";
 
-                                        const nombreIsla = modal.find('#nombreIsla').val();
-                                        const estructuraId = parseInt(modal.find('#tipoEstructura').val());
-                                        const observaciones = modal.find('#observacionesIsla').val();
+                    var respuesta = await MensajeAsync({
+                        Titulo: 'Crear zona',
+                        Cuerpo: formZona,
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                            { Etiqueta: 'Confirmar', Clase: 'btn-success', Valor: true }
+                        ],
+                    });
 
-                                        if (!nombreIsla) {
-                                            bootbox.alert("Por favor nombra la zona");
-                                            return false;
-                                        }
+                    if (respuesta.Valor === false)
+                        return { Confirmado: false };
 
-                                        var datos = {
-                                            Confirmado: true,
-                                            Nombre: nombreIsla,
-                                            IdEstructura: estructuraId,
-                                            Observaciones: observaciones
-                                        }
-                                        //resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
+                    const modal = $('.bootbox-body');
 
-                                        window.crearZona(datos);
-                                        resolve(datos);
-                                    }
-                                }
-                            }
-                        });
-                    })
+                    const nombreIsla = modal.find('#nombreIsla').val();
+                    const estructuraId = parseInt(modal.find('#tipoEstructura').val());
+                    const observaciones = modal.find('#observacionesIsla').val();
+
+                    if (!nombreIsla) {
+                        bootbox.alert("Por favor nombra la zona");
+                        return false;
+                    }
+
+                    this.Isla.Confirmado = true;
+                    this.Isla.Nombre = nombreIsla;
+                    this.Isla.IdEstructura = estructuraId;
+                    this.Isla.Observaciones = observaciones;
+
+                    window.crearZona(this.Isla);
+
                 },
                 async ConfirmacionActualizarAsync(isla) {
-                    bootbox.confirm({
-                        message: 'Deseas actualizar los datos de la zona',
-                        buttons: {
-                            confirm: {
-                                label: "Actualizar datos",
-                                className: "btn-success",
-                            },
-                            cancel: {
-                                label: "Conservar datos actuales",
-                                className: "btn-default",
-                            },
-                        },
-                        callback: (result) => {
-                            if (!result) return;
 
-                            return new Promise((resolve, reject) => {
-                                var formZona = document.getElementById("formZona").cloneNode(true);
-                                formZona.style.display = "block";
-                                bootbox.dialog({
-                                    title: 'Editar zona',
-                                    message: formZona,
-                                    buttons: {
-                                        cancel: {
-                                            label: 'Cancelar',
-                                            className: 'btn-danger',
-                                            callback: (val) => {
-                                                resolve({ Confirmado: false });
-                                            }
-                                        },
-                                        confirm: {
-                                            label: 'Confirmar',
-                                            className: 'btn-success',
-                                            callback: (val) => {
-                                                const modal = $('.bootbox-body');
+                    var formZona = document.getElementById("formZona").cloneNode(true);
+                    formZona.style.display = "block";
 
-                                                const nombreIsla = modal.find('#nombreIsla').val();
-                                                const estructuraId = parseInt(modal.find('#tipoEstructura').val());
-                                                const observaciones = modal.find('#observacionesIsla').val();
 
-                                                if (!nombreIsla) {
-                                                    bootbox.alert("Por favor nombra la isla");
-                                                    return false;
-                                                }
-                                                var datos = {
-                                                    Confirmado: true,
-                                                    Nombre: nombreIsla,
-                                                    IdEstructura: estructuraId,
-                                                    Observaciones: observaciones
-                                                }
-                                                //resolve({ Confirmado: true, Nombre: nombreIsla, IdEstructura: estructuraId, Observaciones: observaciones });
-
-                                                window.editarZona(datos);
-                                                resolve(datos);
-                                            }
-                                        }
-                                    }
-                                });
-                            })
-                        }
+                    var respuesta = await MensajeAsync({
+                        Titulo: 'Actualizacion',
+                        Cuerpo: 'Deseas actualizar los datos de la zona',
+                        Boton: [
+                            {Etiqueta: 'Actualizar datos', Clase: 'btn-success', Valor: 'Cambio'},
+                            {Etiqueta: 'Conservar datos', Clase: 'btn-default', Valor: 'Conservar'},
+                            {Etiqueta: 'Eliminar zona', Clase: 'btn-danger', Valor: 'Borrar'},
+                        ],
                     });
+
+                    if (respuesta.Valor === 'Cambio') {
+                        var cambio = await MensajeAsync({
+                            Titulo: 'Editar zona',
+                            Cuerpo: formZona,
+                            Boton: [
+                                { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                                { Etiqueta: 'Confirmar', Clase: 'btn-success', Valor: true }
+                            ],
+                        });
+
+                        if (cambio.Valor === false)
+                            return { Confirmado: false };
+
+                        const modal = $('.bootbox-body');
+
+                        const nombreIsla = modal.find('#nombreIsla').val();
+                        const estructuraId = parseInt(modal.find('#tipoEstructura').val());
+                        const observaciones = modal.find('#observacionesIsla').val();
+
+                        if (!nombreIsla) {
+                            bootbox.alert("Por favor nombra la zona");
+                            return false;
+                        }
+
+                        this.Isla.Confirmado = true;
+                        this.Isla.Nombre = nombreIsla;
+                        this.Isla.IdEstructura = estructuraId;
+                        this.Isla.Observaciones = observaciones;
+
+                        window.editarZona(this.Isla);
+                    }
                 },
-                //crearZona() {
-                //    //try {
-                //        var preguntar = this.ConfirmacionCrearAsync();
-
-                //    //    if (preguntar.Confirmado) {
-
-                //    //        this.
-                //    //        Isla.Nombre = preguntar.Nombre;
-                //    //        this.Isla.Estructura = preguntar.IdEstructura;
-                //    //        this.Isla.Observaciones = preguntar.Observaciones;
-
-                //    //        window.agregarIslasAGuardar(this.Isla);
-                //    //    }
-                //    //}
-                //    //catch (e) {
-                //    //    console.log(e);
-                //    //}
-                //},
-                //editarZona() {
-                //    /*try {*/
-                //        var preguntar = this.ConfirmacionActualizarAsync();
-
-                //        //if (preguntar.Confirmado) {
-                //        //    this.Isla.Nombre = preguntar.Nombre;
-                //        //    this.Isla.Estructura = { Id: preguntar.IdEstructura };
-                //        //    this.Isla.Observaciones = preguntar.Observaciones;
-
-                //        //    //window.actualizarDatosIsla(this.Isla);
-                //        //}
-                //    //}
-                //    //catch (e) {
-                //    //    console.log(e);
-                //    //}
-                //},
                 async guardarTodo() {
                     await window.guardarTodoAsync();
                 },
@@ -493,7 +440,7 @@
             },
             computed: {
                 areaSeleccionada() {
-                    return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
+                    return this.Area.Nombre ? `Area: ${this.Area.Nombre}` : `Sin seleccion`;
                 },
             },
             mounted(){
