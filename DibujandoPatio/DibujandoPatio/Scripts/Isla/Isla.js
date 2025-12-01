@@ -376,7 +376,7 @@ function inicializarArea() {
             }
             return isla;
         },
-        AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion) {
+        AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion, estructura) {
 
             var isla = new Isla();
             isla.Posicion.x = x;
@@ -386,6 +386,7 @@ function inicializarArea() {
             isla.Orientacion = orientacion;
             isla.Nombre = nombre;
             isla.Color = color;
+//            isla.Estructura = estructura;
             
             var uniCodeIcono;
             if (icono && icono.trim() !== "") {
@@ -634,8 +635,10 @@ function inicializarArea() {
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                this.Grafico.offsetX(this.Grafico.width() / 2);
-                this.Grafico.offsetY(this.Grafico.height() / 2);
+                //this.Grafico.offsetX(this.Grafico.width() / 2);
+                //this.Grafico.offsetY(this.Grafico.height() / 2);
+                this.Grafico.x(-this.Ancho / 2);
+                this.Grafico.y(-this.Alto / 2);
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
                 this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
@@ -670,47 +673,6 @@ function inicializarArea() {
 
                     }
                 }, 300));
-
-                isla.Grafico.on('pointerdblclick', function () {
-                    if (Lienzo.Estado !== enumEstadoLienzo.Editando) {
-                        bootbox.confirm({
-                            message: '¿Deseas eliminar la isla?',
-                            buttons: {
-                                confirm: {
-                                    label: 'Eliminar',
-                                    className: 'btn-success'
-                                },
-                                cancel: {
-                                    label: 'Cancelar',
-                                    className: 'btn-danger'
-                                }
-                            },
-                            callback: (result) => {
-                                var payload = {
-                                    Id: isla.Id,
-                                    Nombre: isla.Nombre,
-                                };
-                                if (result) {
-                                    isla.Eliminar();
-                                    $.ajax({
-                                        url: '/Isla/BorrarIsla',
-                                        method: 'POST',
-                                        data: JSON.stringify(payload),
-                                        contentType: 'application/json; charset=utf-8',
-                                        success: function (res) {
-                                            if (res.ok) {
-                                                Notify(`La zona ${isla.Nombre} ha sido eliminada`, null, null, `danger`);
-                                                //bootbox.alert(`La isla ${isla.Nombre} ha sido eliminada`);
-                                            } else {
-                                                bootbox.alert(`Ha ocurrido un error al intentar eliminar la zona`);
-                                            }
-                                        }
-                                    });
-                                }
-                            },
-                        });
-                    }
-                });
 
                 isla.Grupo.on('dragend', function () {
                     
@@ -849,7 +811,7 @@ function inicializarArea() {
 
             Lienzo.IslaActual = nuevaIsla;
             Lienzo.Estado = enumEstadoLienzo.Moviendo;
-            Lienzo.IslaActual.Estado = enumEstado.Moviendo;
+            //Lienzo.IslaActual.Estado = enumEstado.Moviendo;
 
             if (datosIsla) {
                 Lienzo.IslaActual.Nombre = datosIsla.Nombre;
@@ -958,12 +920,34 @@ function inicializarArea() {
     window.editarZona = async function (datos) {
         //Lienzo.Estado = enumEstadoLienzo.Moviendo;
         //datosIsla = datos;
-        Lienzo.IslaActual.Modificada = true;
-        Lienzo.IslaActual.Nombre = datos.Nombre;
-        Lienzo.IslaActual.Estructura = datos.IdEstructura;
-        Lienzo.IslaActual.Observaciones = datos.Observaciones;
 
+
+        if (datos) {
+            Lienzo.IslaActual.Nombre = datos.Nombre;
+            Lienzo.IslaActual.Estructura = datos.IdEstructura;
+            Lienzo.IslaActual.Observaciones = datos.Observaciones;
+        }
+        Lienzo.IslaActual.Modificada = true;
         Notify("Los datos seran actualizados", null, null, "success");
+    }
+
+    window.borrarZona = async function (datos) {
+        Lienzo.IslaActual = datos;
+        Lienzo.IslaActual.Eliminar();
+
+        $.ajax({
+            url: '/Isla/BorrarIsla',
+            method: 'POST',
+            data: JSON.stringify(Lienzo.IslaActual),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                if (res.ok) {
+                    Notify(`La zona ha sido eliminada`, null, null, `danger`);
+                } else {
+                    bootbox.alert(`Ha ocurrido un error al intentar eliminar la zona`);
+                }
+            }
+        });
     }
 
     window.agregarIslasAGuardar = function (isla) {

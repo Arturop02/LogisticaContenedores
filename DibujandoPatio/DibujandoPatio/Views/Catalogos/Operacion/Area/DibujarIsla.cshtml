@@ -354,6 +354,25 @@
                         this.Isla.Observaciones = observaciones;
 
                         window.editarZona(this.Isla);
+                    } else if (respuesta.Valor === "Conservar") {
+                        window.editarZona();
+                    } else if (respuesta.Valor === "Borrar") {
+
+                        var borrar = await MensajeAsync({
+                            Titulo: "Eliminar zona",
+                            Cuerpo: '¿Deseas eliminar esta zona definitivamente?',
+                            Boton: [
+                                { Etiqueta: 'Cancelar', Clase: 'btn-default', Valor: false },
+                                { Etiqueta: 'Eliminar', Clase: 'btn-danger', Valor: true },
+                            ],
+                        });
+
+                        if (borrar.Valor === false) {
+                            return { Confirmado: false };
+                        }
+
+                        this.Isla = isla;
+                        window.borrarZona(this.Isla);
                     }
                 },
                 async guardarTodo() {
