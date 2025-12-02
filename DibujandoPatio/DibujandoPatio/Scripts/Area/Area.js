@@ -37,93 +37,6 @@ function inicializarArea() {
         return escala;
     }
 
-    function DameRotacion(nodo) {
-        var rotacion = nodo.rotation() % 360;
-        if (rotacion < 0) rotacion += 360;
-        return rotacion;
-    }
-
-    function MoverGrupoIsla(nodo, texto, icono) {
-        var nodoRect = nodo.getParent().findOne('Rect');
-
-        let anchoRect = nodoRect.getWidth();
-        let altoRect = nodoRect.getHeight();
-        var rotacion = DameRotacion(nodo);
-
-        var Centro = {
-            x: nodoRect.width() / 2,
-            y: nodoRect.height() / 2,
-        };
-
-
-        let r = (altoRect / 2) + texto.height();
-        var rad = (90 + rotacion) * Math.PI / 180;
-
-        var xTexto = Centro.x + r * Math.cos(rad);
-        var yTexto = Centro.y + r * Math.sin(rad);
-
-
-        texto.position({
-            x: xTexto,
-            y: yTexto,
-        });
-
-        texto.offsetX(texto.width() / 2);
-        texto.offsetY(texto.height() / 2);
-
-        icono.position({
-            x: Centro.x,
-            y: Centro.y,
-        });
-        icono.fontSize(TamanoIcono(nodoRect));
-
-        icono.offsetX(icono.width() / 2);
-        icono.offsetY(icono.height() / 2);
-
-        texto.rotation(rotacion);
-        icono.rotation(rotacion);
-
-    }
-
-    function DibujarDatosIsla(isla) {
-        const escala = DameEscala();
-        var alto = (isla.Alto * escala).toFixed(2);
-        var ancho = (isla.Ancho * escala).toFixed(2);
-
-        const datosIsla = [{
-            Nombre: isla.Nombre,
-            Descripcion: isla.Descripcion,
-            Ancho: ancho + 'm',
-            Alto: alto + 'm',
-            Observaciones: isla.Observaciones
-        }];
-
-        const tabla = $('#tablaDatos');
-
-        if (tabla.data('initialized')) {
-            $('#tablaDatos').jqGrid('clearGridData');
-            $('#tablaDatos').jqGrid('setGridParam', { data: datosIsla }).trigger('reloadGrid');
-        } else if (tabla) {
-            $('#tablaDatos').jqGrid({
-                datatype: 'local',
-                data: datosIsla,
-                colModel: [
-                    { label: "Nombre", name: "Nombre", width: 200 },
-                    { label: "Tipo de Estructura", name: "Descripcion", width: 200 },
-                    { label: "Ancho", name: "Ancho", width: 150, align: "center" },
-                    { label: "Alto", name: "Alto", width: 150, align: "center" },
-                    { label: "Observaciones", name: "Observaciones", width: 200 },
-                ],
-                viewrecords: true,
-                height: "auto",
-                rowNum: 10,
-            });
-            tabla.data('initialized', true);
-            $("#tablaDatos").jqGrid('setGridWidth', $("#sidebar-content").width());
-        }
-        $("#sidebar").addClass("active");
-    }
-
     Lienzo = {
         Modo: enumModoLienzo.Area, 
         Escala: DameEscala(),
@@ -519,20 +432,6 @@ function inicializarArea() {
         this.Color = null;
         this.Icono = null;
 
-        this.Eliminar = function () {
-            this.Grafico?.destroy();
-            this.GraficoIcono.destroy();
-            this.GraficoTexto.destroy();
-            this.GraficoTrasnformer?.destroy();
-
-            var temp = [];
-            temp.forEach(function (item) {
-                item.Eliminar();
-            });
-
-            return this;
-        };
-
         this.Dibujar = function () {
             var tamanoDefault = Lienzo.TamanoIsla();
 
@@ -540,8 +439,8 @@ function inicializarArea() {
                 Id: this.Id,
                 name: this.Nombre,
                 text: this.Descripcion,
-                width: this.Ancho /*|| tamanoDefault.ancho*/,
-                height: this.Alto /*|| tamanoDefault.alto*/,
+                width: this.Ancho,
+                height: this.Alto,
                 fill: `#${this.Color}`,
                 strokeWidth: 1.2,
                 stroke: 'black',
@@ -563,26 +462,6 @@ function inicializarArea() {
                 fontSize: 12,
                 fill: 'black',
             };
-
-            var cfgTransformer = {
-                nodes: [],
-                enabledAnchors: [
-                    'top-center',
-                    'top-right',
-                    'bottom-right',
-                    'bottom-center',
-                    'middle-right'
-                ],
-                rotateEnabled: true,
-                resizeEnabled: true,
-                visible: false,
-                boundBoxFunc: (oldBox, newBox) => {
-                    if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
-                        return oldBox;
-                    }
-                    return newBox;
-                }
-            }
 
             var cfgGrupo = {
                 x: this.Posicion.x,
@@ -607,75 +486,9 @@ function inicializarArea() {
                 this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
                 this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
-                this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
-
-
-                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto, this.GraficoTrasnformer);
+                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
                 layer.add(this.Grupo);
-                var isla = this;
-
-                this.Grafico.on('pointerdown', throttle((e) => {
-                    
-                    if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-
-                        Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                        Lienzo.IslaActual = isla;
-
-                        isla.GraficoTrasnformer.nodes([isla.Grafico]);
-                        isla.GraficoTrasnformer.visible(true);
-                        isla.Grafico.draggable(true);
-                        //isla.Grafico.on('transform dragmove', function () {
-                        //    TransformarGrupoIsla(this.Grafico, this.GraficoIcono, this.GraficoIcono)
-                        //});
-                        layer.draw();
-
-                    } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
-                        Lienzo.Estado = enumEstadoLienzo.Editando;
-                        Lienzo.IslaActual = null;
-                    }
-                }, 300));
-
-                this.Grafico.on('pointerdblclick', function () {
-                    if (Lienzo.Estado !== enumEstadoLienzo.Editando) {
-                        bootbox.confirm({
-                            message: '¿Deseas eliminar la isla?',
-                            buttons: {
-                                confirm: {
-                                    label: 'Eliminar',
-                                    className: 'btn-success'
-                                },
-                                cancel: {
-                                    label: 'Cancelar',
-                                    className: 'btn-danger'
-                                }
-                            },
-                            callback: (result) => {
-                                var payload = {
-                                    Id: isla.Id,
-                                    Nombre: isla.Nombre,
-                                };
-                                if (result) {
-                                    isla.Eliminar();
-                                    $.ajax({
-                                        url: '/Isla/BorrarIsla',
-                                        method: 'POST',
-                                        data: JSON.stringify(payload),
-                                        contentType: 'application/json; charset=utf-8',
-                                        success: function (res) {
-                                            if (res.ok) {
-                                                Notify(`La zona ${isla.Nombre} ha sido eliminada`, null, null, "danger");
-                                            } else {
-                                                //Notify(`Ha ocurrido un error al intentar eliminar la zona ${isla.Nombre}`, null, null, "danger");
-                                                bootbox.alert(`Ha ocurrido un error al intentar eliminar la isla ${isla.Nombre}`);
-                                            }
-                                        }
-                                    });
-                                }
-                            },
-                        });
-                    }
-                });
             }
             else {
                 this.Grafico.setAttrs(cfgGrafico);
@@ -702,23 +515,21 @@ function inicializarArea() {
     }
 
     function ObtenerUnicodeDesdeClase(iconClass) {
-        // Crear un elemento temporal <i>
+        
         const elementoTemporal = document.createElement('i');
         elementoTemporal.className = `fa ${iconClass}`;
         elementoTemporal.style.fontFamily = 'FontAwesome';
         elementoTemporal.style.display = 'inline-block';
-        elementoTemporal.style.visibility = 'hidden'; // no visible
-        elementoTemporal.style.position = 'absolute'; // fuera de flujo
+        elementoTemporal.style.visibility = 'hidden'; 
+        elementoTemporal.style.position = 'absolute'; 
 
-        // Insertar en el documento (necesario para poder leer el ::before)
         document.body.appendChild(elementoTemporal);
 
-        // Obtener el contenido del pseudo-elemento ::before
+
         const unicode = window.getComputedStyle(elementoTemporal, '::before')
             .getPropertyValue('content')
-            .replace(/['"]/g, ''); // quitar comillas
+            .replace(/['"]/g, ''); 
 
-        // Eliminar el elemento temporal
         document.body.removeChild(elementoTemporal);
 
         return unicode;
@@ -958,50 +769,22 @@ function inicializarArea() {
         });       
     }
 
-    window.agregarEnu = function () {
-        let formularioEnu = `
-            <div class="mb-3">
-                <label for="nuevoEnu">Nuevo ENU:</label>
-                <input type="text" id="nuevoEnu" class="form-control" placeholder="Ingresa el nombre del nuevo ENU"/> 
-            </div>
-        `;
-        bootbox.dialog({
-            title: 'Confirmar Guardado',
-            message: formularioEnu,
-            buttons: {
-                cancel: {
-                    label: 'Cancelar',
-                    className: 'btn-danger'
-                },
-                confirm: {
-                    label: 'Guardar',
-                    className: 'btn-success',
-                    callback: function () {
-                        const DescripcionEnu = $('#nuevoEnu').val().trim();
+    window.agregarEnu = function (Descripcion) {
+        var obj = {
+            Descripcion: Descripcion,
+        };
 
-                        url = '/DetallesEnu/GuardarDetalleEnu';
-                        payload = {
-                            Descripcion: DescripcionEnu,
-                        }
-
-                        $.ajax({
-                            url: url,
-                            method: 'POST',
-                            data: JSON.stringify(payload),
-                            contentType: 'application/json; charset=UTF-8',
-                            success: function (res) {
-                                if (res.ok) {
-                                    Notify(`Guardado correctamente`, null, null, "success");
-                                    //bootbox.alert("Guardado correctamente");
-                                    dibujando = false;
-//                                    $('#guardarBtn').prop('disabled', true);
-                                } else {
-                                    bootbox.alert("Ha ocurrido un problema");
-                                }
-                            }
-                        });
-
-                    }
+        $.ajax({
+            url: '/DetallesEnu/GuardarDetalleEnu',
+            method: 'POST',
+            data: JSON.stringify(obj),
+            contentType: 'application/json; charset=UTF-8',
+            success: function (res) {
+                if (res.ok) {
+                    Notify(`Guardado correctamente`, null, null, "success");
+                    dibujando = false;
+                } else {
+                    bootbox.alert("Ha ocurrido un problema");
                 }
             }
         });

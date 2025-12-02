@@ -88,9 +88,7 @@
             {
                 <a href="@Url.Action("DibujarIsla", new {Id=a.Id})">
                     <label class="btn btn-primary"
-                           :class="{active: Area.Id == @a.Id}"
-                           @*v-on:click="seleccionarArea(@a.Id,'@a.Nombre')"
-                           autocomplete="off"*@>
+                           :class="{active: Area.Id == @a.Id}">
                         @a.Nombre
                     </label>
                 </a>
@@ -251,8 +249,6 @@
                     iconos: [],
                     Paginado: {
                         filtroIcono: '',
-                        //paginaActual: 1,
-                        //totalPaginas: 0,
                         iconoSeleccionado: ''
                     },
                 }
@@ -377,8 +373,10 @@
                 },
                 async guardarTodo() {
                     await window.guardarTodoAsync();
+                    document.location.href = '@Url.Action("DibujarIsla",new {Id="__id__"})'.replace('__id__', this.Area.Id);
                 },
                 buscarIconos(filtro, scope = null, pagina = 1, tamPagina = 12) {
+
                     $.get('/Isla/DameListaIconos', { busqueda: filtro, pagina, tamPagina }, (res) => {
                         if (!res || !res.ok) return;
 
@@ -409,15 +407,32 @@
                         });
                     });
                 },
-                agregarEstructura() {
-                    const contenido = document.getElementById("formularioEstructuras");
-                    if (!contenido) {
-                        console.error("No existe #formularioEstructuras en el HTML");
-                        return;
-                    }
-
-                    const clon = contenido.cloneNode(true);
+                async agregarEstructura() {
+                    var contenido = document.getElementById("formularioEstructuras");
+                    var clon = contenido.cloneNode(true);
                     clon.style.display = "block";
+
+                    //var pregunta = await MensajeAsync({
+                    //    Titulo: 'Agregar un nuevo tipo de estructura',
+                    //    Cuerpo: clon,
+                    //    Boton: [
+                    //        { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                    //        { Etiqueta: 'Guardar', Clase: 'btn-success', Valor: true },
+                    //    ],
+                    //});
+
+                    //if (pregunta.Valor === false) {
+                    //    return;
+                    //}
+
+                    //var modal = $('.bootbox-body');
+
+                    //var descripcion = modal.find(`#descripcionEstructura`).val();
+                    //var idEnu = modal.find(`#enuEstructura`).val();
+                    //var color = modal.find(`#colorEstructura`).val().replace('#', '');
+                    //var icono = clon.querySelector('#iconoSeleccionado').value;
+
+                    //window.agregarEstructura(descripcion, idEnu, color, icono);
 
                     bootbox.dialog({
                         title: 'Agregar nuevo tipo de estructura',
@@ -448,8 +463,8 @@
                     });
 
                     setTimeout(() => {
-                        const btnBuscar = clon.querySelector("#btnBuscarIconos");
-                        const inputFiltro = clon.querySelector("#filtroIcono");
+                        var btnBuscar = clon.querySelector("#btnBuscarIconos");
+                        var inputFiltro = clon.querySelector("#filtroIcono");
 
                         if (btnBuscar) {
                             btnBuscar.onclick = () => this.buscarIconos(inputFiltro.value, clon);
@@ -460,11 +475,4 @@
             computed: {
                 areaSeleccionada() {
                     return this.Area.Nombre ? `Area: ${this.Area.Nombre}` : `Sin seleccion`;
-                },
-            },
-            mounted(){
-                window.recibirDatosAActualizar = this.ConfirmacionActualizarAsync;
-            },
-        });
-    </script>
 }

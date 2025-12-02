@@ -226,23 +226,20 @@ function inicializarArea() {
     //}
 
     function ObtenerUnicodeDesdeClase(iconClass) {
-        // Crear un elemento temporal <i>
+        
         const elementoTemporal = document.createElement('i');
         elementoTemporal.className = `fa ${iconClass}`;
         elementoTemporal.style.fontFamily = 'FontAwesome';
         elementoTemporal.style.display = 'inline-block';
-        elementoTemporal.style.visibility = 'hidden'; // no visible
-        elementoTemporal.style.position = 'absolute'; // fuera de flujo
+        elementoTemporal.style.visibility = 'hidden'; 
+        elementoTemporal.style.position = 'absolute'; 
 
-        // Insertar en el documento (necesario para poder leer el ::before)
         document.body.appendChild(elementoTemporal);
 
-        // Obtener el contenido del pseudo-elemento ::before
         const unicode = window.getComputedStyle(elementoTemporal, '::before')
             .getPropertyValue('content')
-            .replace(/['"]/g, ''); // quitar comillas
+            .replace(/['"]/g, '');
 
-        // Eliminar el elemento temporal
         document.body.removeChild(elementoTemporal);
 
         return unicode;
@@ -386,7 +383,6 @@ function inicializarArea() {
             isla.Orientacion = orientacion;
             isla.Nombre = nombre;
             isla.Color = color;
-//            isla.Estructura = estructura;
             
             var uniCodeIcono;
             if (icono && icono.trim() !== "") {
@@ -635,8 +631,6 @@ function inicializarArea() {
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                //this.Grafico.offsetX(this.Grafico.width() / 2);
-                //this.Grafico.offsetY(this.Grafico.height() / 2);
                 this.Grafico.x(-this.Ancho / 2);
                 this.Grafico.y(-this.Alto / 2);
 
@@ -811,7 +805,6 @@ function inicializarArea() {
 
             Lienzo.IslaActual = nuevaIsla;
             Lienzo.Estado = enumEstadoLienzo.Moviendo;
-            //Lienzo.IslaActual.Estado = enumEstado.Moviendo;
 
             if (datosIsla) {
                 Lienzo.IslaActual.Nombre = datosIsla.Nombre;
@@ -820,7 +813,6 @@ function inicializarArea() {
 
                 datosIsla = null;
             }
-            console.log("Estado:", Lienzo.Estado);
             console.log("IslaActual:", Lienzo.IslaActual);
         }
 
@@ -918,10 +910,7 @@ function inicializarArea() {
     }
 
     window.editarZona = async function (datos) {
-        //Lienzo.Estado = enumEstadoLienzo.Moviendo;
-        //datosIsla = datos;
-
-
+        
         if (datos) {
             Lienzo.IslaActual.Nombre = datos.Nombre;
             Lienzo.IslaActual.Estructura = datos.IdEstructura;
@@ -969,67 +958,8 @@ function inicializarArea() {
         window.agregarIslasAGuardar(isla);
     }
 
-    //window.guardarAsync = function (datos) {
-
-    //    if (!Lienzo.IslaActual) {
-    //        bootbox.alert("No existe una isla para guardar");
-    //        return;
-    //    }
-
-    //    var isla = Lienzo.IslaActual;
-
-    //    datosIsla = {
-    //        Id: isla.Id || 0,
-    //        Nombre: datos?.Nombre ?? isla.Nombre,
-    //        Orientacion: isla.Orientacion,//isla.Grupo.rotation() || isla.Grafico.rotation(),
-    //        X: isla.Grupo.x(),
-    //        Y: isla.Grupo.y(),
-    //        Ancho: isla.Grafico.width() * isla.Grafico.scaleX(),
-    //        Alto: isla.Grafico.height() * isla.Grafico.scaleY(),
-    //        Observaciones: datos?.Observaciones ?? isla.Observaciones,
-    //        Area: { Id: idAreaSeleccionada },
-    //        Estructura: { Id: datos?.IdEstructura ?? isla.Estructura },
-    //    };
-
-    //    window.agregarIslasAGuardar(datosIsla);
-
-    //    return datosIsla;
-
-    //    //var url;
-
-    //    //if (isla.Id == 0) 
-    //    //    url = '/Isla/GuardarIsla';
-    //    //else
-    //    //    url = '/Isla/EditarIsla';
-
-    //    //return new Promise((resolve, reject) => {
-    //    //    $.ajax({
-    //    //        url: url,
-    //    //        method: 'POST',
-    //    //        data: JSON.stringify(datosIsla),
-    //    //        contentType: 'application/json; charset=utf-8',
-    //    //        success: function (res) {
-    //    //            if (res.ok) {
-    //    //                bootbox.alert(`La isla ${datosIsla.Nombre} ha sido editada`);
-    //    //                Lienzo.Estado = enumEstadoLienzo.Editando;
-    //    //                Lienzo.IslaActual = null;
-    //    //            } else {
-    //    //                bootbox.alert(`Ha ocurrido un error al intentar editar la isla ${datosIsla.Nombre}`);
-    //    //            }
-    //    //        },
-    //    //        error: function (XMLHttpRequest, textStatus, errorThrown) {
-    //    //            reject(errorThrown);
-    //    //        }
-    //    //    });
-    //    //});
-
-    //}
-
     window.guardarTodoAsync = async function () {
-        //if (listaIslasGuardar.length < 0) {
-        //    bootbox.alert("No existe isla para guardar");
-        //}
-
+        
         var aEnviar = listaIslasGuardar
             .filter(x => x.Nueva || x.Modificada)
             .map(x => ({

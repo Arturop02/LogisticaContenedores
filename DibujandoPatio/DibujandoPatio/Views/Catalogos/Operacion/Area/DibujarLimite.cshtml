@@ -45,6 +45,11 @@
         max-width: 300px;
     }
 
+    /*font-face {
+        font-family: "FontIconos";
+        src: url('/Content/fontawesome-webfont.woff2')format('truetype');
+    }*/
+
 </style>
 <div id="app">
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
@@ -97,6 +102,12 @@
     </div>
 
     <div id="notifications"></div>
+
+    <div id="formEnu" class="mb-3" style="display:none">
+        <label for="nuevoEnu">Nuevo ENU:</label>
+        <input type="text" id="nuevoEnu" class="form-control" placeholder="Ingresa el nombre del nuevo ENU" />
+    </div>
+
 </div>
 
 
@@ -134,6 +145,29 @@
     });
     </script>
     <script>
+        async function MensajeAsync(configuracion) {
+            return new Promise((resolve, reject) => {
+                var buttons = {};
+
+                configuracion.Boton.forEach((item, index) => {
+                    buttons['btn_' + index] = {
+                        label: item.Etiqueta || '',
+                        className: item.Clase || '',
+                        callback: function () {
+                            resolve(item);
+                        }
+                    }
+                });
+
+                bootbox.dialog({
+                    title: configuracion.Titulo || '',
+                    message: configuracion.Cuerpo || '',
+                    size: 'large',
+                    buttons: buttons
+                });
+            });
+        }
+
         var vueArea= new Vue({
             el: '#app',
             data() {
@@ -170,40 +204,107 @@
 
                     window.iniciarDibujo();
                 },
-                PreguntarConfirmacionGuardarAsync() {
-                    return new Promise((resolve, reject) => {
-                        var contenido = document.getElementById("modalGuardado").cloneNode(true);
-                        contenido.style.display = "block";
-                        bootbox.dialog({
-                            title: 'Confirmar Guardado',
-                            message: contenido,
-                            buttons: {
-                                cancel: {
-                                    label: 'Cancelar',
-                                    className: 'btn-danger',
-                                    callback: (val) => {
-                                        resolve({ Confirmado: false });
-                                    }
-                                },
-                                confirm: {
-                                    label: 'Guardar',
-                                    className: 'btn-success',
-                                    callback: (val) => {
-                                        const modal = $('.bootbox-body');
+                async PreguntarConfirmacionGuardarAsync() {
 
-                                        const idPatio = modal.find('#selectPatio').val();
-                                        const nombreArea = modal.find('#nombreArea').val().trim();
+                    var contenido = document.getElementById("modalGuardado").cloneNode(true);
+                    contenido.style.display = "block";
 
-                                        if (!idPatio || !nombreArea) {
-                                            bootbox.alert("Por favor, rellena todos los campos.");
-                                            return false;
-                                        }
-                                        resolve({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
-                                    }
-                                },
-                            },
-                        });
+                    var pregunta = await MensajeAsync({
+                        Titulo: 'Confirmar guardado',
+                        Cuerpo: contenido,
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                            { Etiqueta: 'Guardar', Clase: 'btn-success', Valor: true },
+                        ],
                     });
+
+                    if (pregunta.Valor === false) {
+                        return { Confirmado: false };
+                    }
+
+                    const modal = $('.bootbox-body');
+
+                    const idPatio = modal.find('#selectPatio').val();
+                    const nombreArea = modal.find('#nombreArea').val().trim();
+
+                    return ({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
+
+                    //return new Promise((resolve, reject) => {
+                    //    var contenido = document.getElementById("modalGuardado").cloneNode(true);
+                    //    contenido.style.display = "block";
+
+                    //    var pregunta = await MensajeAsync({
+                    //        Titulo: 'Confirmar guardado',
+                    //        Cuerpo: contenido,
+                    //        Boton: [
+                    //            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                    //            { Etiqueta: 'Guardar', Clase: 'btn-success', Valor: true },
+                    //        ],
+                    //    });
+
+                    //    if (pregunta.Valor === false) {
+                    //        return { Confirmado: false };
+                    //    }
+
+                    //    const modal = $('.bootbox-body');
+
+                    //    const idPatio = modal.find('#selectPatio').val();
+                    //    const nombreArea = modal.find('#nombreArea').val().trim();
+    
+                    //    resolve({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
+
+                    //    //bootbox.dialog({
+                    //    //    title: 'Confirmar Guardado',
+                    //    //    message: contenido,
+                    //    //    buttons: {
+                    //    //        cancel: {
+                    //    //            label: 'Cancelar',
+                    //    //            className: 'btn-danger',
+                    //    //            callback: (val) => {
+                    //    //                resolve({ Confirmado: false });
+                    //    //            }
+                    //    //        },
+                    //    //        confirm: {
+                    //    //            label: 'Guardar',
+                    //    //            className: 'btn-success',
+                    //    //            callback: (val) => {
+                    //    //                const modal = $('.bootbox-body');
+
+                    //    //                const idPatio = modal.find('#selectPatio').val();
+                    //    //                const nombreArea = modal.find('#nombreArea').val().trim();
+
+                    //    //                if (!idPatio || !nombreArea) {
+                    //    //                    bootbox.alert("Por favor, rellena todos los campos.");
+                    //    //                    return false;
+                    //    //                }
+                    //    //                resolve({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
+                    //    //            }
+                    //    //        },
+                    //    //    },
+                    //    //});
+                    //});
+                },
+                async nuevoEnu() {
+                    var contenido = document.getElementById("formEnu").cloneNode(true);
+                    contenido.style.display = "block";
+
+                    var respuesta = await MensajeAsync({
+                        Titulo: "Agregar Enum",
+                        Cuerpo: contenido,
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                            { Etiqueta: 'Agregar', Clase: 'btn-success', Valor: true },
+                        ],
+                    });
+
+                    if (respuesta.Valor === false) {
+                        return;
+                    }
+
+                    const modal = $('.bootbox-body');
+                    var DescripcionEnu = modal.find('#nuevoEnu').val().trim();
+
+                    window.agregarEnu(DescripcionEnu);
                 },
                async guardar() {
                    if (this.Area?.Id > 0) {
@@ -224,9 +325,6 @@
                        }
                    }
                },
-                nuevoEnu() {
-                    window.agregarEnu();
-                },
             },
             computed: {
                 areaSeleccionada() {
