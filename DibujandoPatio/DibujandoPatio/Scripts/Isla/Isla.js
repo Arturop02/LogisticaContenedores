@@ -275,6 +275,15 @@ function inicializarArea() {
             posicion.y = posicion.y.toFixed(6) * 1;
             return posicion;
         },
+        TransformarAPosicionLocal: function (puntoAbs) {
+            const transform = this.Stage.getAbsoluteTransform().copy();
+            transform.invert();
+            const local = transform.point(puntoAbs);
+            return {
+                x: Number(local.x.toFixed(4)),
+                y: Number(local.y.toFixed(4))
+            };
+        },
         RestaurarTamano: function () {
             this.Stage.scale({ x: 1, y: 1 });
             this.Stage.position({ x: 0, y: 0 });
@@ -612,6 +621,7 @@ function inicializarArea() {
                     'middle-right'
                 ],
                 rotateEnabled: true,
+                flipEnabled: false,
                 resizeEnabled: true,
                 visible: false,
                 boundBoxFunc: (oldBox, newBox) => {
@@ -631,8 +641,8 @@ function inicializarArea() {
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                this.Grafico.x(-this.Ancho / 2);
-                this.Grafico.y(-this.Alto / 2);
+                this.Grafico.offsetX(this.Grafico.width() / 2);
+                this.Grafico.offsetY(this.Grafico.height() / 2);
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
                 this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
@@ -669,10 +679,13 @@ function inicializarArea() {
                 }, 300));
 
                 isla.Grupo.on('dragend', function () {
+
+                    var absPos = isla.Grupo.getAbsolutePosition();
+                    var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
                     
                     Lienzo.IslaActual = isla;
-                    isla.Posicion.x = isla.Grupo.x();
-                    isla.Posicion.y = isla.Grupo.y();
+                    isla.Posicion.x = posFinal.x;
+                    isla.Posicion.y = posFinal.y;
                     isla.Orientacion = isla.Grafico.getAbsoluteRotation();
                     isla.Ancho = isla.Grafico.width() * isla.Grafico.scaleX();
                     isla.Alto = isla.Grafico.height() * isla.Grafico.scaleY();
@@ -684,14 +697,32 @@ function inicializarArea() {
 
                 isla.Grafico.on('transformend', function () {
 
+                    var absPos = isla.Grafico.getAbsolutePosition();
+                    var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
+
+
+                    const anchoReal = isla.Grafico.width() * isla.Grafico.scaleX();
+                    const altoReal = isla.Grafico.height() * isla.Grafico.scaleY();
+
                     Lienzo.IslaActual = isla;
-                    isla.Posicion.x = isla.Grupo.x();
-                    isla.Posicion.y = isla.Grupo.y();
+
+
+                    isla.Posicion.x = posFinal.x;
+                    isla.Posicion.y = posFinal.y;
                     isla.Orientacion = isla.Grafico.getAbsoluteRotation();
-                    isla.Ancho = isla.Grafico.width() * isla.Grafico.scaleX();
-                    isla.Alto = isla.Grafico.height() * isla.Grafico.scaleY();
+                    isla.Ancho = anchoReal;
+                    isla.Alto = altoReal;
 
                     isla.Modificada = true;
+
+                    isla.Grafico.width(anchoReal);
+                    isla.Grafico.height(altoReal);
+                    isla.Grafico.scaleX(1);
+                    isla.Grafico.scaleY(1);
+
+                    isla.Grafico.offsetX(isla.Grafico.width() / 2);
+                    isla.Grafico.offsetY(isla.Grafico.height() / 2);
+
 
                     window.agregarIslasAGuardar(isla);
                     
@@ -699,7 +730,8 @@ function inicializarArea() {
             }
             else {
                 this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.absolutePosition({ x: this.Grupo.x, y: this.Grupo.y });
+                this.Grafico.offsetX(this.Ancho / 2);
+                this.Grafico.offsetY(this.Alto / 2);
                 this.Grafico.getLayer().batchDraw();
 
                 this.GraficoTexto.setAttrs(cfgGraficoTexto);

@@ -314,9 +314,9 @@
                         Titulo: 'Actualizacion',
                         Cuerpo: 'Deseas actualizar los datos de la zona',
                         Boton: [
-                            {Etiqueta: 'Actualizar datos', Clase: 'btn-success', Valor: 'Cambio'},
-                            {Etiqueta: 'Conservar datos', Clase: 'btn-default', Valor: 'Conservar'},
-                            {Etiqueta: 'Eliminar zona', Clase: 'btn-danger', Valor: 'Borrar'},
+                            { Etiqueta: 'Actualizar datos', Clase: 'btn-success', Valor: 'Cambio' },
+                            { Etiqueta: 'Conservar datos', Clase: 'btn-default', Valor: 'Conservar' },
+                            { Etiqueta: 'Eliminar zona', Clase: 'btn-danger', Valor: 'Borrar' },
                         ],
                     });
 
@@ -475,4 +475,11 @@
             computed: {
                 areaSeleccionada() {
                     return this.Area.Nombre ? `Area: ${this.Area.Nombre}` : `Sin seleccion`;
+                }
+            },
+            mounted() {
+                window.recibirDatosAActualizar = this.ConfirmacionActualizarAsync;
+            },
+        });
+    </script>
 }
