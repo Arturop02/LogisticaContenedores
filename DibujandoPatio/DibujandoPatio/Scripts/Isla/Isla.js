@@ -366,6 +366,7 @@ function inicializarArea() {
             isla.Posicion.y = y;
             isla.Alto = Lienzo.TamanoIsla().alto;
             isla.Ancho = Lienzo.TamanoIsla().ancho;
+            isla.Orientacion = 0;
             isla.Nueva = true;
             isla.Modificada = false;
 
@@ -592,6 +593,8 @@ function inicializarArea() {
                 fill: this.Color ? `#${this.Color}` : "#88b7d5",
                 strokeWidth: 1.2,
                 stroke: 'black',
+                offsetX: width / 2,
+                offsetY: height / 2,
             };
 
             var cfgGraficoIcono = {
@@ -680,7 +683,7 @@ function inicializarArea() {
 
                 isla.Grupo.on('dragend', function () {
 
-                    var absPos = isla.Grupo.getAbsolutePosition();
+                    var absPos = isla.Grafico.getAbsolutePosition();
                     var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
                     
                     Lienzo.IslaActual = isla;
@@ -706,12 +709,11 @@ function inicializarArea() {
 
                     Lienzo.IslaActual = isla;
 
-
                     isla.Posicion.x = posFinal.x;
                     isla.Posicion.y = posFinal.y;
                     isla.Orientacion = isla.Grafico.getAbsoluteRotation();
-                    isla.Ancho = anchoReal;
-                    isla.Alto = altoReal;
+                    isla.Ancho = Number(anchoReal.toFixed(4));
+                    isla.Alto = Number(altoReal.toFixed());
 
                     isla.Modificada = true;
 
@@ -723,15 +725,14 @@ function inicializarArea() {
                     isla.Grafico.offsetX(isla.Grafico.width() / 2);
                     isla.Grafico.offsetY(isla.Grafico.height() / 2);
 
-
                     window.agregarIslasAGuardar(isla);
                     
                 });
             }
             else {
                 this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.offsetX(this.Ancho / 2);
-                this.Grafico.offsetY(this.Alto / 2);
+                this.Grafico.offsetX(this.Grafico.width() / 2);
+                this.Grafico.offsetY(this.Grafico.height() / 2);
                 this.Grafico.getLayer().batchDraw();
 
                 this.GraficoTexto.setAttrs(cfgGraficoTexto);

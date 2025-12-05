@@ -47,8 +47,7 @@
               "ViewState": "AgIAAKMBAAAAAAAAABBywLMBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-10-15T15:11:26.103Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -56,9 +55,9 @@
               "Title": "Isla.js",
               "DocumentMoniker": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Isla\\Isla.js",
               "RelativeDocumentMoniker": "DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "RelativeToolTip": "DibujandoPatio\\Scripts\\Isla\\Isla.js",
-              "ViewState": "AgIAAJsDAAAAAAAAAAAwwEQDAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Isla\\Isla.js*",
+              "RelativeToolTip": "DibujandoPatio\\Scripts\\Isla\\Isla.js*",
+              "ViewState": "AgIAAEMCAAAAAAAAAAAQwMMCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-10-15T17:33:15.18Z",
               "IsPinned": true,
@@ -116,8 +115,7 @@
               "RelativeToolTip": "DibujandoPatio\\Controllers\\AreaController.cs",
               "ViewState": "AgIAACIAAAAAAAAAAAAswEwAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-20T19:18:21.282Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T19:18:21.282Z"
             },
             {
               "$type": "Document",
@@ -129,8 +127,7 @@
               "RelativeToolTip": "DibujandoPatio\\Controllers\\IslaController.cs",
               "ViewState": "AgIAACYAAAAAAAAAAADwvzEAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-20T18:02:14.454Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-20T18:02:14.454Z"
             }
           ]
         }
