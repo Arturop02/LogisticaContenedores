@@ -38,3 +38,9 @@ Konva.Rect.prototype.DameRotacion = function () {
     return rotacion;
 };
 
+Konva.Group.prototype.DameRotacion = function () {
+    var rotacion = this.rotation() % 360;
+    if (rotacion < 0) rotacion += 360;
+    return rotacion;
+};
+

@@ -10,6 +10,7 @@ namespace BD.Isla
             IslaBT islaBT = new IslaBT();
             islaBT.Id = (int)record["ide_isla"];
             islaBT.Nombre = record["Nombre"].ToString();
+            islaBT.TipoEstructuraId = (int)record["ide_TipoEstructura"];
             islaBT.Orientacion = (decimal)record["Orientacion"];
             islaBT.X = (decimal)record["X"];
             islaBT.Y = (decimal)record["Y"];

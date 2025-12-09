@@ -13,6 +13,7 @@
         public string Observaciones { get; set; }
         
         //Datos extra de EstructuraBT
+        public int TipoEstructuraId { get; set; }
         public string Color { get; set; }
         public string Descripcion { get; set; }
         public string Icono { get; set; }
