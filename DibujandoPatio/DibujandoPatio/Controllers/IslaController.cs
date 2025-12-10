@@ -86,15 +86,6 @@ namespace DibujandoPatio.Controllers
             return Json(new { ok = true, data = isla }, JsonRequestBehavior.AllowGet);
         }
 
-        //[HttpGet]
-        //public JsonResult ObtenerIconoPorEstructuraId(int IdEstructura)
-        //{
-        //    EstructuraRN estructuraRN = new EstructuraRN();
-        //    var estructura = estructuraRN.BuscarPorId(IdEstructura);
-        //    return Json(new { ok = true, data = estructura }, JsonRequestBehavior.AllowGet);
-        //}
-
-
         public ActionResult Index(int? id)
         {
             AreaRN areaRN = new AreaRN();
