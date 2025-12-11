@@ -228,61 +228,6 @@
                     const nombreArea = modal.find('#nombreArea').val().trim();
 
                     return ({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
-
-                    //return new Promise((resolve, reject) => {
-                    //    var contenido = document.getElementById("modalGuardado").cloneNode(true);
-                    //    contenido.style.display = "block";
-
-                    //    var pregunta = await MensajeAsync({
-                    //        Titulo: 'Confirmar guardado',
-                    //        Cuerpo: contenido,
-                    //        Boton: [
-                    //            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
-                    //            { Etiqueta: 'Guardar', Clase: 'btn-success', Valor: true },
-                    //        ],
-                    //    });
-
-                    //    if (pregunta.Valor === false) {
-                    //        return { Confirmado: false };
-                    //    }
-
-                    //    const modal = $('.bootbox-body');
-
-                    //    const idPatio = modal.find('#selectPatio').val();
-                    //    const nombreArea = modal.find('#nombreArea').val().trim();
-    
-                    //    resolve({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
-
-                    //    //bootbox.dialog({
-                    //    //    title: 'Confirmar Guardado',
-                    //    //    message: contenido,
-                    //    //    buttons: {
-                    //    //        cancel: {
-                    //    //            label: 'Cancelar',
-                    //    //            className: 'btn-danger',
-                    //    //            callback: (val) => {
-                    //    //                resolve({ Confirmado: false });
-                    //    //            }
-                    //    //        },
-                    //    //        confirm: {
-                    //    //            label: 'Guardar',
-                    //    //            className: 'btn-success',
-                    //    //            callback: (val) => {
-                    //    //                const modal = $('.bootbox-body');
-
-                    //    //                const idPatio = modal.find('#selectPatio').val();
-                    //    //                const nombreArea = modal.find('#nombreArea').val().trim();
-
-                    //    //                if (!idPatio || !nombreArea) {
-                    //    //                    bootbox.alert("Por favor, rellena todos los campos.");
-                    //    //                    return false;
-                    //    //                }
-                    //    //                resolve({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
-                    //    //            }
-                    //    //        },
-                    //    //    },
-                    //    //});
-                    //});
                 },
                 async nuevoEnu() {
                     var contenido = document.getElementById("formEnu").cloneNode(true);

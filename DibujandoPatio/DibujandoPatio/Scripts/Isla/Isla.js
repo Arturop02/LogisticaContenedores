@@ -187,10 +187,7 @@ function inicializarArea() {
 
             const isla = new Isla();
 
-            var respuesta = await fetch(`/Estructura/ObtenerTipoEstructuraPorId?id=${datos.IdEstructura}`);
-            var data = await respuesta.json();
-
-            const estructura = data.data;
+            var estructura = await Lienzo.ActualizacionVisual(datos);
 
             isla.Color = estructura.Color;
             var uniCodeIcono;
@@ -246,6 +243,13 @@ function inicializarArea() {
             isla.Modificada = false;
 
             return isla;
+        },
+        ActualizacionVisual: async function (datos) {
+            var respuesta = await fetch(`/Estructura/ObtenerTipoEstructuraPorId?id=${datos.IdEstructura}`);
+            var data = await respuesta.json();
+
+            const estructura = data.data;
+            return estructura;
         },
         HabilitarArrastrable: function (habilitar) {
             if (habilitar) {
@@ -421,6 +425,29 @@ function inicializarArea() {
             return this;
         };
 
+        this.Actualizar = function () {
+            if (!this.Grafico) {
+                this.Dibujar();
+                return;
+            }
+
+            this.Grafico.setAttrs({
+                fill: this.Color ? `#${this.Color}` : "#88b7d5",
+            });
+
+            if (this.GraficoTexto) {
+                this.GraficoTexto.text(this.Nombre);
+            }
+
+            if (this.GraficoIcono) {
+                this.GraficoIcono.text(this.Icono);
+                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
+            }
+
+            this.Grafico.getLayer().batchDraw();
+
+        }
+
         this.Dibujar = function () {
             var tamanoDefault = Lienzo.TamanoIsla();
             
@@ -430,12 +457,14 @@ function inicializarArea() {
                 y: 0,
                 name: this.Nombre,
                 text: this.Descripcion,
-                width: this.Ancho,
+                width: this.Ancho, 
                 height: this.Alto,
                 fill: this.Color ? `#${this.Color}` : "#88b7d5",
                 strokeWidth: 1.2,
                 stroke: 'black',
                 rotation: this.Orientacion,
+                offsetX: this.Ancho / 2,
+                offsetY: this.Alto / 2,
             };
 
             var cfgGraficoIcono = {
@@ -445,6 +474,7 @@ function inicializarArea() {
                 align: 'center',
                 fontFamily: 'FontAwesome',
                 fill: 'white',
+                rotation: this.Orientacion,
             };
             
             var cfgGraficoTexto = {
@@ -453,6 +483,7 @@ function inicializarArea() {
                 text: this.Nombre,
                 fontSize: 12,
                 fill: 'black',
+                rotation: this.Orientacion,
             };
 
             var cfgTransformer = {
@@ -476,7 +507,7 @@ function inicializarArea() {
                     }
                     return newBox;
                 }
-            }
+            };
             
             if (this.Grafico == null) {
                 this.Grupo = new Konva.Group({
@@ -488,16 +519,26 @@ function inicializarArea() {
                 this.Grafico = new Konva.Rect(cfgGrafico);
                 this.Grafico.offsetX(this.Grafico.width() / 2);
                 this.Grafico.offsetY(this.Grafico.height() / 2);
-                this.Grafico.rotation(this.Orientacion);
+
+                var centro = this.Grafico.DameCentroAbsoluto();
+
+                this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+
+                var radio = (this.Alto / 2) + this.GraficoTexto.height();
+                var radianes = (90 + this.Orientacion) * Math.PI / 180;
+
+                var xNombre = centro.x + radio * Math.cos(radianes);
+                var yNombre = centro.y + radio * Math.sin(radianes);
+
+                this.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
+                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
+                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
+                this.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
                 this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
                 this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
                 this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
-
-                this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
-                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
                 this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
 
@@ -512,6 +553,7 @@ function inicializarArea() {
                         Lienzo.IslaActual = isla;
                         window.recibirDatosAActualizar(Lienzo.IslaActual);
 
+                        isla.Grafico.setAttrs({ fill: Lienzo.IslaActual.Color ? `#${Lienzo.IslaActual.Color}` : "#88b7d5" });
                         isla.GraficoTrasnformer.nodes([isla.Grafico]);
                         isla.GraficoTrasnformer.visible(true);
                         isla.Grupo.draggable(true);
@@ -549,9 +591,7 @@ function inicializarArea() {
                     const anchoReal = rectIsla.width() * scaleX;
                     const altoReal = rectIsla.height() * scaleY;
 
-
                     var absPos = rectIsla.getAbsolutePosition();
-                    var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
 
                     rectIsla.setAttrs({
                         scaleX: 1,
@@ -594,7 +634,6 @@ function inicializarArea() {
                     const anchoReal = rectIsla.width() * scaleX;
                     const altoReal = rectIsla.height() * scaleY;
 
-
                     var absPos = rectIsla.getAbsolutePosition();
                     var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
 
@@ -621,38 +660,38 @@ function inicializarArea() {
 
                 });
             }
-            else {
-                this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.offsetX(this.Grafico.width() / 2);
-                this.Grafico.offsetY(this.Grafico.height() / 2);
-                this.Grafico.rotation(this.Orientacion);
-                //this.Grafico.getLayer().batchDraw();
+            //else {
+            //    this.Grafico.setAttrs(cfgGrafico);
+            //    this.Grafico.offsetX(this.Grafico.width() / 2);
+            //    this.Grafico.offsetY(this.Grafico.height() / 2);
+            //    //this.Grafico.rotation(this.Orientacion);
+            //    //this.Grafico.getLayer().batchDraw();
 
-                var centro = isla.Grafico.DameCentroAbsoluto();
-                const radio = (this.Alto / 2) + this.GraficoTexto.height();
-                const radianes = (90 + (this.Orientacion || 0)) * Math.PI / 180;
+            //    var centro = isla.Grafico.DameCentroAbsoluto();
+            //    const radio = (this.Alto / 2) + this.GraficoTexto.height();
+            //    const radianes = (90 + (this.Orientacion || 0)) * Math.PI / 180;
 
-                const xNombre = centro.x + radio * Math.cos(radianes);
-                const yNombre = centro.y + radio * Math.sin(radianes);
+            //    const xNombre = centro.x + radio * Math.cos(radianes);
+            //    const yNombre = centro.y + radio * Math.sin(radianes);
 
-                this.GraficoTexto.setAttrs(cfgGraficoTexto);
-                this.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
-                this.GraficoTexto.rotation(this.Orientacion);
-                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
-                //this.GraficoTexto.position({ x: 0, y: (this.Grafico.height() / 2) + 10 });
-                //this.GraficoTexto.getLayer().batchDraw();
+            //    this.GraficoTexto.setAttrs(cfgGraficoTexto);
+            //    this.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
+            //    //this.GraficoTexto.rotation(this.Orientacion);
+            //    this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
+            //    this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
+            //    //this.GraficoTexto.position({ x: 0, y: (this.Grafico.height() / 2) + 10 });
+            //    //this.GraficoTexto.getLayer().batchDraw();
 
-                this.GraficoIcono.setAttrs(cfgGraficoIcono);
-                this.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
-                this.GraficoIcono.rotation(this.Orientacion);
-                this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-                this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
-                //this.GraficoIcono.position({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
-                //this.GraficoIcono.getLayer().batchDraw();
+            //    this.GraficoIcono.setAttrs(cfgGraficoIcono);
+            //    this.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
+            //    //this.GraficoIcono.rotation(this.Orientacion);
+            //    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
+            //    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+            //    //this.GraficoIcono.position({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
+            //    //this.GraficoIcono.getLayer().batchDraw();
 
-                layer.batchDraw();
-            }
+            //    layer.batchDraw();
+            //}
 
             this.lstIslas.forEach(function (item) {
                 item.Dibujar();
@@ -849,8 +888,18 @@ function inicializarArea() {
             Lienzo.IslaActual.Nombre = datos.Nombre;
             Lienzo.IslaActual.Estructura = datos.IdEstructura;
             Lienzo.IslaActual.Observaciones = datos.Observaciones;
+
+            var actualizar = await Lienzo.ActualizacionVisual(datos);
+
+            Lienzo.IslaActual.Color = actualizar.Color;
+            Lienzo.IslaActual.Icono = ObtenerUnicodeDesdeClase(actualizar.Icono);
+
+            Lienzo.IslaActual.Actualizar();
         }
+
         Lienzo.IslaActual.Modificada = true;
+        layer.batchDraw();
+
         Notify("Los datos seran actualizados", null, null, "success");
     }
 
