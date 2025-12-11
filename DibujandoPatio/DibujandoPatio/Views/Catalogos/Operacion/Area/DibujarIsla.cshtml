@@ -270,6 +270,11 @@
                     window.seleccionarArea(id, nombre);
                 },
                 async ConfirmacionCrearAsync() {
+                    if (!this.Area.Id) {
+                        bootbox.alert("Por favor, seleccione un patio");
+                        return;
+                    }
+
                     var formZona = document.getElementById("formZona").cloneNode(true);
                     formZona.style.display = "block";
 

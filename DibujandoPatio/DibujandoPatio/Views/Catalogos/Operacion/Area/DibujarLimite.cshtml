@@ -254,6 +254,7 @@
                async guardar() {
                    if (this.Area?.Id > 0) {
                        await window.guardarAsync(this.Area);
+                       document.location.href = '@Url.Action("DibujarLimite",new {Id="__id__"})'.replace('__id__', this.Area.Id);
                    }
                    else {
                        try {
@@ -265,10 +266,12 @@
                                this.Area = await window.guardarAsync(this.Area);
                                document.location.href = '@Url.Action("DibujarLimite",new {Id="__id__"})'.replace('__id__', this.Area.Id);
                            }
+
                        } catch (e) {
                            console.log(e);
                        }
                    }
+                   
                },
             },
             computed: {

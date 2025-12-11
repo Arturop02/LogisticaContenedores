@@ -547,7 +547,7 @@ function inicializarArea() {
                 layer.add(this.Grupo, this.GraficoTrasnformer);
                 var isla = this;
 
-                isla.Grafico.on('pointerdown', throttle((e) => {
+                isla.Grafico.on('pointerdblclick', throttle((e) => {
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         Lienzo.IslaActual = isla;
@@ -602,10 +602,12 @@ function inicializarArea() {
                         offsetY: altoReal / 2,
                     });
 
+                    //var posicion = Lienzo.TransformarAPosicionLocal(absPos);
+                    //rectIsla.absolutePosition(posicion);
                     rectIsla.absolutePosition(absPos);
                     rectIsla.rotation(rotacion);
 
-                    var centro = isla.Grafico.DameCentroAbsoluto();
+                    var centro = rectIsla.DameCentroAbsoluto();
                     var radio = (altoReal / 2) + isla.GraficoTexto.height();
                     var radianes = (90 + rotacion) * Math.PI / 180;
 
@@ -613,8 +615,8 @@ function inicializarArea() {
                     var yNombre = centro.y + radio * Math.sin(radianes);
 
                     isla.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
-                    isla.GraficoTexto.offsetX(isla.GraficoTexto.width() / 2);
-                    isla.GraficoTexto.offsetY(isla.GraficoTexto.height() / 2);
+                    //isla.GraficoTexto.offsetX(isla.GraficoTexto.width() / 2);
+                    //isla.GraficoTexto.offsetY(isla.GraficoTexto.height() / 2);
                     isla.GraficoTexto.rotation(rotacion);
 
                     isla.GraficoIcono.fontSize(TamanoIcono(isla.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }));
