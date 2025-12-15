@@ -450,7 +450,8 @@ function inicializarArea() {
 
         this.Dibujar = function () {
             var tamanoDefault = Lienzo.TamanoIsla();
-            
+            Lienzo.TamanoIsla();
+
             var cfgGrafico = {
                 Id: this.Id,
                 x: 0,
@@ -471,15 +472,20 @@ function inicializarArea() {
                 x: 0,
                 y: 0,
                 text: this.Icono,
+                //width: this.Ancho,
+                //height: this.Alto,
                 align: 'center',
+                //verticalalign: 'middle',
                 fontFamily: 'FontAwesome',
                 fill: 'white',
                 rotation: this.Orientacion,
+                //offsetX: this.Ancho / 2,
+                //offsetY: this.Alto / 2,
             };
             
             var cfgGraficoTexto = {
-                x: 0,
-                y: this.Alto / 2 + 10,
+                //x: 0,
+                //y: this.Alto / 2 + 10,
                 text: this.Nombre,
                 fontSize: 12,
                 fill: 'black',
@@ -501,10 +507,12 @@ function inicializarArea() {
                 visible: false,
                 rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315],
                 rotateAnchorOffset: 30,
+                strokeScaleEnabled: false,
                 boundBoxFunc: (oldBox, newBox) => {
                     if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
                         return oldBox;
                     }
+
                     return newBox;
                 }
             };
@@ -517,25 +525,32 @@ function inicializarArea() {
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                this.Grafico.offsetX(this.Grafico.width() / 2);
-                this.Grafico.offsetY(this.Grafico.height() / 2);
-
                 var centro = this.Grafico.DameCentroAbsoluto();
 
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
-
-                var radio = (this.Alto / 2) + this.GraficoTexto.height();
+                var radio = ((this.Grafico.height() * this.Grafico.scaleY()) / 2) + this.GraficoTexto.height();
                 var radianes = (90 + this.Orientacion) * Math.PI / 180;
-
                 var xNombre = centro.x + radio * Math.cos(radianes);
                 var yNombre = centro.y + radio * Math.sin(radianes);
-
-                this.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
-                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
+                this.GraficoTexto.setAttrs({
+                    absolutePosition: {
+                        x: xNombre,
+                        y: yNombre,
+                    },
+                    offsetX: this.GraficoTexto.width() / 2,
+                    offsetY: this.GraficoTexto.height() / 2,
+                });
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
-                this.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
+                //this.GraficoIcono.setAttrs({
+                //    fontSize: TamanoIcono(this.Grafico),
+                //    offsetX: this.GraficoIcono.width() / 2,
+                //    offsetY: this.GraficoIcono.height() / 2,
+                //    absolutePosition: {
+                //        x: centro.x,
+                //        y: centro.y
+                //    },
+                //});
                 this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
                 this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
                 this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
@@ -586,6 +601,9 @@ function inicializarArea() {
                     var rectIsla = this;
                     var scaleX = rectIsla.scaleX();
                     var scaleY = rectIsla.scaleY();
+                    var stage = rectIsla.getStage();
+                    var stageScale = stage.scaleX();
+                    
                     var rotacion = rectIsla.DameRotacion();
 
                     const anchoReal = rectIsla.width() * scaleX;
@@ -601,30 +619,95 @@ function inicializarArea() {
                         offsetX: anchoReal / 2,
                         offsetY: altoReal / 2,
                     });
-
-                    //var posicion = Lienzo.TransformarAPosicionLocal(absPos);
-                    //rectIsla.absolutePosition(posicion);
+                    
                     rectIsla.absolutePosition(absPos);
                     rectIsla.rotation(rotacion);
 
                     var centro = rectIsla.DameCentroAbsoluto();
-                    var radio = (altoReal / 2) + isla.GraficoTexto.height();
+                    
+                    var radio = ((altoReal / 2) + isla.GraficoTexto.height()) * stageScale;
                     var radianes = (90 + rotacion) * Math.PI / 180;
 
                     var xNombre = centro.x + radio * Math.cos(radianes);
                     var yNombre = centro.y + radio * Math.sin(radianes);
 
-                    isla.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
-                    //isla.GraficoTexto.offsetX(isla.GraficoTexto.width() / 2);
-                    //isla.GraficoTexto.offsetY(isla.GraficoTexto.height() / 2);
-                    isla.GraficoTexto.rotation(rotacion);
+                    isla.GraficoTexto.setAttrs({
+                        absolutePosition: {
+                            x: xNombre, 
+                            y: yNombre,
+                        },
+                        offsetX: isla.GraficoTexto.width() / 2,
+                        offsetY: isla.GraficoTexto.height() / 2,
+                        rotation: rotacion,
+                    });
 
-                    isla.GraficoIcono.fontSize(TamanoIcono(isla.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }));
-                    isla.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
-                    isla.GraficoIcono.offsetX(isla.GraficoIcono.width() / 2);
-                    isla.GraficoIcono.offsetY(isla.GraficoIcono.height() / 2);
-                    isla.GraficoIcono.rotation(rotacion);
+                    isla.GraficoIcono.setAttrs({
+                        fontSize: TamanoIcono(isla.Grafico),
+                        absolutePosition: {
+                            x: centro.x,
+                            y: centro.y,
+                        },
+                        offsetX: isla.GraficoIcono.width() / 2,
+                        offsetY: isla.GraficoIcono.height() / 2,
+                        rotation: rotacion,
+                    });
+                    
                 });
+                //isla.Grafico.on('transform', function () {
+
+                //    //var rectIsla = this;
+                //    //var scaleX = rectIsla.scaleX();
+                //    //var scaleY = rectIsla.scaleY();
+                //    //var rotacion = rectIsla.DameRotacion();
+
+                //    //var escalaStage = stage.scale();
+
+
+                //    //const anchoReal = rectIsla.width() * scaleX;
+                //    //const altoReal = rectIsla.height() * scaleY;
+
+                //    //var posRel = {
+                //    //    x: rectIsla.x(),
+                //    //    y: rectIsla.y(),
+                //    //};
+
+                //    ////var absPos = rectIsla.getAbsolutePosition();
+
+                //    //rectIsla.setAttrs({
+                //    //    //absolutePosition: ({ x: absPos.x, y: absPos.y}),
+                //    //    scaleX: 1,
+                //    //    scaleY: 1,
+                //    //    width: anchoReal,
+                //    //    height: altoReal,
+                //    //    offsetX: anchoReal / 2,
+                //    //    offsetY: altoReal / 2,
+                //    //    x: posRel.x,
+                //    //    y: posRel.y,
+                //    //});
+
+                //    ////var posicion = Lienzo.TransformarAPosicionLocal(absPos);
+                //    ////rectIsla.absolutePosition(posicion);
+                //    ////rectIsla.absolutePosition(absPos);
+                //    //rectIsla.rotation(rotacion);
+
+                //    ////var centro = rectIsla.DameCentroAbsoluto();
+                //    //var radio = (altoReal / 2) + isla.GraficoTexto.height();
+                //    //var radianes = (90 + rotacion) * Math.PI / 180;
+
+                //    //var xNombre = /*centro.x +*/ radio * Math.cos(radianes);
+                //    //var yNombre = /*centro.y +*/ radio * Math.sin(radianes);
+
+                //    //isla.GraficoTexto.position({ x: xNombre, y: yNombre });
+                //    //isla.GraficoTexto.offsetX(isla.GraficoTexto.width() / 2);
+                //    //isla.GraficoTexto.offsetY(isla.GraficoTexto.height() / 2);
+                //    //isla.GraficoTexto.rotation(rotacion);
+
+                //    //isla.GraficoIcono.fontSize(TamanoIcono(isla.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }));
+                //    //isla.GraficoIcono.absolutePosition({ x: 0/*centro.x*/, y: 0/*centro.y*/ });
+                //    //isla.GraficoIcono.offsetX(isla.GraficoIcono.width() / 2);
+                //    //isla.GraficoIcono.offsetY(isla.GraficoIcono.height() / 2);
+                //    //isla.GraficoIcono.rotation(rotacion);
+                //});
 
                 isla.Grafico.on('transformend', function () {
 
@@ -736,7 +819,7 @@ function inicializarArea() {
         const escalaAnterior = stage.scaleX();
         const cursor = stage.getPointerPosition();
 
-        const escalarPor = 1.25;
+        const escalarPor = 1.05;
         const direccion = e.evt.deltaY > 0 ? 1 : -1;
         const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
 

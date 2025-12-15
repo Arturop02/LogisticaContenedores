@@ -579,7 +579,7 @@ function inicializarArea() {
         const escalaAnterior = stage.scaleX();
         const cursor = stage.getPointerPosition();
 
-        const escalarPor = 1.25;
+        const escalarPor = 1.05;
         const direccion = e.evt.deltaY > 0 ? 1 : -1;
         const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
 
