@@ -91,6 +91,7 @@ function inicializarArea() {
         PuntoActual: null,
         IslaActual: null,
         lstIslas: [],
+        Transformer: null,
         DamePosicion: function () {
             const transform = this.Stage.getAbsoluteTransform().copy();
             transform.invert();
@@ -250,6 +251,11 @@ function inicializarArea() {
 
             const estructura = data.data;
             return estructura;
+        },
+        CerrarTransformer: function () {
+            Lienzo.Transformer.nodes([]);
+            Lienzo.Transformer.visible(false);
+            layer.batchDraw();
         },
         HabilitarArrastrable: function (habilitar) {
             if (habilitar) {
@@ -469,23 +475,15 @@ function inicializarArea() {
             };
 
             var cfgGraficoIcono = {
-                x: 0,
-                y: 0,
                 text: this.Icono,
-                //width: this.Ancho,
-                //height: this.Alto,
                 align: 'center',
-                //verticalalign: 'middle',
+                verticalAlign: 'middle',
                 fontFamily: 'FontAwesome',
                 fill: 'white',
                 rotation: this.Orientacion,
-                //offsetX: this.Ancho / 2,
-                //offsetY: this.Alto / 2,
             };
             
             var cfgGraficoTexto = {
-                //x: 0,
-                //y: this.Alto / 2 + 10,
                 text: this.Nombre,
                 fontSize: 12,
                 fill: 'black',
@@ -525,60 +523,109 @@ function inicializarArea() {
                 });
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                var centro = this.Grafico.DameCentroAbsoluto();
 
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
-                var radio = ((this.Grafico.height() * this.Grafico.scaleY()) / 2) + this.GraficoTexto.height();
+                var radio = this.Alto / 2 + this.GraficoTexto.height();
                 var radianes = (90 + this.Orientacion) * Math.PI / 180;
-                var xNombre = centro.x + radio * Math.cos(radianes);
-                var yNombre = centro.y + radio * Math.sin(radianes);
+                var xNombre = radio * Math.cos(radianes);
+                var yNombre = radio * Math.sin(radianes);
+
                 this.GraficoTexto.setAttrs({
-                    absolutePosition: {
+                    position: {
                         x: xNombre,
                         y: yNombre,
                     },
-                    offsetX: this.GraficoTexto.width() / 2,
-                    offsetY: this.GraficoTexto.height() / 2,
                 });
+                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
+                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
                 this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
-                //this.GraficoIcono.setAttrs({
-                //    fontSize: TamanoIcono(this.Grafico),
-                //    offsetX: this.GraficoIcono.width() / 2,
-                //    offsetY: this.GraficoIcono.height() / 2,
-                //    absolutePosition: {
-                //        x: centro.x,
-                //        y: centro.y
-                //    },
-                //});
-                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
-                this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-                this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+                document.fonts.ready.then(() => {
+                    this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
 
-                this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
+                    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
+                    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+
+                    this.GraficoIcono.position({ x: 0, y: 0 });
+
+                    layer.batchDraw();
+                });
+
+                Lienzo.Transformer = new Konva.Transformer(cfgTransformer);
+                //this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
 
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
-                layer.add(this.Grupo, this.GraficoTrasnformer);
+                layer.add(this.Grupo, Lienzo.Transformer);
                 var isla = this;
 
                 isla.Grafico.on('pointerdblclick', throttle((e) => {
+
+                    //if (Lienzo.Transformer && Lienzo.IslaActual !== isla) {
+                    //    Lienzo.CerrarTransformer();
+                    //    isla.Grupo.draggable(false);
+                    //}
+                    var transformer = Lienzo.Transformer;
+
+                    if (Lienzo.IslaActual && Lienzo.IslaActual !== isla) {
+                        Lienzo.IslaActual.Grupo.draggable(false);
+                    }
+
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                        Lienzo.Estado = enumEstadoLienzo.Moviendo;
+
                         Lienzo.IslaActual = isla;
+                        Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         window.recibirDatosAActualizar(Lienzo.IslaActual);
 
-                        isla.Grafico.setAttrs({ fill: Lienzo.IslaActual.Color ? `#${Lienzo.IslaActual.Color}` : "#88b7d5" });
-                        isla.GraficoTrasnformer.nodes([isla.Grafico]);
-                        isla.GraficoTrasnformer.visible(true);
-                        isla.Grupo.draggable(true);
-                        layer.draw();
+                        isla.Grafico.setAttrs({
+                            fill: Lienzo.IslaActual.Color ?
+                                `#${Lienzo.IslaActual.Color}` : "#88b7d5"
+                        });
 
+                        transformer.nodes([isla.Grafico]);
+                        transformer.visible(true);
+                        isla.Grupo.draggable(true);
+                        layer.batchDraw();
                     } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+                        transformer.nodes([]);
+                        transformer.visible(false);
+                        isla.Grupo.draggable(false);
                         Lienzo.Estado = enumEstadoLienzo.Editando;
                         Lienzo.IslaActual = null;
 
+                        layer.batchDraw();
                     }
+
+
+
+                    //if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+
+                    //    Lienzo.Estado = enumEstadoLienzo.Moviendo;
+                    //    Lienzo.IslaActual = isla;
+                    //    window.recibirDatosAActualizar(Lienzo.IslaActual);
+
+                    //    isla.Grafico.setAttrs({
+                    //        fill: Lienzo.IslaActual.Color ?
+                    //            `#${Lienzo.IslaActual.Color}` : "#88b7d5"
+                    //    });
+
+                    //    transformer.nodes([isla.Grafico]);
+                    //    transformer.visible(true);
+                    //    isla.Grupo.draggable(true);
+                    //    layer.batchDraw();
+
+                    //} else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+
+                    //    transformer.nodes([]);
+                    //    transformer.visible(false);
+
+                    //    isla.Grupo.draggable(false);
+
+                    //    Lienzo.Estado = enumEstadoLienzo.Editando;
+                    //    Lienzo.IslaActual = null;
+
+                    //    layer.batchDraw();
+                    //}
                 }, 300));
 
                 isla.Grupo.on('dragend', function () {
@@ -653,62 +700,7 @@ function inicializarArea() {
                     });
                     
                 });
-                //isla.Grafico.on('transform', function () {
-
-                //    //var rectIsla = this;
-                //    //var scaleX = rectIsla.scaleX();
-                //    //var scaleY = rectIsla.scaleY();
-                //    //var rotacion = rectIsla.DameRotacion();
-
-                //    //var escalaStage = stage.scale();
-
-
-                //    //const anchoReal = rectIsla.width() * scaleX;
-                //    //const altoReal = rectIsla.height() * scaleY;
-
-                //    //var posRel = {
-                //    //    x: rectIsla.x(),
-                //    //    y: rectIsla.y(),
-                //    //};
-
-                //    ////var absPos = rectIsla.getAbsolutePosition();
-
-                //    //rectIsla.setAttrs({
-                //    //    //absolutePosition: ({ x: absPos.x, y: absPos.y}),
-                //    //    scaleX: 1,
-                //    //    scaleY: 1,
-                //    //    width: anchoReal,
-                //    //    height: altoReal,
-                //    //    offsetX: anchoReal / 2,
-                //    //    offsetY: altoReal / 2,
-                //    //    x: posRel.x,
-                //    //    y: posRel.y,
-                //    //});
-
-                //    ////var posicion = Lienzo.TransformarAPosicionLocal(absPos);
-                //    ////rectIsla.absolutePosition(posicion);
-                //    ////rectIsla.absolutePosition(absPos);
-                //    //rectIsla.rotation(rotacion);
-
-                //    ////var centro = rectIsla.DameCentroAbsoluto();
-                //    //var radio = (altoReal / 2) + isla.GraficoTexto.height();
-                //    //var radianes = (90 + rotacion) * Math.PI / 180;
-
-                //    //var xNombre = /*centro.x +*/ radio * Math.cos(radianes);
-                //    //var yNombre = /*centro.y +*/ radio * Math.sin(radianes);
-
-                //    //isla.GraficoTexto.position({ x: xNombre, y: yNombre });
-                //    //isla.GraficoTexto.offsetX(isla.GraficoTexto.width() / 2);
-                //    //isla.GraficoTexto.offsetY(isla.GraficoTexto.height() / 2);
-                //    //isla.GraficoTexto.rotation(rotacion);
-
-                //    //isla.GraficoIcono.fontSize(TamanoIcono(isla.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }));
-                //    //isla.GraficoIcono.absolutePosition({ x: 0/*centro.x*/, y: 0/*centro.y*/ });
-                //    //isla.GraficoIcono.offsetX(isla.GraficoIcono.width() / 2);
-                //    //isla.GraficoIcono.offsetY(isla.GraficoIcono.height() / 2);
-                //    //isla.GraficoIcono.rotation(rotacion);
-                //});
-
+                
                 isla.Grafico.on('transformend', function () {
 
                     var rectIsla = this;
@@ -745,38 +737,6 @@ function inicializarArea() {
 
                 });
             }
-            //else {
-            //    this.Grafico.setAttrs(cfgGrafico);
-            //    this.Grafico.offsetX(this.Grafico.width() / 2);
-            //    this.Grafico.offsetY(this.Grafico.height() / 2);
-            //    //this.Grafico.rotation(this.Orientacion);
-            //    //this.Grafico.getLayer().batchDraw();
-
-            //    var centro = isla.Grafico.DameCentroAbsoluto();
-            //    const radio = (this.Alto / 2) + this.GraficoTexto.height();
-            //    const radianes = (90 + (this.Orientacion || 0)) * Math.PI / 180;
-
-            //    const xNombre = centro.x + radio * Math.cos(radianes);
-            //    const yNombre = centro.y + radio * Math.sin(radianes);
-
-            //    this.GraficoTexto.setAttrs(cfgGraficoTexto);
-            //    this.GraficoTexto.absolutePosition({ x: xNombre, y: yNombre });
-            //    //this.GraficoTexto.rotation(this.Orientacion);
-            //    this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-            //    this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
-            //    //this.GraficoTexto.position({ x: 0, y: (this.Grafico.height() / 2) + 10 });
-            //    //this.GraficoTexto.getLayer().batchDraw();
-
-            //    this.GraficoIcono.setAttrs(cfgGraficoIcono);
-            //    this.GraficoIcono.absolutePosition({ x: centro.x, y: centro.y });
-            //    //this.GraficoIcono.rotation(this.Orientacion);
-            //    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-            //    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
-            //    //this.GraficoIcono.position({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
-            //    //this.GraficoIcono.getLayer().batchDraw();
-
-            //    layer.batchDraw();
-            //}
 
             this.lstIslas.forEach(function (item) {
                 item.Dibujar();
@@ -844,9 +804,10 @@ function inicializarArea() {
         //var esTouch = e.type.startsWith("touch");
 
         if (esStage) {
-            if (Lienzo.IslaActual?.GraficoTrasnformer) {
-                Lienzo.IslaActual.GraficoTrasnformer.nodes([]);
-                Lienzo.IslaActual.GraficoTrasnformer.visible(false);
+            if (Lienzo.Transformer) {
+                Lienzo.CerrarTransformer();
+                //Lienzo.Transformer.nodes([]);
+                //Lienzo.Transformer.visible(false);
             }
             layer.draw();
         }
