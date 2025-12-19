@@ -112,7 +112,25 @@ function inicializarArea() {
         RestaurarTamano: function () {
             this.Stage.scale({ x: 1, y: 1 });
             this.Stage.position({ x: 0, y: 0 });
+            Lienzo.AjustarEscalaVisual();
             this.Stage.batchDraw();
+        },
+        AjustarEscalaVisual: function () {
+            var escala = stage.scaleX();
+            var div = 1 / escala;
+            Lienzo.lstPunto.forEach(p => {
+                if (p.Grafico) {
+                    p.Grafico.radius(7 * div);
+                }
+
+                p.lstRelacionado.forEach(item => {
+                    item.Grafico.strokeWidth(4 * div);
+
+                    if (item.GraficoTexto) {
+                        item.GraficoTexto.fontSize(16 * div);
+                    }
+                });
+            });
         },
         Cerrar: function () {
             if (this.PuntoActual != null)
@@ -252,9 +270,9 @@ function inicializarArea() {
             const estructura = data.data;
             return estructura;
         },
-        CerrarTransformer: function () {
-            Lienzo.Transformer.nodes([]);
-            Lienzo.Transformer.visible(false);
+        CerrarTransformer: function (transformer) {
+            transformer.nodes([]);
+            transformer.visible(false);
             layer.batchDraw();
         },
         HabilitarArrastrable: function (habilitar) {
@@ -421,7 +439,7 @@ function inicializarArea() {
             this.Grafico?.destroy();
             this.GraficoIcono.destroy();
             this.GraficoTexto.destroy();
-            this.GraficoTrasnformer?.destroy();
+            Lienzo.Transformer?.destroy();
 
             var temp = [];
             temp.forEach(function (item) {
@@ -551,8 +569,8 @@ function inicializarArea() {
                     layer.batchDraw();
                 });
 
-                Lienzo.Transformer = new Konva.Transformer(cfgTransformer);
-                //this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
+                this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
+                Lienzo.Transformer = this.GraficoTrasnformer;
 
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
@@ -561,17 +579,14 @@ function inicializarArea() {
 
                 isla.Grafico.on('pointerdblclick', throttle((e) => {
 
-                    //if (Lienzo.Transformer && Lienzo.IslaActual !== isla) {
-                    //    Lienzo.CerrarTransformer();
-                    //    isla.Grupo.draggable(false);
-                    //}
                     var transformer = Lienzo.Transformer;
 
-                    if (Lienzo.IslaActual && Lienzo.IslaActual !== isla) {
-                        Lienzo.IslaActual.Grupo.draggable(false);
-                    }
-
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+
+                        if (Lienzo.IslaActual && Lienzo.IslaActual !== isla && transformer) {
+                            Lienzo.CerrarTransformer(transformer);
+                            Lienzo.IslaActual.Grupo.draggable(false);
+                        }
 
                         Lienzo.IslaActual = isla;
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
@@ -587,45 +602,11 @@ function inicializarArea() {
                         isla.Grupo.draggable(true);
                         layer.batchDraw();
                     } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
-                        transformer.nodes([]);
-                        transformer.visible(false);
-                        isla.Grupo.draggable(false);
                         Lienzo.Estado = enumEstadoLienzo.Editando;
                         Lienzo.IslaActual = null;
 
                         layer.batchDraw();
                     }
-
-
-
-                    //if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-
-                    //    Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                    //    Lienzo.IslaActual = isla;
-                    //    window.recibirDatosAActualizar(Lienzo.IslaActual);
-
-                    //    isla.Grafico.setAttrs({
-                    //        fill: Lienzo.IslaActual.Color ?
-                    //            `#${Lienzo.IslaActual.Color}` : "#88b7d5"
-                    //    });
-
-                    //    transformer.nodes([isla.Grafico]);
-                    //    transformer.visible(true);
-                    //    isla.Grupo.draggable(true);
-                    //    layer.batchDraw();
-
-                    //} else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
-
-                    //    transformer.nodes([]);
-                    //    transformer.visible(false);
-
-                    //    isla.Grupo.draggable(false);
-
-                    //    Lienzo.Estado = enumEstadoLienzo.Editando;
-                    //    Lienzo.IslaActual = null;
-
-                    //    layer.batchDraw();
-                    //}
                 }, 300));
 
                 isla.Grupo.on('dragend', function () {
@@ -781,8 +762,12 @@ function inicializarArea() {
 
         const escalarPor = 1.05;
         const direccion = e.evt.deltaY > 0 ? 1 : -1;
-        const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
+        var nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
 
+        const escalaMinima = 0.2;
+        const escalaMaxima = 10;
+
+        nuevaEscala = Math.max(escalaMinima, Math.min(escalaMaxima, nuevaEscala));
         stage.scale({ x: nuevaEscala, y: nuevaEscala });
 
         const mousePointTo = {
@@ -793,6 +778,9 @@ function inicializarArea() {
             x: cursor.x - mousePointTo.x * nuevaEscala,
             y: cursor.y - mousePointTo.y * nuevaEscala
         });
+
+        Lienzo.AjustarEscalaVisual();
+
         stage.batchDraw();
     });
 
@@ -805,9 +793,7 @@ function inicializarArea() {
 
         if (esStage) {
             if (Lienzo.Transformer) {
-                Lienzo.CerrarTransformer();
-                //Lienzo.Transformer.nodes([]);
-                //Lienzo.Transformer.visible(false);
+                Lienzo.CerrarTransformer(Lienzo.Transformer);
             }
             layer.draw();
         }
@@ -978,9 +964,7 @@ function inicializarArea() {
 
     window.actualizarDatosIsla = function (datos) {
         var isla = Lienzo.IslaActual;
-
         datosIsla = datos;
-
         isla.Modificada = true;
         window.agregarIslasAGuardar(isla);
     }

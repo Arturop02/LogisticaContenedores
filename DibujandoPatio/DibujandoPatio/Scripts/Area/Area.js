@@ -54,7 +54,25 @@ function inicializarArea() {
         RestaurarTamano: function () {
             this.Stage.scale({ x: 1, y: 1 });
             this.Stage.position({ x: 0, y: 0 });
+            Lienzo.AjustarEscalaVisual();
             this.Stage.batchDraw();
+        },
+        AjustarEscalaVisual: function () {
+            var escala = stage.scaleX();
+            var div = 1 / escala;
+            Lienzo.lstPunto.forEach(p => {
+                if (p.Grafico) {
+                    p.Grafico.radius(7 * div);
+                }
+
+                p.lstRelacionado.forEach(item => {
+                    item.Grafico.strokeWidth(4 * div);
+
+                    if (item.GraficoTexto) {
+                        item.GraficoTexto.fontSize(16 * div);
+                    }
+                });
+            });
         },
         Cerrar: function () {
             if (this.PuntoActual != null)
@@ -249,45 +267,7 @@ function inicializarArea() {
                     }
 
                     const pos = Lienzo.DamePosicion();
-                    bootbox.confirm({
-                        message: '¿Deseas agregar un nuevo punto?',
-                        buttons: {
-                            confirm: {
-                                label: 'Agregar',
-                                className: 'btn-success'
-                            },
-                            cancel: {
-                                label: 'Cancelar',
-                                className: 'btn-danger'
-                            }
-                        },
-                        callback: (result) => {
-                            if (result) {
-                                var Orden = linea.lstRelacionado.Min(c => c.Orden);
-
-                                linea.Eliminar();
-                                var punto = Lienzo.AgregarPunto(pos.x, pos.y);
-
-                                linea.lstRelacionado.forEach(item => {
-                                    Lienzo.RelacionarPuntos(item, punto);
-                                });
-
-                                Orden = linea.lstRelacionado.Min(c => c.Orden);
-                                if (Orden == 0)
-                                    Orden = linea.lstRelacionado.Max(c => c.Orden);
-                                punto.Orden = Orden + 1;
-
-                                Lienzo.lstPunto.Where(c => c.Orden > Orden && c != punto).forEach(item => {
-                                    item.Orden++;
-                                });
-
-                                punto.Dibujar();
-                                Lienzo.AjustarOrden();
-                                Lienzo.PuntoActual = punto;
-                                Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                            }
-                        }
-                    });
+                    window.agregarPunto(linea, pos);
                 });
             } else {
                 this.Grafico.setAttrs(cfgGraficoLinea);
@@ -356,44 +336,7 @@ function inicializarArea() {
                     if (Lienzo.Modo === enumModoLienzo.Isla) return;
                     if (Lienzo.Modo === enumModoLienzo.Area) {
                         if (Lienzo.Estado === enumEstadoLienzo.Editando) {
-                            var lstpunto = [];
-                            bootbox.confirm({
-                                message: '¿Deseas eliminar el punto?',
-                                buttons: {
-                                    confirm: {
-                                        label: 'Eliminar',
-                                        className: 'btn-success'
-                                    },
-                                    cancel: {
-                                        label: 'Cancelar',
-                                        className: 'btn-danger'
-                                    }
-                                },
-                                callback: (result) => {
-                                    if (result) {
-                                        this.lstRelacionado.forEach(linea => {
-                                            linea.lstRelacionado.forEach(punto => {
-                                                if (punto != this)
-                                                    lstpunto.push(punto);
-                                            });
-                                        });
-
-                                        var punto1 = lstpunto[0];
-                                        var punto2 = lstpunto[1];
-
-                                        this.Eliminar();
-
-                                        Lienzo.RelacionarPuntos(punto1, punto2);
-
-                                        punto1.Dibujar();
-
-                                        Lienzo.lstPunto.forEach(item => {
-                                            if (item.Orden > this.Orden && item != this)
-                                                item.Orden--;
-                                        });
-                                    }
-                                }
-                            });
+                            window.confirmarEliminarPunto(this);
                         }
                     }
                 });
@@ -437,36 +380,39 @@ function inicializarArea() {
 
             var cfgGrafico = {
                 Id: this.Id,
+                x: 0,
+                y: 0,
                 name: this.Nombre,
                 text: this.Descripcion,
                 width: this.Ancho,
                 height: this.Alto,
-                fill: `#${this.Color}`,
+                fill: this.Color ? `#${this.Color}` : "#88b7d5",
                 strokeWidth: 1.2,
                 stroke: 'black',
+                rotation: this.Orientacion,
+                offsetX: this.Ancho / 2,
+                offsetY: this.Alto / 2,
             };
 
             var cfgGraficoIcono = {
-                x: 0,
-                y: 0,
                 text: this.Icono,
                 align: 'center',
+                verticalAlign: 'middle',
                 fontFamily: 'FontAwesome',
                 fill: 'white',
+                rotation: this.Orientacion,
             };
 
             var cfgGraficoTexto = {
-                x: 0,
-                y: this.Alto / 2 + 10,
                 text: this.Nombre,
                 fontSize: 12,
                 fill: 'black',
+                rotation: this.Orientacion,
             };
 
             var cfgGrupo = {
                 x: this.Posicion.x,
                 y: this.Posicion.y,
-                rotation: this.Orientacion,
                 draggable: false,
             };
 
@@ -474,35 +420,51 @@ function inicializarArea() {
                 this.Grupo = new Konva.Group(cfgGrupo);
 
                 this.Grafico = new Konva.Rect(cfgGrafico);
-                this.Grafico.offsetX(this.Grafico.width() / 2);
-                this.Grafico.offsetY(this.Grafico.height() / 2);
-
-                this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
-                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico || { width: c => tamanoDefault.ancho, height: c => tamanoDefault.alto, }))
-                this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-                this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
 
                 this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+                var radio = this.Alto / 2 + this.GraficoTexto.height();
+                var radianes = (90 + this.Orientacion) * Math.PI / 180;
+                var xNombre = radio * Math.cos(radianes);
+                var yNombre = radio * Math.sin(radianes);
+
+                this.GraficoTexto.setAttrs({
+                    position: {
+                        x: xNombre,
+                        y: yNombre,
+                    },
+                });
                 this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
                 this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
+
+                this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
+                document.fonts.ready.then(() => {
+                    this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
+
+                    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
+                    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+
+                    this.GraficoIcono.position({ x: 0, y: 0 });
+
+                    layer.batchDraw();
+                });
 
                 this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
                 layer.add(this.Grupo);
             }
-            else {
-                this.Grafico.setAttrs(cfgGrafico);
-                this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
-                this.Grafico.getLayer().batchDraw();
+            //else {
+            //    this.Grafico.setAttrs(cfgGrafico);
+            //    this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
+            //    this.Grafico.getLayer().batchDraw();
 
-                this.GraficoTexto.setAttrs(cfgGraficoTexto);
-                this.GraficoTexto.absolutePosition({ x: cfgGraficoTexto.x, y: cfgGraficoTexto.y });
-                this.GraficoTexto.getLayer().batchDraw();
+            //    this.GraficoTexto.setAttrs(cfgGraficoTexto);
+            //    this.GraficoTexto.absolutePosition({ x: cfgGraficoTexto.x, y: cfgGraficoTexto.y });
+            //    this.GraficoTexto.getLayer().batchDraw();
 
-                this.GraficoIcono.setAttrs(cfgGraficoIcono);
-                this.GraficoIcono.absolutePosition({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
-                this.GraficoIcono.getLayer().batchDraw();
-            }
+            //    this.GraficoIcono.setAttrs(cfgGraficoIcono);
+            //    this.GraficoIcono.absolutePosition({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
+            //    this.GraficoIcono.getLayer().batchDraw();
+            //}
 
             this.lstIslas.forEach(function (item) {
                 item.Dibujar();
@@ -581,8 +543,12 @@ function inicializarArea() {
 
         const escalarPor = 1.05;
         const direccion = e.evt.deltaY > 0 ? 1 : -1;
-        const nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
+        var nuevaEscala = direccion > 0 ? escalaAnterior / escalarPor : escalaAnterior * escalarPor;
 
+        const escalaMinima = 0.2;
+        const escalaMaxima = 10;
+        
+        nuevaEscala = Math.max(escalaMinima, Math.min(escalaMaxima, nuevaEscala));
         stage.scale({ x: nuevaEscala, y: nuevaEscala });
 
         const mousePointTo = {
@@ -593,6 +559,9 @@ function inicializarArea() {
             x: cursor.x - mousePointTo.x * nuevaEscala,
             y: cursor.y - mousePointTo.y * nuevaEscala
         });
+
+        Lienzo.AjustarEscalaVisual();
+
         stage.batchDraw();
     });
 
@@ -636,6 +605,7 @@ function inicializarArea() {
     //Acciones que se realizan al arrastrar el mouse
     stage.on('pointermove', function (e) {
         if (Lienzo.Modo === enumModoLienzo.Area) {
+            
             if ([enumEstadoLienzo.Agregando, enumEstadoLienzo.Editando, enumEstadoLienzo.Moviendo].includes(Lienzo.Estado)) {
 
                 if (Lienzo.PuntoActual != null) {
@@ -645,6 +615,7 @@ function inicializarArea() {
                     Lienzo.PuntoActual.Posicion.y = pos.y;
                     Lienzo.PuntoActual.Dibujar();
                 }
+                Lienzo.AjustarEscalaVisual();
             }
         }
     });
@@ -728,6 +699,77 @@ function inicializarArea() {
 
     window.agregarZona = function () {
         window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', idAreaSeleccionada);
+    }
+
+    window.eliminarPuntos = async function (Punto) {
+        var lstpunto = [];
+        console.log(Punto);
+        Punto.lstRelacionado.forEach(linea => {
+            linea.lstRelacionado.forEach(punto => {
+                if (punto !== Punto) {
+                    lstpunto.push(punto);
+                }
+            });
+        });
+
+        var punto1 = lstpunto[0];
+        var punto2 = lstpunto[1];
+
+        Punto.Eliminar();
+
+        Lienzo.RelacionarPuntos(punto1, punto2);
+
+        punto1.Dibujar();
+
+        Lienzo.lstPunto.forEach(item => {
+            if (item.Orden > Punto.Orden && item != Punto) {
+                item.Orden--;
+                item.MoverArriba();
+            }
+        });
+        Lienzo.AjustarEscalaVisual();
+    }
+
+    window.agregarPuntos = async function (linea, pos) {
+        var Orden = linea.lstRelacionado.Min(c => c.Orden);
+
+        linea.Eliminar();
+        var punto = Lienzo.AgregarPunto(pos.x, pos.y);
+
+        var insercionAlInicio =
+            linea.lstRelacionado.some(p => p.Orden === 0) &&
+            linea.lstRelacionado.some(p => p.Orden === 1);
+
+        if (insercionAlInicio) {
+            punto.Orden = 1;
+            Lienzo.lstPunto
+                .filter(p => p !== punto && p.Orden >= 1)
+                .forEach(p => p.Orden++);
+
+            linea.lstRelacionado.forEach(item => {
+                Lienzo.RelacionarPuntos(item, punto);
+            });
+        } else {
+
+            linea.lstRelacionado.forEach(item => {
+                Lienzo.RelacionarPuntos(item, punto);
+            });
+
+            Orden = linea.lstRelacionado.Min(c => c.Orden);
+            if (Orden == 0)
+                Orden = linea.lstRelacionado.Max(c => c.Orden);
+            punto.Orden = Orden + 1;
+
+            Lienzo.lstPunto.Where(c => c.Orden > Orden && c != punto).forEach(item => {
+                item.Orden++;
+            });
+        }
+
+        punto.Dibujar();
+        Lienzo.AjustarOrden();
+        Lienzo.AjustarEscalaVisual();
+        Lienzo.PuntoActual = punto;
+        Lienzo.Estado = enumEstadoLienzo.Moviendo;
     }
 
     window.guardarAsync = function (area) {

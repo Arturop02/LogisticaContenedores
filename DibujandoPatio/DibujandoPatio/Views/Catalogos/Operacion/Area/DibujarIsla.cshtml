@@ -314,7 +314,6 @@
                     var formZona = document.getElementById("formZona").cloneNode(true);
                     formZona.style.display = "block";
 
-
                     var respuesta = await MensajeAsync({
                         Titulo: 'Actualizacion',
                         Cuerpo: 'Deseas actualizar los datos de la zona',
@@ -396,7 +395,6 @@
                             );
                         });
 
-
                         for (let i = 1; i < res.totalPaginas; i++) {
                             const btn = $(`<button class="btn btn-sm ${i === res.paginaActual ? 'btn-primary' : 'btn-light'}">${i}</button>`);
                             btn.on('click', () => this.buscarIconos(filtro, scope, i, tamPagina));
@@ -416,28 +414,6 @@
                     var contenido = document.getElementById("formularioEstructuras");
                     var clon = contenido.cloneNode(true);
                     clon.style.display = "block";
-
-                    //var pregunta = await MensajeAsync({
-                    //    Titulo: 'Agregar un nuevo tipo de estructura',
-                    //    Cuerpo: clon,
-                    //    Boton: [
-                    //        { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
-                    //        { Etiqueta: 'Guardar', Clase: 'btn-success', Valor: true },
-                    //    ],
-                    //});
-
-                    //if (pregunta.Valor === false) {
-                    //    return;
-                    //}
-
-                    //var modal = $('.bootbox-body');
-
-                    //var descripcion = modal.find(`#descripcionEstructura`).val();
-                    //var idEnu = modal.find(`#enuEstructura`).val();
-                    //var color = modal.find(`#colorEstructura`).val().replace('#', '');
-                    //var icono = clon.querySelector('#iconoSeleccionado').value;
-
-                    //window.agregarEstructura(descripcion, idEnu, color, icono);
 
                     bootbox.dialog({
                         title: 'Agregar nuevo tipo de estructura',

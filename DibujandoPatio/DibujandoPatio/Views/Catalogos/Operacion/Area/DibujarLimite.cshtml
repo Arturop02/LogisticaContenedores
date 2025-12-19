@@ -45,11 +45,6 @@
         max-width: 300px;
     }
 
-    /*font-face {
-        font-family: "FontIconos";
-        src: url('/Content/fontawesome-webfont.woff2')format('truetype');
-    }*/
-
 </style>
 <div id="app">
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000;">
@@ -107,6 +102,8 @@
         <label for="nuevoEnu">Nuevo ENU:</label>
         <input type="text" id="nuevoEnu" class="form-control" placeholder="Ingresa el nombre del nuevo ENU" />
     </div>
+
+    
 
 </div>
 
@@ -174,7 +171,10 @@
                 return {
                     mostrarModalArea: false,
                     dibujando: false,
-                    Area: null
+                    Area: null,
+                    Punto: null,
+                    Linea: null,
+                    Posicion: null,
                 }
             },
             watch: {
@@ -229,6 +229,40 @@
 
                     return ({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
                 },
+                async confirmarEliminarPunto(punto) {
+                    var pregunta = await MensajeAsync({
+                        Titulo: 'Eliminar punto',
+                        Cuerpo: 'Deseas eliminar este punto',
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-default', Valor: false },
+                            { Etiqueta: 'Eliminar', Clase: 'btn-danger', Valor: true},
+                        ],
+                    });
+
+                    if (!pregunta.Valor) {
+                        return;
+                    }
+
+                    this.Punto = punto
+                    window.eliminarPuntos(this.Punto);
+                },
+                async confirmacionAgregarPunto(linea, posicion) {
+                    var pregunta = await MensajeAsync({
+                        Titulo: 'Agregar un nuevo punto',
+                        Cuerpo: 'Desea agregar un nuevo punto',
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-default', Valor: false },
+                            { Etiqueta: 'Agregar', Clase: 'btn-success', Valor: true },
+                        ]
+                    });
+
+                    if (!pregunta.Valor) {
+                        return;
+                    }
+                    this.Linea = linea;
+                    this.Posicion = posicion;
+                    window.agregarPuntos(this.Linea, this.Posicion);
+                },
                 async nuevoEnu() {
                     var contenido = document.getElementById("formEnu").cloneNode(true);
                     contenido.style.display = "block";
@@ -251,7 +285,7 @@
 
                     window.agregarEnu(DescripcionEnu);
                 },
-               async guardar() {
+                async guardar() {
                    if (this.Area?.Id > 0) {
                        await window.guardarAsync(this.Area);
                        document.location.href = '@Url.Action("DibujarLimite",new {Id="__id__"})'.replace('__id__', this.Area.Id);
@@ -272,12 +306,16 @@
                        }
                    }
                    
-               },
+                },
             },
             computed: {
                 areaSeleccionada() {
                     return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
                 }
+            },
+            mounted() {
+                window.confirmarEliminarPunto = this.confirmarEliminarPunto;
+                window.agregarPunto = this.confirmacionAgregarPunto;
             }
         });
     </script>
