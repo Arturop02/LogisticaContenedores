@@ -63,6 +63,16 @@
                 v-on:click="iniciarDibujo">
             <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>Nueva Area
         </button>
+        <button class="btn btn-warning"
+                v-on:click="editarArea">
+            <i class="glyphicon glyphicon-pencil" aria-hidden="true"></i>Editar Area
+        </button>
+
+        <button id="eliminarArea"
+                class="btn btn-danger"
+                v-on:click="eliminarArea">
+            <i class="glyphicon glyphicon-remove"></i>Eliminar Area
+        </button>
         <button class="btn btn-success pull-right"
                 v-on:click="guardar">
             <i class="glyphicon glyphicon-ok"></i>Guardar
@@ -71,9 +81,10 @@
                 v-on:click="agregarZona">
             <i class="glyphicon glyphicon-pencil"></i>Agregar Zona
         </button>
+
         <button class="btn btn-default"
                 v-on:click="nuevoEnu">
-            <i class="glyphicon glyphicon-plus"></i>Nuevo Enu
+            <i class="glyphicon glyphicon-plus"></i>Nuevo Enum
         </button>
         <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-resize-full" aria-hidden="true"></i></button>
         <button onclick="Lienzo.PantallaCompleta()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
@@ -93,6 +104,13 @@
             </select>
             <label class="mt-2">Nombre del area::</label>
             <input id="nombreArea" type="text" class="form-control" placeholder="Ingresa el nombre del área nueva" />
+        </div>
+    </div>
+
+    <div id="modalEdicion" class="mi-modal-overlay" style="display:none">
+        <div class="mi-modal">
+            <label class="mt-2">Ingresa el nuevo nombre del area</label>
+            <input id="nombreAreaEditado" type="text" class="form-control" />
         </div>
     </div>
 
@@ -204,6 +222,44 @@
 
                     window.iniciarDibujo();
                 },
+                async editarArea() {
+
+                    var contenido = document.getElementById('modalEdicion').cloneNode(true);
+                    contenido.style.display = 'block';
+
+                    var pregunta = await MensajeAsync({
+                        Titulo: 'Editar Area',
+                        Cuerpo: contenido,
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-danger', Valor: false },
+                            { Etiqueta: 'Editar', Clase: 'btn-success', Valor: true},
+                        ],
+                    });
+
+                    if (!pregunta.Valor) return;
+
+                    const modal = $('.bootbox-body');
+                    const nombreArea = modal.find('#nombreAreaEditado').val().trim();
+
+                    this.Area.Nombre = nombreArea;
+                    await window.editarArea(this.Area);
+                    document.location.href = '@Url.Action("DibujarLimite",new {Id="__id__"})'.replace('__id__', this.Area.Id);
+                },
+                async eliminarArea() {
+
+                    var pregunta = await MensajeAsync({
+                        Titulo: 'Eliminar la Area',
+                        Cuerpo: `Estas de acuerdo en eliminar el area ${this.Area.Nombre}`,
+                        Boton: [
+                            { Etiqueta: 'Cancelar', Clase: 'btn-default', Valor: false },
+                            { Etiqueta: 'Eliminar', Clase: 'btn-danger', Valor: true },
+                        ],
+                    });
+
+                    if (!pregunta.Valor) return;
+
+                    window.eliminarArea(this.Area);
+                },
                 async PreguntarConfirmacionGuardarAsync() {
 
                     var contenido = document.getElementById("modalGuardado").cloneNode(true);
@@ -305,7 +361,7 @@
                            console.log(e);
                        }
                    }
-                   
+
                 },
             },
             computed: {

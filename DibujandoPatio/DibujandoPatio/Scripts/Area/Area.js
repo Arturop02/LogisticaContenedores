@@ -701,6 +701,64 @@ function inicializarArea() {
         window.location.href = objSer.Url.Area.DibujarIsla.replace('__id__', idAreaSeleccionada);
     }
 
+    window.editarArea = async function (area) {
+        area.Vertices = Lienzo.lstPunto.map(p => ({
+            Id: p.Id,
+            X: p.Posicion.x,
+            Y: p.Posicion.y,
+            Orden: p.Orden,
+            Activo: p.Activo
+        }));
+
+        $.ajax({
+            url: '/Area/EditarArea',
+            method: 'POST',
+            data: JSON.stringify(area),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                if (res.ok) {
+                    Notify(`Editado correctamente`, null, null, "success");
+                    dibujando = false;
+                    //window.location.href = objSer.Url.Area
+                } else {
+                    bootbox.alert("Ha ocurrido un problema");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                reject(errorThrown);
+            }
+        });
+
+    }
+
+    window.eliminarArea = async function (area) {
+        
+        layer.destroyChildren();
+        Lienzo.lstPunto = [];
+        Lienzo.PuntoActual = null;
+        Lienzo.IslaActual = null;
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/Area/BorrarArea',
+                method: 'POST',
+                data: JSON.stringify(area),
+                contentType: 'application/json; charset=utf-8',
+                success: function (res) {
+                    if (res.ok) {
+                        Notify(`Eliminado correctamente`, null, null, "success");
+                    } else {
+                        bootbox.alert("Ha ocurrido un problema");
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    reject(errorThrown);
+                }
+            });
+        });       
+
+    }
+
     window.eliminarPuntos = async function (Punto) {
         var lstpunto = [];
         console.log(Punto);

@@ -36,13 +36,12 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpPost]
-        public JsonResult BorrarArea(int id)
+        public JsonResult BorrarArea(AreaBT areaBT)
         {
             try
             {
                 AreaRN areaRN = new AreaRN();
-                AreaBT areaBT = new AreaBT { Id = id };
-                areaRN.Borrado(areaBT);
+                var area = areaRN.Borrado(areaBT);
                 return Json(new { ok = true });
             }
             catch (Exception ex)
