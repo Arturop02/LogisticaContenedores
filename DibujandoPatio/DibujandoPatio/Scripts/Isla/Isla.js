@@ -90,6 +90,7 @@ function inicializarArea() {
         lstPunto: [],
         PuntoActual: null,
         IslaActual: null,
+        IslaAnterior: null,
         lstIslas: [],
         Transformer: null,
         DamePosicion: function () {
@@ -270,9 +271,18 @@ function inicializarArea() {
             const estructura = data.data;
             return estructura;
         },
-        CerrarTransformer: function (transformer) {
-            transformer.nodes([]);
-            transformer.visible(false);
+        CerrarTransformer: function () {
+
+            if (Lienzo.Transformer) {
+                Lienzo.Transformer.nodes([]);
+                Lienzo.Transformer.visible(false);
+            }
+
+            if (Lienzo.IslaAnterior) {
+                Lienzo.IslaAnterior.Grupo.draggable(false);
+            }
+
+            Lienzo.IslaAnterior = null;
             layer.batchDraw();
         },
         HabilitarArrastrable: function (habilitar) {
@@ -577,18 +587,28 @@ function inicializarArea() {
                 layer.add(this.Grupo, Lienzo.Transformer);
                 var isla = this;
 
-                isla.Grafico.on('pointerdblclick', throttle((e) => {
+                isla.Grafico.on('pointerclick', throttle((e) => {
+                    if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+                        Lienzo.Estado = enumEstadoLienzo.Editando;
 
-                    var transformer = Lienzo.Transformer;
+                        if (Lienzo.IslaActual || Lienzo.Transformer) {
+                            Lienzo.CerrarTransformer();
+                        }
+                        layer.batchDraw();
+                    }
 
                     if (Lienzo.Estado === enumEstadoLienzo.Editando) {
 
-                        if (Lienzo.IslaActual && Lienzo.IslaActual !== isla && transformer) {
-                            Lienzo.CerrarTransformer(transformer);
-                            Lienzo.IslaActual.Grupo.draggable(false);
+                        if (Lienzo.IslaActual && Lienzo.IslaActual !== isla) {
+                            Lienzo.IslaAnterior = Lienzo.IslaActual;
                         }
 
                         Lienzo.IslaActual = isla;
+
+                        if (Lienzo.IslaAnterior) {
+                            Lienzo.CerrarTransformer();
+                        }
+                        
                         Lienzo.Estado = enumEstadoLienzo.Moviendo;
                         window.recibirDatosAActualizar(Lienzo.IslaActual);
 
@@ -597,15 +617,11 @@ function inicializarArea() {
                                 `#${Lienzo.IslaActual.Color}` : "#88b7d5"
                         });
 
-                        transformer.nodes([isla.Grafico]);
-                        transformer.visible(true);
+                        Lienzo.Transformer.nodes([isla.Grafico]);
+                        Lienzo.Transformer.visible(true);
                         isla.Grupo.draggable(true);
                         layer.batchDraw();
-                    } else if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
-                        Lienzo.Estado = enumEstadoLienzo.Editando;
-                        Lienzo.IslaActual = null;
 
-                        layer.batchDraw();
                     }
                 }, 300));
 
@@ -793,7 +809,7 @@ function inicializarArea() {
 
         if (esStage) {
             if (Lienzo.Transformer) {
-                Lienzo.CerrarTransformer(Lienzo.Transformer);
+                Lienzo.CerrarTransformer(Lienzo.Transformer, Lienzo.IslaActual);
             }
             layer.draw();
         }

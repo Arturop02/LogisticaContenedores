@@ -683,18 +683,18 @@ function inicializarArea() {
 
         });
 
-        $.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
-            var area = res.data;
-            area.Islas.forEach(i => {
-                Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y, i.Ancho, i.Alto, i.Nombre, i.Color, i.Icono, i.Orientacion);
-                Lienzo.IslaActual.Id = i.Id;
-                Lienzo.IslaActual.Dibujar();
-            });
+        //$.getJSON('/Area/ObtenerIslasPorAreaId', { id: id }, function (res) {
+        //    var area = res.data;
+        //    area.Islas.forEach(i => {
+        //        Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y, i.Ancho, i.Alto, i.Nombre, i.Color, i.Icono, i.Orientacion);
+        //        Lienzo.IslaActual.Id = i.Id;
+        //        Lienzo.IslaActual.Dibujar();
+        //    });
 
-            Lienzo.IslaActual = null;
-            Lienzo.Estado = enumEstadoLienzo.Editando;
-            Lienzo.BloquearArea(false);
-        });
+        //    Lienzo.IslaActual = null;
+        //    Lienzo.Estado = enumEstadoLienzo.Editando;
+        //    Lienzo.BloquearArea(false);
+        //});
     }
 
     window.agregarZona = function () {
