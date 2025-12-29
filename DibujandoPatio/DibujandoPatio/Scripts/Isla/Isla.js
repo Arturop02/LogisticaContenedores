@@ -616,12 +616,6 @@ function inicializarArea() {
                             fill: Lienzo.IslaActual.Color ?
                                 `#${Lienzo.IslaActual.Color}` : "#88b7d5"
                         });
-
-                        Lienzo.Transformer.nodes([isla.Grafico]);
-                        Lienzo.Transformer.visible(true);
-                        isla.Grupo.draggable(true);
-                        layer.batchDraw();
-
                     }
                 }, 300));
 
@@ -946,6 +940,9 @@ function inicializarArea() {
         }
 
         Lienzo.IslaActual.Modificada = true;
+        Lienzo.Transformer.nodes([Lienzo.IslaActual.Grafico]);
+        Lienzo.Transformer.visible(true);
+        Lienzo.IslaActual.Grupo.draggable(true);
         layer.batchDraw();
 
         Notify("Los datos seran actualizados", null, null, "success");

@@ -116,6 +116,19 @@ namespace RN.Patio
             }
         }
 
+        public AreaBT BuscarPorPatioId(int id)
+        {
+            try
+            {
+                AreaBD areaBD = new AreaBD(ConstantesRN.BD_CONECTION);
+                return areaBD.BuscaPorOpcion(BuscarOpcion.PorPatio, Query: id.ToString()).FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<AreaBT> DameTodosAlta()
         {
             try

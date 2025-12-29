@@ -15,7 +15,7 @@
         TodosAB = 5,
         ListaA = 6,
         PorArea = 7,
-        Otra2 = 8,
+        PorPatio = 8,
         Otra3 = 9,
         Otra4 = 10,
         Otra5 = 11,

@@ -4,6 +4,7 @@
     ViewBag.Title = "Dibujando Patio";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var patios = ViewBag.Patios as List<PatioBT>;
+    var areas = ViewBag.Areas as List<BT.AreaBT>;
 }
 
 
@@ -34,54 +35,158 @@
         padding: 0px;
     }
 
+    .grid-previews {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .preview-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fafafa;
+        box-shadow: 0 2px 6px rgba(0,0,0,.1);
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .preview-header {
+        padding: 10px;
+        font-weight: bold;
+        background: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .preview-canvas {
+        height: 220px;
+    }
+
     body > nav.navbar {
         display: none;
     }
 </style>
-<div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
-    <div id="lstAreas" class="btn-group" data-toggle="buttons">
-        @{
-            int i = 0;
-        }
-
-        @foreach (var p in patios)
-        {
-            <label class="btn btn-primary @(i==0 ? "active" : "")">
-                <input type="radio"
-                       name="area"
-                       id="Area_@(p.Id)"
-                       data-id="@p.Id"
-                       autocomplete="off"
-                       @(i == 0 ? "checked" : "")> @p.Nombre
-                </label>
-                i++;
+<div id="app">
+    <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
+        <div id="lstPatios" class="btn-group">
+            
+            @foreach (var p in patios)
+            {
+                <a href="@Url.Action("Index", new {Id =p.Id})">
+                    <label class="btn btn-primary"
+                           :class="{active: Patio?.Id == @p.Id}">
+                        @p.Nombre
+                    </label>
+                </a>
             }
+        </div>
+    </div>
+
+    <div id="previews-container" style="width: 100vw; padding: 30px; position: fixed; z-index: 9">
+        <div id="lstAreasGrid" class="grid-previews">
+            @foreach (var a in areas)
+            {
+                <a href="@Url.Action("DibujarLimite",new {Id=a.Id})">
+                    <label class="preview-header">
+                        @a.Nombre
+                    </label>
+
+                    <div class="preview-card" id="preview-card-@a.Id">
+                        <div class="preview-canvas" id="preview-@a.Id"></div>
+                    </div>
+                </a>
+            }
+        </div>
 
     </div>
-    <button id="guardarBtn" class="btn btn-success pull-right" disabled><i class="glyphicon glyphicon-ok"></i> Guardar</button>
-    <button id="btnRedirigir" class="btn btn-warning" disabled><i class="glyphicon glyphicon-pencil"></i>Agregar Isla</button>
-    <button onclick="Lienzo.RestaurarTamano()" class="btn btn-warning"><i class="glyphicon glyphicon-fullscreen" aria-hidden="true"></i></button>
+
+    <div id="preview-renderer" style="display:none;">
+
+    </div>
+
 </div>
+
+
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 
 @section scripts{
+    @Scripts.Render("~/bundles/vue")
+    @Scripts.Render("~/bundles/konva")
+    @Scripts.Render("~/bundles/linq")
+    @Styles.Render("~/bundles/bootstrapselectcss")
+    @Styles.Render("~/bundles/jqgridcss")
+    @Scripts.Render("~/bundles/jqgrid")
+    @Scripts.Render("~/bundles/bootstrapselect")
+    @Styles.Render("~/bundles/fontawesomecss")
+    @Scripts.Render("~/bundles/notify")
+    <script src="~/Scripts/Patio/Patio.js"></script>
     <script src="~/Scripts/Area/Area.js"></script>
     <script>
         var objSer = {
             Url: {
+                Patio: {
+                    Index: '@Url.Action("Index", "Patio", new { Id = "__id__" })'
+                },
                 Isla: {
                     Index: '@Url.Action("Index", "Isla", new { id = "__id__" })',
                 }
-            }
+            },
+            Dato: {
+                PatioSeleccionado:@(ViewBag.PatioSeleccionado == null?"null": Html.Raw(ViewBag.PatioSeleccionado))
+            },
         };
         $(document).ready(function () {
-            inicializarArea();
-            var inputSeleccionado = $('#lstAreas input[name="area"]:checked');
-            if (inputSeleccionado.length) {
-                // Tomar el label padre y disparar el clic para cargar el patio
-                inputSeleccionado.closest('label').trigger('click');
-            }
+            if (objSer.Dato.PatioSeleccionado != null)
+                vuePatio.Patio = objSer.Dato.PatioSeleccionado;
+        });
+    </script>
+
+    <script>
+        var vuePatio = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    Patio: null,
+                    Area: null,
+                }
+            },
+            watch: {
+                Patio: {
+                    handler(newValue, oldValue) {
+                        if (newValue != null)
+                            seleccionarPatio(newValue.Id);
+                    },
+                    deep: true
+                },
+                Area: {
+                    handler(newValue, oldValue) {
+                        if (newValue != null)
+                            seleccionarArea(newValue.Id, newValue.Nombre);
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                seleccionarPatio(id, nombre) {
+                    this.Patio.Id = id;
+                    this.Patio.Nombre = nombre;
+
+                    
+                    window.seleccionarPatio(this.Patio.Id);
+                },
+                seleccionarArea(id, nombre) {
+                    this.areaId = id;
+                    this.areaNombre = nombre;
+
+                    window.seleccionarArea(id);
+                },
+            },
+            computed: {
+                PatioSeleccionado() {
+                    return this.Patio.Nombre ? `Patio: ${this.Patio.Nombre}` : `Sin seleccion`;
+                }
+            },
         });
     </script>
 }

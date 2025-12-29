@@ -78,6 +78,22 @@ namespace DibujandoPatio.Controllers
             return Json(new { ok = false, message = "No se pudo encontrar el area con el id " + id }, JsonRequestBehavior.AllowGet);
         }
 
+
+        [HttpGet]
+        public JsonResult ObtenerPreview(int id)
+        {
+            AreaRN areaRN = new AreaRN();
+            IslaRN islaRN = new IslaRN();
+            var area = areaRN.BuscarPorId(id);
+            var islas = islaRN.BuscarPorArea(id);
+            if (area != null)
+            {
+                area.Islas = islas;
+                return Json(new { ok = true, data = area }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { ok = false, message = "No se pudo encontrar el area con el id " + id }, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpGet]
         public JsonResult ListarAreas()
         {
@@ -103,7 +119,7 @@ namespace DibujandoPatio.Controllers
             if (Id != null)
             {
                 var areaSeleccionada = areaRN.BuscarPorId(Id.Value);
-                ViewBag.AreaSeleccionada = Newtonsoft.Json.JsonConvert.SerializeObject(areaSeleccionada);
+                ViewBag.AreaSeleccionada = JsonConvert.SerializeObject(areaSeleccionada);
             }
 
 
@@ -129,7 +145,7 @@ namespace DibujandoPatio.Controllers
             if (Id != null)
             {
                 var areaSeleccionada = areaRN.BuscarPorId(Id.Value);
-                ViewBag.AreaSeleccionada = Newtonsoft.Json.JsonConvert.SerializeObject(areaSeleccionada);
+                ViewBag.AreaSeleccionada = JsonConvert.SerializeObject(areaSeleccionada);
             }
 
             //ViewBag.IdAreaSeleccionada = id;

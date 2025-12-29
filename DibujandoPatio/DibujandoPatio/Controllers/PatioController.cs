@@ -1,10 +1,12 @@
 ﻿using BT.Patio;
+using Newtonsoft.Json;
 using RN.Patio;
 using System;
 using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace DibujandoPatio.Controllers
 {
@@ -46,8 +48,6 @@ namespace DibujandoPatio.Controllers
             {
                 PatioRN patioRN = new PatioRN();
                 PatioBT patioBT = new PatioBT { Id = id};
-                //VerticeRN verticeRN = new VerticeRN();
-                //var patio = patioRN.Borrar(patioBT);
                 patioRN.Borrar(patioBT);
 
                 return Json(new { ok = true });
@@ -71,6 +71,32 @@ namespace DibujandoPatio.Controllers
         }
 
         [HttpGet]
+        public JsonResult ObtenerTodoPorPatioId(int id)
+        {
+            PatioRN patioRN = new PatioRN();
+            AreaRN areaRN = new AreaRN();
+            IslaRN islaRN = new IslaRN();
+            VerticeRN verticeRN = new VerticeRN();
+
+            var patio = patioRN.BuscarPorId(id);
+            if (patio == null)
+                return Json(new { ok = false, message = "patio no encontrado" }, JsonRequestBehavior.AllowGet);
+
+            var areas = areaRN.BuscarPorPatioId(id);
+            var areaId = areas.Id;
+            var islas = islaRN.BuscarPorArea(areaId);
+            var vertices = verticeRN.BuscarPorArea(areaId);
+
+            if (areas != null)
+            {
+                areas.Islas = islas;
+                areas.Vertices = vertices;
+                return Json(new { ok = true, data = areas }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { ok = false, message = "No se pudo encontrar el area con el id " + id }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public JsonResult ListarPatios()
         {
             PatioRN patioRN = new PatioRN();
@@ -86,13 +112,23 @@ namespace DibujandoPatio.Controllers
             patioRN.BuscarPorId(patioBT.Id);
             return Json(new { ok = true });
         }
-        public ActionResult Index()
+        public ActionResult Index(int? Id)
         {
             PatioRN patioRN = new PatioRN();
             var patio = patioRN.DameTodosAlta();
             ViewBag.Patios = patio;
 
-            ViewBag.IdPatioSeleccionado = TempData["IdPatioSeleccionado"] ?? 0;
+            AreaRN areaRN = new AreaRN();
+            var area = areaRN.DameTodosAlta();
+            ViewBag.Areas = area;
+
+            if(Id != null)
+            {
+                var patioSeleccionado = patioRN.BuscarPorId(Id.Value);
+                ViewBag.PatioSeleccionado = JsonConvert.SerializeObject(patioSeleccionado);
+            }
+
+            //ViewBag.IdPatioSeleccionado = TempData["IdPatioSeleccionado"] ?? 0;
             return View();
         }
     }
