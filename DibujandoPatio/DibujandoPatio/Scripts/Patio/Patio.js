@@ -1,13 +1,14 @@
 ﻿var stage;
 var layer;
 var Lienzo;
+var previewStage;
+var previewLayer
 
 var enumModoLienzo = {
     Area: 'Area',
     Isla: 'Isla',
     Contenedor: 'Contenedor',
 }
-
 function DameEscala() {
     const escala = 0.4;
     return escala;
@@ -19,6 +20,7 @@ Lienzo = {
     Estado: null,
     lstPunto: [],
     PuntoActual: null,
+    IslaActual: null,
     Cerrar: function () {
             if (this.PuntoActual != null)
                 this.PuntoActual.Eliminar();
@@ -117,6 +119,27 @@ var enumTipoGrafico = {
         Rectangulo: 'Rectangulo',
     };
 
+function CrearLienzo(stage, layer) {
+    return {
+        Modo: enumModoLienzo.Area,
+        Escala: DameEscala(),
+        Estado: null,
+        lstPunto: [],
+        PuntoActual: null,
+        IslaActual: null,
+        Stage: stage,
+        Layer: layer,
+
+        AgregarPunto: Lienzo.AgregarPunto,
+        RelacionarPuntos: Lienzo.RelacionarPuntos,
+        Cerrar: Lienzo.Cerrar,
+        AgregarIsla: Lienzo.AgregarIsla,
+        TamanoIsla: Lienzo.TamanoIsla,
+        AjustarOrden: Lienzo.AjustarOrden,
+        AjustarTamanosIsla: Lienzo.AjustarTamanosIsla,
+    };
+}
+
 function Linea(puntoInicial, puntoFinal) {
     this.Tipo = enumTipoGrafico.Linea;
     this.Grafico = null;
@@ -144,7 +167,7 @@ function Linea(puntoInicial, puntoFinal) {
         if (this.Grafico == null) {
             this.Grafico = new Konva.Line(cfgGraficoLinea);
 
-            layer.add(this.Grafico);
+            previewLayer.add(this.Grafico);
         } else {
             this.Grafico.setAttrs(cfgGraficoLinea);
             this.Grafico.getLayer().batchDraw();
@@ -188,7 +211,7 @@ function Punto() {
 
         if (this.Grafico == null) {
             this.Grafico = new Konva.Circle(cfgGrafico);
-            layer.add(this.Grafico);
+            previewLayer.add(this.Grafico);
         }
         else {
             this.Grafico.setAttrs(cfgGrafico);
@@ -270,12 +293,12 @@ function Isla() {
 
                 this.GraficoIcono.position({ x: 0, y: 0 });
 
-                layer.batchDraw();
+                previewLayer.batchDraw();
             });
 
             this.Grupo.add(this.Grafico, this.GraficoIcono);
 
-            layer.add(this.Grupo);
+            previewLayer.add(this.Grupo);
         }
 
         this.lstIslas.forEach(function (item) {
@@ -338,21 +361,20 @@ stage = new Konva.Stage({
 
 Lienzo.Stage = stage;
 
-//Instanciar las capas en el escenario
 layer = new Konva.Layer();
 stage.add(layer);
 
 function cargarPreviewsPorPatio(patioId) {
-    $('.preview-card').hide();
-
+    
     $.getJSON('/Patio/ObtenerTodoPorPatioId', { id: patioId }, function (res) {
-        if (!res.ok || !res.data);
+        if (!res.ok || !res.data) return;
 
-        var areas = Array.isArray(res.data) ? res.data : [res.data];
+        var areas = res.data;
 
         areas.forEach(area => {
-            var containerId = "preview-" + area.Id;
-            $('.preview-card-' + area.Id).show();
+            const containerId = "preview-" + area.Id;
+            $('#preview-header-' + area.Id).show();
+            $('#preview-card-' + area.Id).show();
             generarPreview(area, containerId);
         });
     });
@@ -360,98 +382,52 @@ function cargarPreviewsPorPatio(patioId) {
 
 function generarPreview(area, containerId) {
 
-    Lienzo.lstPunto = [];
-    Lienzo.PuntoActual = null;
-    layer.destroyChildren();
+    const cont = document.getElementById(containerId);
+    cont.innerHTML = "";
 
-    var previewStage = new Konva.Stage({
+    previewStage = new Konva.Stage({
         container: containerId,
-        width: container.offsetWidth,
-        height: container.offsetHeight,
+        width: cont.offsetWidth,
+        height: cont.offsetHeight,
     });
 
-    const previewLayer = new Konva.Layer();
+    previewLayer = new Konva.Layer();
     previewStage.add(previewLayer);
 
-    const lienzoPreview = Object.assign({}, Lienzo);
+    const lienzoPreview = CrearLienzo(previewStage, previewLayer);   /* Object.assign({}, Lienzo);*/
     lienzoPreview.Stage = previewStage;
 
     area.Vertices = area.Vertices.OrderBy(c => c.Orden).ToArray();
     area.Vertices.forEach(v => {
-
         lienzoPreview.PuntoActual = lienzoPreview.AgregarPunto(v.X, v.Y);
         lienzoPreview.PuntoActual.Id = v.Id;
-        lienzoPreview.PuntoActual.Dibujar();
-
-        Lienzo.PuntoActual = null;
-        Lienzo.Cerrar();
+        lienzoPreview.PuntoActual.Dibujar();    
     });
+
+    lienzoPreview.PuntoActual = null;
+    lienzoPreview.Cerrar();
 
     area.Islas.forEach(i => {
-
-        const isla = new Isla();
-        Object.assign(isla, i);
-        isla.Dibujar(previewLayer);
+        lienzoPreview.IslaActual = lienzoPreview.AgregarIsla(i.X, i.Y, i.Ancho, i.Alto, i.Nombre, i.Color, i.Icono, i.Orientacion);
+        lienzoPreview.IslaActual.Dibujar();
     });
 
-    layer.draw();
+    lienzoPreview.IslaActual = null;
 
-    const dataUrl = previewStage.toDataURL({ pixelRatio: 0.25 });
+    previewLayer.draw();
+
+    const scaleX = previewStage.width() / stage.width();
+    const scaleY = previewStage.height() / stage.height();
+    const scale = Math.min(scaleX, scaleY);
+
+    previewStage.scale({ x: scale, y: scale });
+    previewStage.draw();
+
+    const dataUrl = previewStage.toDataURL({ pixelRatio: 0.9 });
     previewStage.destroy();
 
-    $('#' + containerId).html(`<img src="${dataUrl}" class="preview-img"/>`);
-
-    //$.getJSON('/Area/ObtenerAreaPorId', { id: areaId }, function (res) {
-    //    if (!res.ok || !res.data) return;
-
-    //    var area = res.data;
-    //    area.Vertices = area.Vertices.OrderBy(c => c.Orden).ToArray();
-    //    area.Vertices.forEach(v => {
-
-    //        const p = new Punto();
-    //        p.Posicion = { x: v.X, y: v.Y };
-    //        p.PuntoActual.Id = v.Id;
-    //        p.Dibujar(previewStage);
-
-    //        //Lienzo.PuntoActual = Lienzo.AgregarPunto(v.X, v.Y);
-    //        //Lienzo.PuntoActual.Id = v.Id;
-    //        //Lienzo.PuntoActual.Dibujar();
-    //    });
-
-    //    Lienzo.PuntoActual = null;
-    //    Lienzo.Cerrar();
-
-    //});
-
-    //$.getJSON('/Area/ObtenerPreview', { id: areaId }, function (res) {
-    //    var area = res.data;
-    //    area.Islas.forEach(i => {
-
-    //        const isla = new Isla();
-    //        isla.Posicion = { x: i.X, y: i.Y };
-    //        isla.Ancho = i.Ancho;
-    //        isla.Alto = i.Alto;
-    //        isla.Nombre = i.Nombre;
-    //        isla.Color = i.Color;
-    //        isla.Icono = i.Icono;
-    //        isla.Orientacion = i.Orientacion;
-
-    //        //Lienzo.IslaActual = Lienzo.AgregarIsla(i.X, i.Y, i.Ancho, i.Alto, i.Nombre, i.Color, i.Icono, i.Orientacion);
-    //        //Lienzo.IslaActual.Id = i.Id;
-    //        //Lienzo.IslaActual.Dibujar();
-    //    });
-
-    //    Lienzo.IslaActual = null;
-
-    //    previewLayer.draw();
-
-    //    const dataUrl = previewStage.toDataURL({ pixelRatio: 0.25 });
-
-    //    previewStage.destroy();
-
-    //    callback(dataUrl);
-    //});
-
+    cont.innerHTML = `<img src="${dataUrl}" class="preview-img"/>`;
+    
 }
 
 
@@ -459,16 +435,9 @@ window.seleccionarPatio = function (id) {
     var idPatioSeleccionado = id;
     if (!id) return;
 
-    layer.destroyChildren();
+    layer.destroy();
 
     cargarPreviewsPorPatio(idPatioSeleccionado);
-
-    //$.getJSON('/Patio/ObtenerPatioPorId', { id: idPatioSeleccionado }, function (res) {
-    //    if (!res.ok || !res.data) return;
-
-    //    cargarPreviewsPorPatio(idPatioSeleccionado);
-
-    //});
 }
 
 

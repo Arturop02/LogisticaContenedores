@@ -42,6 +42,12 @@
         padding: 20px;
     }
 
+        .grid-previews a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
     .preview-card {
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -49,6 +55,7 @@
         box-shadow: 0 2px 6px rgba(0,0,0,.1);
         cursor: pointer;
         overflow: hidden;
+        display: none;
     }
 
     .preview-header {
@@ -56,10 +63,21 @@
         font-weight: bold;
         background: #f0f0f0;
         border-bottom: 1px solid #ddd;
+        display: none;
+    }
+
+    .preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
 
     .preview-canvas {
         height: 220px;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     body > nav.navbar {
@@ -87,7 +105,7 @@
             @foreach (var a in areas)
             {
                 <a href="@Url.Action("DibujarLimite",new {Id=a.Id})">
-                    <label class="preview-header">
+                    <label class="preview-header-@a.Id">
                         @a.Nombre
                     </label>
 
@@ -97,10 +115,6 @@
                 </a>
             }
         </div>
-
-    </div>
-
-    <div id="preview-renderer" style="display:none;">
 
     </div>
 
@@ -171,8 +185,6 @@
                 seleccionarPatio(id, nombre) {
                     this.Patio.Id = id;
                     this.Patio.Nombre = nombre;
-
-                    
                     window.seleccionarPatio(this.Patio.Id);
                 },
                 seleccionarArea(id, nombre) {

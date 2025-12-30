@@ -83,17 +83,19 @@ namespace DibujandoPatio.Controllers
                 return Json(new { ok = false, message = "patio no encontrado" }, JsonRequestBehavior.AllowGet);
 
             var areas = areaRN.BuscarPorPatioId(id);
-            var areaId = areas.Id;
-            var islas = islaRN.BuscarPorArea(areaId);
-            var vertices = verticeRN.BuscarPorArea(areaId);
+            if(areas == null)
+                return Json(new { ok = false, message = "patio no encontrado" }, JsonRequestBehavior.AllowGet);
 
-            if (areas != null)
+            foreach(var a in areas)
             {
-                areas.Islas = islas;
-                areas.Vertices = vertices;
-                return Json(new { ok = true, data = areas }, JsonRequestBehavior.AllowGet);
+                var areaId = a.Id;
+                var islas = islaRN.BuscarPorArea(areaId);
+                var vertices = verticeRN.BuscarPorArea(areaId);
+                a.Islas = islas;
+                a.Vertices = vertices;
             }
-            return Json(new { ok = false, message = "No se pudo encontrar el area con el id " + id }, JsonRequestBehavior.AllowGet);
+            return Json(new { ok = true, data = areas }, JsonRequestBehavior.AllowGet);
+
         }
 
         [HttpGet]

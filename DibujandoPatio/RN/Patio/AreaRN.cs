@@ -116,12 +116,12 @@ namespace RN.Patio
             }
         }
 
-        public AreaBT BuscarPorPatioId(int id)
+        public List<AreaBT> BuscarPorPatioId(int id)
         {
             try
             {
                 AreaBD areaBD = new AreaBD(ConstantesRN.BD_CONECTION);
-                return areaBD.BuscaPorOpcion(BuscarOpcion.PorPatio, Query: id.ToString()).FirstOrDefault();
+                return areaBD.BuscaPorOpcion(BuscarOpcion.PorPatio, Query: id.ToString());
             }
             catch (Exception)
             {
