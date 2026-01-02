@@ -3,7 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\scripts\\patio\\patio.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|c:\\users\\arturo\\documents\\github\\logisticacontenedores\\dibujandopatio\\dibujandopatio\\scripts\\patio\\patio.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\scripts\\patio\\patio.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
@@ -19,7 +19,7 @@
       "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\controllers\\patiocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4CAE4601-251D-4B19-8DA3-F2D5B542651C}|RN\\RN.csproj|c:\\users\\arturo\\documents\\github\\logisticacontenedores\\dibujandopatio\\rn\\patio\\arearn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{4CAE4601-251D-4B19-8DA3-F2D5B542651C}|RN\\RN.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\rn\\patio\\arearn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4CAE4601-251D-4B19-8DA3-F2D5B542651C}|RN\\RN.csproj|solutionrelative:rn\\patio\\arearn.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -31,7 +31,7 @@
       "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\scripts\\isla\\isla.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|c:\\users\\arturo\\documents\\github\\logisticacontenedores\\dibujandopatio\\dibujandopatio\\views\\catalogos\\operacion\\area\\dibujarlimite.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\dibujandopatio\\views\\catalogos\\operacion\\area\\dibujarlimite.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{B5A257B3-6E98-4DF4-87CD-3CE092A5F12F}|DibujandoPatio\\DibujandoPatio.csproj|solutionrelative:dibujandopatio\\views\\catalogos\\operacion\\area\\dibujarlimite.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
@@ -72,8 +72,7 @@
               "ViewState": "AgIAACcAAAAAAAAAAAAAAKgBAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-10-15T17:33:15.18Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -86,8 +85,7 @@
               "ViewState": "AgIAACIAAAAAAAAAAADwvzsAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-10-15T15:11:27.293Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -100,8 +98,7 @@
               "ViewState": "AgIAAKYCAAAAAAAAAAAYwLACAAB9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-10-15T15:53:26.691Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -129,8 +126,7 @@
               "RelativeToolTip": "RN\\Patio\\AreaRN.cs",
               "ViewState": "AgIAAHIAAAAAAAAAAAAswIUAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-30T20:25:38.852Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-30T20:25:38.852Z"
             },
             {
               "$type": "Document",
@@ -142,8 +138,7 @@
               "RelativeToolTip": "DibujandoPatio\\Controllers\\AreaController.cs",
               "ViewState": "AgIAAEIAAAAAAAAAAAAowEwAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-11T18:52:21.469Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-11T18:52:21.469Z"
             },
             {
               "$type": "Document",
@@ -155,8 +150,7 @@
               "RelativeToolTip": "DibujandoPatio\\Views\\Patio\\Index.cshtml",
               "ViewState": "AgIAADMAAAAAAAAAAADwvzkAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-24T16:03:06.211Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-24T16:03:06.211Z"
             },
             {
               "$type": "Document",
@@ -166,7 +160,7 @@
               "RelativeDocumentMoniker": "DibujandoPatio\\Scripts\\Patio\\Patio.js",
               "ToolTip": "C:\\Users\\Arturo\\Documents\\GitHub\\LogisticaContenedores\\DibujandoPatio\\DibujandoPatio\\Scripts\\Patio\\Patio.js",
               "RelativeToolTip": "DibujandoPatio\\Scripts\\Patio\\Patio.js",
-              "ViewState": "AgIAAGcBAAAAAAAAAAAmwHMBAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAADQBAAAAAAAAAAAQwHMBAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-12-24T15:42:57.433Z",
               "EditorCaption": ""
@@ -181,8 +175,7 @@
               "RelativeToolTip": "DibujandoPatio\\Controllers\\PatioController.cs",
               "ViewState": "AgIAAFYAAAAAAAAAAAAewGEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-26T15:29:07.75Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-26T15:29:07.75Z"
             }
           ]
         }

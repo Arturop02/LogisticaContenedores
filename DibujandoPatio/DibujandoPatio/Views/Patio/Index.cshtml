@@ -100,6 +100,7 @@
 
     <div v-if="mostrar" id="previews-container" style="width: 100vw; padding: 30px; position: fixed; z-index: 9">
         <div id="lstAreasGrid" class="grid-previews">
+            @*convertire esto en un div para ver si de esa manera funciona todo como buttons y la vista me muestra el menu overlay correctamente*@
             <a v-for="a in areas" :key="a.Id" :href="`/Area/DibujarLimite?Id=${a.Id}`">
                 <label :class="`preview-header-${a.Id}`">
                     {{a.Nombre}}
@@ -107,6 +108,12 @@
 
                 <div class="preview-card" :id="`preview-card-${a.Id}`">
                     <div class="preview-canvas" :id="`preview-${a.Id}`"></div>
+
+                    @*<div class="preview-overlay" v-if="areaOpcion === ${a.Id}">
+                        <label v-on:click="redireccion('DibujarLimite', ${a.Id})">Editar Area</label>
+                        <label v-on:click="redireccion('DibujarIsla', ${a.Id})">Editar Zonas</label>
+                    </div>*@
+
                 </div>
 
             </a>
@@ -192,6 +199,9 @@
 
                     window.seleccionarArea(id);
                 },
+                redireccion(accion, id) {
+                    window.location.href = `/Area/${accion}/?id=${id}`;
+                }
             },
             computed: {
                 PatioSeleccionado() {
