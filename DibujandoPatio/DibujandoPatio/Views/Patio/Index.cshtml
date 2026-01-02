@@ -4,10 +4,7 @@
     ViewBag.Title = "Dibujando Patio";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var patios = ViewBag.Patios as List<PatioBT>;
-    var areas = ViewBag.Areas as List<BT.AreaBT>;
 }
-
-
 
 <div class="mb-3 hidden">
     <input type="text" id="nombreInput" placeholder="Ingresa el nombre del patio" />
@@ -55,7 +52,7 @@
         box-shadow: 0 2px 6px rgba(0,0,0,.1);
         cursor: pointer;
         overflow: hidden;
-        display: none;
+        display: block;
     }
 
     .preview-header {
@@ -63,7 +60,7 @@
         font-weight: bold;
         background: #f0f0f0;
         border-bottom: 1px solid #ddd;
-        display: none;
+        display: block;
     }
 
     .preview-img {
@@ -74,7 +71,7 @@
 
     .preview-canvas {
         height: 220px;
-        width: 100vw;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -87,12 +84,13 @@
 <div id="app">
     <div style="width: 100vw; padding: 4px; position: fixed; z-index: 1000; ">
         <div id="lstPatios" class="btn-group">
-            
+
             @foreach (var p in patios)
             {
                 <a href="@Url.Action("Index", new {Id =p.Id})">
                     <label class="btn btn-primary"
-                           :class="{active: Patio?.Id == @p.Id}">
+                           :class="{active: Patio?.Id == @p.Id}"
+                           >
                         @p.Nombre
                     </label>
                 </a>
@@ -100,27 +98,21 @@
         </div>
     </div>
 
-    <div id="previews-container" style="width: 100vw; padding: 30px; position: fixed; z-index: 9">
+    <div v-if="mostrar" id="previews-container" style="width: 100vw; padding: 30px; position: fixed; z-index: 9">
         <div id="lstAreasGrid" class="grid-previews">
-            @foreach (var a in areas)
-            {
-                <a href="@Url.Action("DibujarLimite",new {Id=a.Id})">
-                    <label class="preview-header-@a.Id">
-                        @a.Nombre
-                    </label>
+            <a v-for="a in areas" :key="a.Id" :href="`/Area/DibujarLimite?Id=${a.Id}`">
+                <label :class="`preview-header-${a.Id}`">
+                    {{a.Nombre}}
+                </label>
 
-                    <div class="preview-card" id="preview-card-@a.Id">
-                        <div class="preview-canvas" id="preview-@a.Id"></div>
-                    </div>
-                </a>
-            }
+                <div class="preview-card" :id="`preview-card-${a.Id}`">
+                    <div class="preview-canvas" :id="`preview-${a.Id}`"></div>
+                </div>
+
+            </a>
         </div>
-
     </div>
-
 </div>
-
-
 <div id="container" style=" box-sizing: border-box; border: 2px solid #000; overflow:hidden;"></div>
 
 
@@ -144,7 +136,10 @@
                 },
                 Isla: {
                     Index: '@Url.Action("Index", "Isla", new { id = "__id__" })',
-                }
+                },
+                Area: {
+                    DibujarLimite: '@Url.Action("DibujarLimite", "Area", new {id="__id__"})',
+                },
             },
             Dato: {
                 PatioSeleccionado:@(ViewBag.PatioSeleccionado == null?"null": Html.Raw(ViewBag.PatioSeleccionado))
@@ -163,13 +158,17 @@
                 return {
                     Patio: null,
                     Area: null,
+                    mostrar: false,
+                    areas: [],
                 }
             },
             watch: {
                 Patio: {
                     handler(newValue, oldValue) {
-                        if (newValue != null)
+                        if (newValue != null) {
+                            this.mostrar = true;
                             seleccionarPatio(newValue.Id);
+                        }
                     },
                     deep: true
                 },

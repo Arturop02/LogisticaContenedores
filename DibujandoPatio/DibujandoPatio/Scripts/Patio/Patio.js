@@ -369,20 +369,22 @@ function cargarPreviewsPorPatio(patioId) {
     $.getJSON('/Patio/ObtenerTodoPorPatioId', { id: patioId }, function (res) {
         if (!res.ok || !res.data) return;
 
-        var areas = res.data;
+        vuePatio.areas = res.data;
 
-        areas.forEach(area => {
-            const containerId = "preview-" + area.Id;
-            $('#preview-header-' + area.Id).show();
-            $('#preview-card-' + area.Id).show();
-            generarPreview(area, containerId);
+        vuePatio.$nextTick(() => {
+            requestAnimationFrame(() => {
+                vuePatio.areas.forEach(a => {
+                    generarPreview(a, `preview-${a.Id}`);
+                });
+            });
         });
     });
 }
 
-function generarPreview(area, containerId) {
+async function generarPreview(area, containerId) {
 
     const cont = document.getElementById(containerId);
+    
     cont.innerHTML = "";
 
     previewStage = new Konva.Stage({
@@ -394,7 +396,7 @@ function generarPreview(area, containerId) {
     previewLayer = new Konva.Layer();
     previewStage.add(previewLayer);
 
-    const lienzoPreview = CrearLienzo(previewStage, previewLayer);   /* Object.assign({}, Lienzo);*/
+    const lienzoPreview = CrearLienzo(previewStage, previewLayer);
     lienzoPreview.Stage = previewStage;
 
     area.Vertices = area.Vertices.OrderBy(c => c.Orden).ToArray();
@@ -429,7 +431,6 @@ function generarPreview(area, containerId) {
     cont.innerHTML = `<img src="${dataUrl}" class="preview-img"/>`;
     
 }
-
 
 window.seleccionarPatio = function (id) {
     var idPatioSeleccionado = id;
