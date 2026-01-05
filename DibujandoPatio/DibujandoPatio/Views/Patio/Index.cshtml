@@ -53,14 +53,22 @@
         cursor: pointer;
         overflow: hidden;
         display: block;
+        position: relative;
     }
+        .preview-card :hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+        }
 
     .preview-header {
         padding: 10px;
         font-weight: bold;
-        background: #f0f0f0;
+        background: #337AB7;
+        color: #fff;
         border-bottom: 1px solid #ddd;
-        display: block;
+        display: flex;
+        align-content: center;
+        justify-content: center;
     }
 
     .preview-img {
@@ -76,6 +84,49 @@
         align-items: center;
         justify-content: center;
     }
+
+    .preview-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 60px;
+        background: rgba(0,0,0,0.65);
+        display: flex !important;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+        z-index: 10;
+    }
+
+        .preview-overlay.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .preview-overlay button {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: #449d44;
+            font-weight: bold;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            min-width: 120px;
+            color: #fff;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+            .preview-overlay button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            }
 
     body > nav.navbar {
         display: none;
@@ -96,27 +147,46 @@
                 </a>
             }
         </div>
+
+        <button class="btn btn-success" v-on:click="agregarArea">
+            <i class="glyphicon glyphicon-plus"></i>Agregar Nueva Area
+        </button>
+
     </div>
 
     <div v-if="mostrar" id="previews-container" style="width: 100vw; padding: 30px; position: fixed; z-index: 9">
         <div id="lstAreasGrid" class="grid-previews">
-            @*convertire esto en un div para ver si de esa manera funciona todo como buttons y la vista me muestra el menu overlay correctamente*@
-            <a v-for="a in areas" :key="a.Id" :href="`/Area/DibujarLimite?Id=${a.Id}`">
+            <div v-for="a in areas" :key="a.Id">
+                <label class="preview-header">{{a.Nombre}}</label>
+                <div class="preview-card" v-on:click.stop="areaOpcion = a.Id">
+                    <div class="preview-canvas" :id="`preview-${a.Id}`"></div>
+                    
+                    <div class="preview-overlay" :class="{show: areaOpcion === a.Id}">
+                        <button type="button" v-on:click.stop="redireccion('DibujarLimite', a.Id)">
+                            Editar Areas
+                        </button>
+                        <button type="button" v-on:click.stop="redireccion('DibujarIsla', a.Id)">
+                            Editar Zonas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!--<a v-for="a in areas" :key="a.Id" :href="`/Area/DibujarLimite?Id=${a.Id}`">
                 <label :class="`preview-header-${a.Id}`">
                     {{a.Nombre}}
                 </label>
 
                 <div class="preview-card" :id="`preview-card-${a.Id}`">
-                    <div class="preview-canvas" :id="`preview-${a.Id}`"></div>
-
-                    @*<div class="preview-overlay" v-if="areaOpcion === ${a.Id}">
+                    <div class="preview-canvas" :id="`preview-${a.Id}`"></div>-->
+                        @*<div class="preview-overlay" v-if="areaOpcion === ${a.Id}">
                         <label v-on:click="redireccion('DibujarLimite', ${a.Id})">Editar Area</label>
                         <label v-on:click="redireccion('DibujarIsla', ${a.Id})">Editar Zonas</label>
                     </div>*@
 
-                </div>
+                <!--</div>
 
-            </a>
+            </a>-->
         </div>
     </div>
 </div>
@@ -167,6 +237,7 @@
                     Area: null,
                     mostrar: false,
                     areas: [],
+                    areaOpcion: null,
                 }
             },
             watch: {
@@ -185,7 +256,7 @@
                             seleccionarArea(newValue.Id, newValue.Nombre);
                     },
                     deep: true
-                }
+                },
             },
             methods: {
                 seleccionarPatio(id, nombre) {
@@ -201,6 +272,9 @@
                 },
                 redireccion(accion, id) {
                     window.location.href = `/Area/${accion}/?id=${id}`;
+                },
+                agregarArea() {
+                    window.nuevaArea();
                 }
             },
             computed: {

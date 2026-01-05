@@ -95,7 +95,6 @@ namespace DibujandoPatio.Controllers
                 a.Vertices = vertices;
             }
             return Json(new { ok = true, data = areas }, JsonRequestBehavior.AllowGet);
-
         }
 
         [HttpGet]
