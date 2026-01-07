@@ -13,6 +13,7 @@ namespace DibujandoPatio.Controllers
     public class PatioController : Controller
     {
         private string conexion = ConfigurationManager.ConnectionStrings["mapaConnection"].ConnectionString;
+        public string RutaBase { get; set; } = "~/Views/Catalogos/Operacion/Patio/";
 
         [HttpPost]
         public JsonResult GuardarPatio(PatioBT patioBT)
@@ -113,7 +114,7 @@ namespace DibujandoPatio.Controllers
             patioRN.BuscarPorId(patioBT.Id);
             return Json(new { ok = true });
         }
-        public ActionResult Index(int? Id)
+        public ActionResult MostrarPatios(int? Id)
         {
             PatioRN patioRN = new PatioRN();
             var patio = patioRN.DameTodosAlta();
@@ -130,7 +131,7 @@ namespace DibujandoPatio.Controllers
             }
 
             //ViewBag.IdPatioSeleccionado = TempData["IdPatioSeleccionado"] ?? 0;
-            return View();
+            return View(RutaBase + "MostrarPatios.cshtml");
         }
     }
 }

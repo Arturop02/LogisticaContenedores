@@ -356,125 +356,125 @@ function inicializarArea() {
         }
     }
 
-    function Isla() {
-        this.Tipo = enumTipoGrafico.Rectangulo;
-        this.Grafico = null;
-        this.GraficoTexto = null;
-        this.GraficoIcono = null;
-        this.GraficoTrasnformer = null;
-        this.lstIslas = [];
+    //function Isla() {
+    //    this.Tipo = enumTipoGrafico.Rectangulo;
+    //    this.Grafico = null;
+    //    this.GraficoTexto = null;
+    //    this.GraficoIcono = null;
+    //    this.GraficoTrasnformer = null;
+    //    this.lstIslas = [];
 
-        this.Posicion = { x: null, y: null };
-        this.Orientacion = null;
-        this.Ancho = null;
-        this.Alto = null;
+    //    this.Posicion = { x: null, y: null };
+    //    this.Orientacion = null;
+    //    this.Ancho = null;
+    //    this.Alto = null;
 
-        this.Id = null;
-        this.Nombre = null;
-        this.Descripcion = null;
-        this.Color = null;
-        this.Icono = null;
+    //    this.Id = null;
+    //    this.Nombre = null;
+    //    this.Descripcion = null;
+    //    this.Color = null;
+    //    this.Icono = null;
 
-        this.Dibujar = function () {
-            var tamanoDefault = Lienzo.TamanoIsla();
+    //    this.Dibujar = function () {
+    //        var tamanoDefault = Lienzo.TamanoIsla();
 
-            var cfgGrafico = {
-                Id: this.Id,
-                x: 0,
-                y: 0,
-                name: this.Nombre,
-                text: this.Descripcion,
-                width: this.Ancho,
-                height: this.Alto,
-                fill: this.Color ? `#${this.Color}` : "#88b7d5",
-                strokeWidth: 1.2,
-                stroke: 'black',
-                rotation: this.Orientacion,
-                offsetX: this.Ancho / 2,
-                offsetY: this.Alto / 2,
-            };
+    //        var cfgGrafico = {
+    //            Id: this.Id,
+    //            x: 0,
+    //            y: 0,
+    //            name: this.Nombre,
+    //            text: this.Descripcion,
+    //            width: this.Ancho,
+    //            height: this.Alto,
+    //            fill: this.Color ? `#${this.Color}` : "#88b7d5",
+    //            strokeWidth: 1.2,
+    //            stroke: 'black',
+    //            rotation: this.Orientacion,
+    //            offsetX: this.Ancho / 2,
+    //            offsetY: this.Alto / 2,
+    //        };
 
-            var cfgGraficoIcono = {
-                text: this.Icono,
-                align: 'center',
-                verticalAlign: 'middle',
-                fontFamily: 'FontAwesome',
-                fill: 'white',
-                rotation: this.Orientacion,
-            };
+    //        var cfgGraficoIcono = {
+    //            text: this.Icono,
+    //            align: 'center',
+    //            verticalAlign: 'middle',
+    //            fontFamily: 'FontAwesome',
+    //            fill: 'white',
+    //            rotation: this.Orientacion,
+    //        };
 
-            var cfgGraficoTexto = {
-                text: this.Nombre,
-                fontSize: 12,
-                fill: 'black',
-                rotation: this.Orientacion,
-            };
+    //        var cfgGraficoTexto = {
+    //            text: this.Nombre,
+    //            fontSize: 12,
+    //            fill: 'black',
+    //            rotation: this.Orientacion,
+    //        };
 
-            var cfgGrupo = {
-                x: this.Posicion.x,
-                y: this.Posicion.y,
-                draggable: false,
-            };
+    //        var cfgGrupo = {
+    //            x: this.Posicion.x,
+    //            y: this.Posicion.y,
+    //            draggable: false,
+    //        };
 
-            if (this.Grafico == null) {
-                this.Grupo = new Konva.Group(cfgGrupo);
+    //        if (this.Grafico == null) {
+    //            this.Grupo = new Konva.Group(cfgGrupo);
 
-                this.Grafico = new Konva.Rect(cfgGrafico);
+    //            this.Grafico = new Konva.Rect(cfgGrafico);
 
-                this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
-                var radio = this.Alto / 2 + this.GraficoTexto.height();
-                var radianes = (90 + this.Orientacion) * Math.PI / 180;
-                var xNombre = radio * Math.cos(radianes);
-                var yNombre = radio * Math.sin(radianes);
+    //            this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+    //            var radio = this.Alto / 2 + this.GraficoTexto.height();
+    //            var radianes = (90 + this.Orientacion) * Math.PI / 180;
+    //            var xNombre = radio * Math.cos(radianes);
+    //            var yNombre = radio * Math.sin(radianes);
 
-                this.GraficoTexto.setAttrs({
-                    position: {
-                        x: xNombre,
-                        y: yNombre,
-                    },
-                });
-                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
+    //            this.GraficoTexto.setAttrs({
+    //                position: {
+    //                    x: xNombre,
+    //                    y: yNombre,
+    //                },
+    //            });
+    //            this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
+    //            this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
-                this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
-                document.fonts.ready.then(() => {
-                    this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
+    //            this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
+    //            document.fonts.ready.then(() => {
+    //                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
 
-                    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-                    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+    //                this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
+    //                this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
 
-                    this.GraficoIcono.position({ x: 0, y: 0 });
+    //                this.GraficoIcono.position({ x: 0, y: 0 });
 
-                    layer.batchDraw();
-                });
+    //                layer.batchDraw();
+    //            });
 
-                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
+    //            this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
-                layer.add(this.Grupo);
-            }
-            //else {
-            //    this.Grafico.setAttrs(cfgGrafico);
-            //    this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
-            //    this.Grafico.getLayer().batchDraw();
+    //            layer.add(this.Grupo);
+    //        }
+    //        //else {
+    //        //    this.Grafico.setAttrs(cfgGrafico);
+    //        //    this.Grafico.absolutePosition({ x: cfgGrafico.x, y: cfgGrafico.y });
+    //        //    this.Grafico.getLayer().batchDraw();
 
-            //    this.GraficoTexto.setAttrs(cfgGraficoTexto);
-            //    this.GraficoTexto.absolutePosition({ x: cfgGraficoTexto.x, y: cfgGraficoTexto.y });
-            //    this.GraficoTexto.getLayer().batchDraw();
+    //        //    this.GraficoTexto.setAttrs(cfgGraficoTexto);
+    //        //    this.GraficoTexto.absolutePosition({ x: cfgGraficoTexto.x, y: cfgGraficoTexto.y });
+    //        //    this.GraficoTexto.getLayer().batchDraw();
 
-            //    this.GraficoIcono.setAttrs(cfgGraficoIcono);
-            //    this.GraficoIcono.absolutePosition({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
-            //    this.GraficoIcono.getLayer().batchDraw();
-            //}
+    //        //    this.GraficoIcono.setAttrs(cfgGraficoIcono);
+    //        //    this.GraficoIcono.absolutePosition({ x: cfgGraficoIcono.x, y: cfgGraficoIcono.y });
+    //        //    this.GraficoIcono.getLayer().batchDraw();
+    //        //}
 
-            this.lstIslas.forEach(function (item) {
-                item.Dibujar();
-            })
+    //        this.lstIslas.forEach(function (item) {
+    //            item.Dibujar();
+    //        })
 
-            this.MoverArriba = function () {
-                this.Grafico.moveToTop();
-            }
-        }
-    }
+    //        this.MoverArriba = function () {
+    //            this.Grafico.moveToTop();
+    //        }
+    //    }
+    //}
 
     function ObtenerUnicodeDesdeClase(iconClass) {
         
@@ -487,7 +487,6 @@ function inicializarArea() {
 
         document.body.appendChild(elementoTemporal);
 
-
         const unicode = window.getComputedStyle(elementoTemporal, '::before')
             .getPropertyValue('content')
             .replace(/['"]/g, ''); 
@@ -496,22 +495,23 @@ function inicializarArea() {
 
         return unicode;
     }
-    function TamanoIcono(rectangulo) {
-        var tamIcono;
 
-        var promedio = (rectangulo.width() + rectangulo.height()) / 2;
+    //function TamanoIcono(rectangulo) {
+    //    var tamIcono;
 
-        if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
-            tamIcono = 20;
-        }
+    //    var promedio = (rectangulo.width() + rectangulo.height()) / 2;
 
-        tamIcono = promedio * 0.4;
+    //    if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
+    //        tamIcono = 20;
+    //    }
 
-        if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
-            tamIcono = 20;
-        }
-        return tamIcono
-    }
+    //    tamIcono = promedio * 0.4;
+
+    //    if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
+    //        tamIcono = 20;
+    //    }
+    //    return tamIcono
+    //}
     
     Punto.OrdenActual = 0;
 
@@ -651,7 +651,6 @@ function inicializarArea() {
 
         Lienzo.Modo = enumModoLienzo.Area;
         Lienzo.Estado = enumEstadoLienzo.Agregando;
-
     }
 
     window.seleccionarArea = function (id) {
@@ -719,7 +718,6 @@ function inicializarArea() {
                 if (res.ok) {
                     Notify(`Editado correctamente`, null, null, "success");
                     dibujando = false;
-                    //window.location.href = objSer.Url.Area
                 } else {
                     bootbox.alert("Ha ocurrido un problema");
                 }
@@ -746,7 +744,7 @@ function inicializarArea() {
                 contentType: 'application/json; charset=utf-8',
                 success: function (res) {
                     if (res.ok) {
-                        Notify(`Eliminado correctamente`, null, null, "success");
+                        window.location.href = objSer.Url.Area.DibujarLimite;
                     } else {
                         bootbox.alert("Ha ocurrido un problema");
                     }

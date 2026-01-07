@@ -63,6 +63,9 @@ namespace DibujandoPatio
 
             bundles.Add(new ScriptBundle("~/bundles/notify").Include(
                         "~/Scripts/Notify.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/vuex").Include(
+                        "~/Scripts/vuex.js"));
         }
     }
 }
