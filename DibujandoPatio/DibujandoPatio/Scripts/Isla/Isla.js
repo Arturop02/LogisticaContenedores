@@ -68,21 +68,7 @@ function inicializarArea() {
 
         return unicode;
     }
-    function TamanoIcono(rectangulo) {
-        var tamIcono;
-
-        var promedio = (rectangulo.width() + rectangulo.height()) / 2;
-
-        tamIcono = promedio * 0.4;
-
-
-        if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
-            tamIcono = 20;
-        }
-
-        return tamIcono
-    }
-
+    
     Lienzo = {
         Modo: enumModoLienzo.Isla,
         Escala: DameEscala(),
@@ -135,7 +121,7 @@ function inicializarArea() {
         },
         Cerrar: function () {
             if (this.PuntoActual != null)
-                this.PuntoActual.Eliminar();
+                this.PuntoActual.Eliminar(Lienzo);
 
             var puntoInicial = this.lstPunto[0];
             var puntoFinal = this.lstPunto[this.lstPunto.length - 1];
@@ -161,13 +147,18 @@ function inicializarArea() {
             var punto = new Punto();
             punto.Posicion.x = x;
             punto.Posicion.y = y;
+            punto.Tipo = enumTipoGrafico.Punto;
+            punto.Grafico = null;
+            punto.lstRelacionado = [];
+            punto.Arrastrable = false;
+            punto.Orden = Punto.OrdenActual++;
 
             this.lstPunto.push(punto);
 
             if (this.PuntoActual != null) {
                 this.RelacionarPuntos(this.PuntoActual, punto);
             }
-            punto.Dibujar();
+            punto.Dibujar(Lienzo, throttle, layer, enumModoLienzo, enumEstadoLienzo);
 
             this.AjustarOrden();
 
@@ -203,9 +194,23 @@ function inicializarArea() {
             isla.scaleX(1);
             isla.scaleY(1);
         },
+        AjustarIconoIsla: function (isla) {
+            var tamIcono;
+
+            var promedio = (isla.width() + isla.height()) / 2;
+
+            tamIcono = promedio * 0.4;
+
+
+            if (!tamIcono || tamIcono <= 0 || isNaN(tamIcono)) {
+                tamIcono = 20;
+            }
+
+            return tamIcono
+        },
         CrearIslaTemporal: async function (x, y, datos) {
 
-            const isla = new Isla();
+            const isla = new IslaRect();
 
             var estructura = await Lienzo.ActualizacionVisual(datos);
 
@@ -242,7 +247,7 @@ function inicializarArea() {
         },
         AgregarIsla: function (x, y, ancho, alto, nombre, color, icono, orientacion, estructura) {
 
-            var isla = new Isla();
+            var isla = new IslaRect();
             isla.Posicion.x = x;
             isla.Posicion.y = y;
             isla.Ancho = ancho;
@@ -335,411 +340,411 @@ function inicializarArea() {
         Rectangulo: 'Rectangulo',
     };
 
-    function Linea(puntoInicial, puntoFinal) {
-        this.Tipo = enumTipoGrafico.Linea;
-        this.Grafico = null;
-        this.GraficoTexto = null;
-        this.lstRelacionado = [];
+    //function Linea(puntoInicial, puntoFinal) {
+    //    this.Tipo = enumTipoGrafico.Linea;
+    //    this.Grafico = null;
+    //    this.GraficoTexto = null;
+    //    this.lstRelacionado = [];
 
-        this.PuntoInicial = puntoInicial
-        this.PuntoFinal = puntoFinal;
+    //    this.PuntoInicial = puntoInicial
+    //    this.PuntoFinal = puntoFinal;
 
-        this.Dibujar = function () {
+    //    this.Dibujar = function () {
 
-            var cfgGraficoLinea = {
-                points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
-                stroke: 'blue',
-                strokeWidth: 4
-            };
+    //        var cfgGraficoLinea = {
+    //            points: [this.PuntoInicial.Posicion.x, this.PuntoInicial.Posicion.y, this.PuntoFinal.Posicion.x, this.PuntoFinal.Posicion.y],
+    //            stroke: 'blue',
+    //            strokeWidth: 4
+    //        };
 
-            const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
-            const dy = this.PuntoFinal.Posicion.y - this.PuntoInicial.Posicion.y;
-            const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
-            const distanciaMetros = distanciaPixeles * Lienzo.Escala;
+    //        const dx = this.PuntoFinal.Posicion.x - this.PuntoInicial.Posicion.x;
+    //        const dy = this.PuntoFinal.Posicion.y - this.PuntoInicial.Posicion.y;
+    //        const distanciaPixeles = Math.sqrt(dx * dx + dy * dy);
+    //        const distanciaMetros = distanciaPixeles * Lienzo.Escala;
 
-            var cfgGraficoTexto = {
-                x: (this.PuntoInicial.Posicion.x + this.PuntoFinal.Posicion.x) / 2,
-                y: (this.PuntoInicial.Posicion.y + this.PuntoFinal.Posicion.y) / 2,
-                text: `${distanciaMetros.toFixed(2)}m`,
-                fontSize: 16,
-                fill: 'black',
-                padding: 4,
-                background: 'white'
-            };
+    //        var cfgGraficoTexto = {
+    //            x: (this.PuntoInicial.Posicion.x + this.PuntoFinal.Posicion.x) / 2,
+    //            y: (this.PuntoInicial.Posicion.y + this.PuntoFinal.Posicion.y) / 2,
+    //            text: `${distanciaMetros.toFixed(2)}m`,
+    //            fontSize: 16,
+    //            fill: 'black',
+    //            padding: 4,
+    //            background: 'white'
+    //        };
 
-            if (this.Grafico == null) {
-                this.Grafico = new Konva.Line(cfgGraficoLinea);
-                this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+    //        if (this.Grafico == null) {
+    //            this.Grafico = new Konva.Line(cfgGraficoLinea);
+    //            this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
 
-                layer.add(this.Grafico);
-                layer.add(this.GraficoTexto);
+    //            layer.add(this.Grafico);
+    //            layer.add(this.GraficoTexto);
                 
-            } else {
-            this.Grafico.setAttrs(cfgGraficoLinea);
-            this.Grafico.getLayer().batchDraw();
+    //        } else {
+    //        this.Grafico.setAttrs(cfgGraficoLinea);
+    //        this.Grafico.getLayer().batchDraw();
 
-            this.GraficoTexto.setAttrs(cfgGraficoTexto);
-            this.GraficoTexto.getLayer().batchDraw();
-            }
-        }
-    }
+    //        this.GraficoTexto.setAttrs(cfgGraficoTexto);
+    //        this.GraficoTexto.getLayer().batchDraw();
+    //        }
+    //    }
+    //}
 
-    function Punto() {
-        this.Tipo = enumTipoGrafico.Punto;
-        this.Grafico = null;
-        this.lstRelacionado = [];
-        this.Arrastrable = false;
+    //function Punto() {
+    //    this.Tipo = enumTipoGrafico.Punto;
+    //    this.Grafico = null;
+    //    this.lstRelacionado = [];
+    //    this.Arrastrable = false;
 
-        this.Posicion = { x: null, y: null };
-        this.Orden = Punto.OrdenActual++;
+    //    this.Posicion = { x: null, y: null };
+    //    this.Orden = Punto.OrdenActual++;
 
-        this.Dibujar = function () {
+    //    this.Dibujar = function () {
 
-            var cfgGrafico = {
-                x: this.Posicion.x,
-                y: this.Posicion.y,
-                radius: 7,
-                fill: 'red',
-                draggable: false
-            };
+    //        var cfgGrafico = {
+    //            x: this.Posicion.x,
+    //            y: this.Posicion.y,
+    //            radius: 7,
+    //            fill: 'red',
+    //            draggable: false
+    //        };
 
-            if (this.Grafico == null) {
-                this.Grafico = new Konva.Circle(cfgGrafico);
-                layer.add(this.Grafico);
-            }
-            else {
-            this.Grafico.setAttrs(cfgGrafico);
-            this.Grafico.getLayer().batchDraw();
-            }
+    //        if (this.Grafico == null) {
+    //            this.Grafico = new Konva.Circle(cfgGrafico);
+    //            layer.add(this.Grafico);
+    //        }
+    //        else {
+    //        this.Grafico.setAttrs(cfgGrafico);
+    //        this.Grafico.getLayer().batchDraw();
+    //        }
 
-            this.lstRelacionado.forEach(function (item) {
-                item.Dibujar();
-            });
-        }
+    //        this.lstRelacionado.forEach(function (item) {
+    //            item.Dibujar();
+    //        });
+    //    }
 
-        this.MoverArriba = function () {
-            this.Grafico.moveToTop();
-        }
-    }
+    //    this.MoverArriba = function () {
+    //        this.Grafico.moveToTop();
+    //    }
+    //}
 
-    function Isla() {
-        this.Tipo = enumTipoGrafico.Rectangulo;
-        this.Grafico = null;
-        this.GraficoTexto = null;
-        this.GraficoIcono = null;
-        this.GraficoTrasnformer = null;
-        this.lstIslas = [];
+    //function Isla() {
+    //    this.Tipo = enumTipoGrafico.Rectangulo;
+    //    this.Grafico = null;
+    //    this.GraficoTexto = null;
+    //    this.GraficoIcono = null;
+    //    this.GraficoTrasnformer = null;
+    //    this.lstIslas = [];
 
-        this.Posicion = { x: null, y: null };
-        this.Orientacion = null;
-        this.Ancho = null;
-        this.Alto = null;
+    //    this.Posicion = { x: null, y: null };
+    //    this.Orientacion = null;
+    //    this.Ancho = null;
+    //    this.Alto = null;
 
-        this.Id = null;
-        this.Nombre = null;
-        this.Descripcion = null;
-        this.Estructura = null;
-        this.Color = null;
-        this.Icono = null;
+    //    this.Id = null;
+    //    this.Nombre = null;
+    //    this.Descripcion = null;
+    //    this.Estructura = null;
+    //    this.Color = null;
+    //    this.Icono = null;
 
-        this.Nueva = null;
-        this.Modificada = null;
+    //    this.Nueva = null;
+    //    this.Modificada = null;
         
-        this.Eliminar = function () {
-            this.Grafico?.destroy();
-            this.GraficoIcono.destroy();
-            this.GraficoTexto.destroy();
-            Lienzo.Transformer?.destroy();
+    //    this.Eliminar = function () {
+    //        this.Grafico?.destroy();
+    //        this.GraficoIcono.destroy();
+    //        this.GraficoTexto.destroy();
+    //        Lienzo.Transformer?.destroy();
 
-            var temp = [];
-            temp.forEach(function (item) {
-                item.Eliminar();
-            });
+    //        var temp = [];
+    //        temp.forEach(function (item) {
+    //            item.Eliminar();
+    //        });
 
-            return this;
-        };
+    //        return this;
+    //    };
 
-        this.Actualizar = function () {
-            if (!this.Grafico) {
-                this.Dibujar();
-                return;
-            }
+    //    this.Actualizar = function () {
+    //        if (!this.Grafico) {
+    //            this.Dibujar();
+    //            return;
+    //        }
 
-            this.Grafico.setAttrs({
-                fill: this.Color ? `#${this.Color}` : "#88b7d5",
-            });
+    //        this.Grafico.setAttrs({
+    //            fill: this.Color ? `#${this.Color}` : "#88b7d5",
+    //        });
 
-            if (this.GraficoTexto) {
-                this.GraficoTexto.text(this.Nombre);
-            }
+    //        if (this.GraficoTexto) {
+    //            this.GraficoTexto.text(this.Nombre);
+    //        }
 
-            if (this.GraficoIcono) {
-                this.GraficoIcono.text(this.Icono);
-                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
-            }
+    //        if (this.GraficoIcono) {
+    //            this.GraficoIcono.text(this.Icono);
+    //            this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
+    //        }
 
-            this.Grafico.getLayer().batchDraw();
+    //        this.Grafico.getLayer().batchDraw();
 
-        }
+    //    }
 
-        this.Dibujar = function () {
-            var tamanoDefault = Lienzo.TamanoIsla();
-            Lienzo.TamanoIsla();
+    //    this.Dibujar = function () {
+    //        var tamanoDefault = Lienzo.TamanoIsla();
+    //        Lienzo.TamanoIsla();
 
-            var cfgGrafico = {
-                Id: this.Id,
-                x: 0,
-                y: 0,
-                name: this.Nombre,
-                text: this.Descripcion,
-                width: this.Ancho, 
-                height: this.Alto,
-                fill: this.Color ? `#${this.Color}` : "#88b7d5",
-                strokeWidth: 1.2,
-                stroke: 'black',
-                rotation: this.Orientacion,
-                offsetX: this.Ancho / 2,
-                offsetY: this.Alto / 2,
-            };
+    //        var cfgGrafico = {
+    //            Id: this.Id,
+    //            x: 0,
+    //            y: 0,
+    //            name: this.Nombre,
+    //            text: this.Descripcion,
+    //            width: this.Ancho, 
+    //            height: this.Alto,
+    //            fill: this.Color ? `#${this.Color}` : "#88b7d5",
+    //            strokeWidth: 1.2,
+    //            stroke: 'black',
+    //            rotation: this.Orientacion,
+    //            offsetX: this.Ancho / 2,
+    //            offsetY: this.Alto / 2,
+    //        };
 
-            var cfgGraficoIcono = {
-                text: this.Icono,
-                align: 'center',
-                verticalAlign: 'middle',
-                fontFamily: 'FontAwesome',
-                fill: 'white',
-                rotation: this.Orientacion,
-            };
+    //        var cfgGraficoIcono = {
+    //            text: this.Icono,
+    //            align: 'center',
+    //            verticalAlign: 'middle',
+    //            fontFamily: 'FontAwesome',
+    //            fill: 'white',
+    //            rotation: this.Orientacion,
+    //        };
             
-            var cfgGraficoTexto = {
-                text: this.Nombre,
-                fontSize: 12,
-                fill: 'black',
-                rotation: this.Orientacion,
-            };
+    //        var cfgGraficoTexto = {
+    //            text: this.Nombre,
+    //            fontSize: 12,
+    //            fill: 'black',
+    //            rotation: this.Orientacion,
+    //        };
 
-            var cfgTransformer = {
-                nodes: [],
-                enabledAnchors: [
-                    'top-center',
-                    'top-right',
-                    'bottom-right',
-                    'bottom-center',
-                    'middle-right'
-                ],
-                rotateEnabled: true,
-                flipEnabled: false,
-                resizeEnabled: true,
-                visible: false,
-                rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315],
-                rotateAnchorOffset: 30,
-                strokeScaleEnabled: false,
-                boundBoxFunc: (oldBox, newBox) => {
-                    if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
-                        return oldBox;
-                    }
+    //        var cfgTransformer = {
+    //            nodes: [],
+    //            enabledAnchors: [
+    //                'top-center',
+    //                'top-right',
+    //                'bottom-right',
+    //                'bottom-center',
+    //                'middle-right'
+    //            ],
+    //            rotateEnabled: true,
+    //            flipEnabled: false,
+    //            resizeEnabled: true,
+    //            visible: false,
+    //            rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315],
+    //            rotateAnchorOffset: 30,
+    //            strokeScaleEnabled: false,
+    //            boundBoxFunc: (oldBox, newBox) => {
+    //                if (newBox.width < tamanoDefault.ancho || newBox.height < tamanoDefault.alto) {
+    //                    return oldBox;
+    //                }
 
-                    return newBox;
-                }
-            };
+    //                return newBox;
+    //            }
+    //        };
             
-            if (this.Grafico == null) {
-                this.Grupo = new Konva.Group({
-                    x: this.Posicion.x,
-                    y: this.Posicion.y,
-                    draggable: false,
-                });
+    //        if (this.Grafico == null) {
+    //            this.Grupo = new Konva.Group({
+    //                x: this.Posicion.x,
+    //                y: this.Posicion.y,
+    //                draggable: false,
+    //            });
 
-                this.Grafico = new Konva.Rect(cfgGrafico);
+    //            this.Grafico = new Konva.Rect(cfgGrafico);
 
-                this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
-                var radio = this.Alto / 2 + this.GraficoTexto.height();
-                var radianes = (90 + this.Orientacion) * Math.PI / 180;
-                var xNombre = radio * Math.cos(radianes);
-                var yNombre = radio * Math.sin(radianes);
+    //            this.GraficoTexto = new Konva.Text(cfgGraficoTexto);
+    //            var radio = this.Alto / 2 + this.GraficoTexto.height();
+    //            var radianes = (90 + this.Orientacion) * Math.PI / 180;
+    //            var xNombre = radio * Math.cos(radianes);
+    //            var yNombre = radio * Math.sin(radianes);
 
-                this.GraficoTexto.setAttrs({
-                    position: {
-                        x: xNombre,
-                        y: yNombre,
-                    },
-                });
-                this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
-                this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
+    //            this.GraficoTexto.setAttrs({
+    //                position: {
+    //                    x: xNombre,
+    //                    y: yNombre,
+    //                },
+    //            });
+    //            this.GraficoTexto.offsetX(this.GraficoTexto.width() / 2);
+    //            this.GraficoTexto.offsetY(this.GraficoTexto.height() / 2);
 
-                this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
-                document.fonts.ready.then(() => {
-                    this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
+    //            this.GraficoIcono = new Konva.Text(cfgGraficoIcono);
+    //            document.fonts.ready.then(() => {
+    //                this.GraficoIcono.fontSize(TamanoIcono(this.Grafico));
 
-                    this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
-                    this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
+    //                this.GraficoIcono.offsetX(this.GraficoIcono.width() / 2);
+    //                this.GraficoIcono.offsetY(this.GraficoIcono.height() / 2);
 
-                    this.GraficoIcono.position({ x: 0, y: 0 });
+    //                this.GraficoIcono.position({ x: 0, y: 0 });
 
-                    layer.batchDraw();
-                });
+    //                layer.batchDraw();
+    //            });
 
-                this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
-                Lienzo.Transformer = this.GraficoTrasnformer;
+    //            this.GraficoTrasnformer = new Konva.Transformer(cfgTransformer);
+    //            Lienzo.Transformer = this.GraficoTrasnformer;
 
-                this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
+    //            this.Grupo.add(this.Grafico, this.GraficoIcono, this.GraficoTexto);
 
-                layer.add(this.Grupo, Lienzo.Transformer);
-                var isla = this;
+    //            layer.add(this.Grupo, Lienzo.Transformer);
+    //            var isla = this;
 
-                isla.Grafico.on('pointerclick', throttle((e) => {
-                    if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
-                        Lienzo.Estado = enumEstadoLienzo.Editando;
+    //            isla.Grafico.on('pointerclick', throttle((e) => {
+    //                if (Lienzo.Estado === enumEstadoLienzo.Moviendo) {
+    //                    Lienzo.Estado = enumEstadoLienzo.Editando;
 
-                        if (Lienzo.IslaActual || Lienzo.Transformer) {
-                            Lienzo.CerrarTransformer();
-                        }
-                        layer.batchDraw();
-                    }
+    //                    if (Lienzo.IslaActual || Lienzo.Transformer) {
+    //                        Lienzo.CerrarTransformer();
+    //                    }
+    //                    layer.batchDraw();
+    //                }
 
-                    if (Lienzo.Estado === enumEstadoLienzo.Editando) {
+    //                if (Lienzo.Estado === enumEstadoLienzo.Editando) {
 
-                        if (Lienzo.IslaActual && Lienzo.IslaActual !== isla) {
-                            Lienzo.IslaAnterior = Lienzo.IslaActual;
-                        }
+    //                    if (Lienzo.IslaActual && Lienzo.IslaActual !== isla) {
+    //                        Lienzo.IslaAnterior = Lienzo.IslaActual;
+    //                    }
 
-                        Lienzo.IslaActual = isla;
+    //                    Lienzo.IslaActual = isla;
 
-                        if (Lienzo.IslaAnterior) {
-                            Lienzo.CerrarTransformer();
-                        }
+    //                    if (Lienzo.IslaAnterior) {
+    //                        Lienzo.CerrarTransformer();
+    //                    }
                         
-                        Lienzo.Estado = enumEstadoLienzo.Moviendo;
-                        window.recibirDatosAActualizar(Lienzo.IslaActual);
+    //                    Lienzo.Estado = enumEstadoLienzo.Moviendo;
+    //                    window.recibirDatosAActualizar(Lienzo.IslaActual);
 
-                        isla.Grafico.setAttrs({
-                            fill: Lienzo.IslaActual.Color ?
-                                `#${Lienzo.IslaActual.Color}` : "#88b7d5"
-                        });
-                    }
-                }, 300));
+    //                    isla.Grafico.setAttrs({
+    //                        fill: Lienzo.IslaActual.Color ?
+    //                            `#${Lienzo.IslaActual.Color}` : "#88b7d5"
+    //                    });
+    //                }
+    //            }, 300));
 
-                isla.Grupo.on('dragend', function () {
+    //            isla.Grupo.on('dragend', function () {
 
-                    var absPos = isla.Grafico.getAbsolutePosition();
-                    var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
+    //                var absPos = isla.Grafico.getAbsolutePosition();
+    //                var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
 
-                    Lienzo.IslaActual = isla;
-                    isla.Posicion.x = posFinal.x;
-                    isla.Posicion.y = posFinal.y;
-                    isla.Ancho = isla.Grafico.width() * isla.Grafico.scaleX();
-                    isla.Alto = isla.Grafico.height() * isla.Grafico.scaleY();
-                    isla.Modificada = true;
+    //                Lienzo.IslaActual = isla;
+    //                isla.Posicion.x = posFinal.x;
+    //                isla.Posicion.y = posFinal.y;
+    //                isla.Ancho = isla.Grafico.width() * isla.Grafico.scaleX();
+    //                isla.Alto = isla.Grafico.height() * isla.Grafico.scaleY();
+    //                isla.Modificada = true;
 
-                    window.agregarIslasAGuardar(isla);
-                });
+    //                window.agregarIslasAGuardar(isla);
+    //            });
 
-                isla.Grafico.on('transform', function () {
+    //            isla.Grafico.on('transform', function () {
 
-                    var rectIsla = this;
-                    var scaleX = rectIsla.scaleX();
-                    var scaleY = rectIsla.scaleY();
-                    var stage = rectIsla.getStage();
-                    var stageScale = stage.scaleX();
+    //                var rectIsla = this;
+    //                var scaleX = rectIsla.scaleX();
+    //                var scaleY = rectIsla.scaleY();
+    //                var stage = rectIsla.getStage();
+    //                var stageScale = stage.scaleX();
                     
-                    var rotacion = rectIsla.DameRotacion();
+    //                var rotacion = rectIsla.DameRotacion();
 
-                    const anchoReal = rectIsla.width() * scaleX;
-                    const altoReal = rectIsla.height() * scaleY;
+    //                const anchoReal = rectIsla.width() * scaleX;
+    //                const altoReal = rectIsla.height() * scaleY;
 
-                    var absPos = rectIsla.getAbsolutePosition();
+    //                var absPos = rectIsla.getAbsolutePosition();
 
-                    rectIsla.setAttrs({
-                        scaleX: 1,
-                        scaleY: 1,
-                        width: anchoReal,
-                        height: altoReal,
-                        offsetX: anchoReal / 2,
-                        offsetY: altoReal / 2,
-                    });
+    //                rectIsla.setAttrs({
+    //                    scaleX: 1,
+    //                    scaleY: 1,
+    //                    width: anchoReal,
+    //                    height: altoReal,
+    //                    offsetX: anchoReal / 2,
+    //                    offsetY: altoReal / 2,
+    //                });
                     
-                    rectIsla.absolutePosition(absPos);
-                    rectIsla.rotation(rotacion);
+    //                rectIsla.absolutePosition(absPos);
+    //                rectIsla.rotation(rotacion);
 
-                    var centro = rectIsla.DameCentroAbsoluto();
+    //                var centro = rectIsla.DameCentroAbsoluto();
                     
-                    var radio = ((altoReal / 2) + isla.GraficoTexto.height()) * stageScale;
-                    var radianes = (90 + rotacion) * Math.PI / 180;
+    //                var radio = ((altoReal / 2) + isla.GraficoTexto.height()) * stageScale;
+    //                var radianes = (90 + rotacion) * Math.PI / 180;
 
-                    var xNombre = centro.x + radio * Math.cos(radianes);
-                    var yNombre = centro.y + radio * Math.sin(radianes);
+    //                var xNombre = centro.x + radio * Math.cos(radianes);
+    //                var yNombre = centro.y + radio * Math.sin(radianes);
 
-                    isla.GraficoTexto.setAttrs({
-                        absolutePosition: {
-                            x: xNombre, 
-                            y: yNombre,
-                        },
-                        offsetX: isla.GraficoTexto.width() / 2,
-                        offsetY: isla.GraficoTexto.height() / 2,
-                        rotation: rotacion,
-                    });
+    //                isla.GraficoTexto.setAttrs({
+    //                    absolutePosition: {
+    //                        x: xNombre, 
+    //                        y: yNombre,
+    //                    },
+    //                    offsetX: isla.GraficoTexto.width() / 2,
+    //                    offsetY: isla.GraficoTexto.height() / 2,
+    //                    rotation: rotacion,
+    //                });
 
-                    isla.GraficoIcono.setAttrs({
-                        fontSize: TamanoIcono(isla.Grafico),
-                        absolutePosition: {
-                            x: centro.x,
-                            y: centro.y,
-                        },
-                        offsetX: isla.GraficoIcono.width() / 2,
-                        offsetY: isla.GraficoIcono.height() / 2,
-                        rotation: rotacion,
-                    });
+    //                isla.GraficoIcono.setAttrs({
+    //                    fontSize: TamanoIcono(isla.Grafico),
+    //                    absolutePosition: {
+    //                        x: centro.x,
+    //                        y: centro.y,
+    //                    },
+    //                    offsetX: isla.GraficoIcono.width() / 2,
+    //                    offsetY: isla.GraficoIcono.height() / 2,
+    //                    rotation: rotacion,
+    //                });
                     
-                });
+    //            });
                 
-                isla.Grafico.on('transformend', function () {
+    //            isla.Grafico.on('transformend', function () {
 
-                    var rectIsla = this;
-                    var scaleX = rectIsla.scaleX();
-                    var scaleY = rectIsla.scaleY();
-                    var rotacion = rectIsla.DameRotacion();
+    //                var rectIsla = this;
+    //                var scaleX = rectIsla.scaleX();
+    //                var scaleY = rectIsla.scaleY();
+    //                var rotacion = rectIsla.DameRotacion();
 
-                    const anchoReal = rectIsla.width() * scaleX;
-                    const altoReal = rectIsla.height() * scaleY;
+    //                const anchoReal = rectIsla.width() * scaleX;
+    //                const altoReal = rectIsla.height() * scaleY;
 
-                    var absPos = rectIsla.getAbsolutePosition();
-                    var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
+    //                var absPos = rectIsla.getAbsolutePosition();
+    //                var posFinal = Lienzo.TransformarAPosicionLocal(absPos);
 
-                    rectIsla.setAttrs({
-                        scaleX: 1,
-                        scaleY: 1,
-                        width: anchoReal,
-                        height: altoReal,
-                        offsetX: anchoReal / 2,
-                        offsetY: altoReal / 2,
-                    });
+    //                rectIsla.setAttrs({
+    //                    scaleX: 1,
+    //                    scaleY: 1,
+    //                    width: anchoReal,
+    //                    height: altoReal,
+    //                    offsetX: anchoReal / 2,
+    //                    offsetY: altoReal / 2,
+    //                });
 
-                    rectIsla.absolutePosition(absPos);
-                    rectIsla.rotation(rotacion);
+    //                rectIsla.absolutePosition(absPos);
+    //                rectIsla.rotation(rotacion);
 
-                    isla.Posicion.x = posFinal.x;
-                    isla.Posicion.y = posFinal.y;
-                    isla.Orientacion = rotacion;
-                    isla.Ancho = Number(anchoReal.toFixed(4));
-                    isla.Alto = Number(altoReal.toFixed(4));
-                    isla.Modificada = true;
+    //                isla.Posicion.x = posFinal.x;
+    //                isla.Posicion.y = posFinal.y;
+    //                isla.Orientacion = rotacion;
+    //                isla.Ancho = Number(anchoReal.toFixed(4));
+    //                isla.Alto = Number(altoReal.toFixed(4));
+    //                isla.Modificada = true;
 
-                    window.agregarIslasAGuardar(isla);
+    //                window.agregarIslasAGuardar(isla);
 
-                });
-            }
+    //            });
+    //        }
 
-            this.lstIslas.forEach(function (item) {
-                item.Dibujar();
-            })
+    //        this.lstIslas.forEach(function (item) {
+    //            item.Dibujar();
+    //        })
 
-            this.MoverArriba = function () {
-                this.Grafico.moveToTop();
-            }
-        }
-    }
+    //        this.MoverArriba = function () {
+    //            this.Grafico.moveToTop();
+    //        }
+    //    }
+    //}
 
-    Punto.OrdenActual = 0;
+    //Punto.OrdenActual = 0;
 
     var container = document.getElementById('container');
 

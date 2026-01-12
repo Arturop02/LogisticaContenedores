@@ -123,7 +123,6 @@
 
 
 @section scripts{
-    <script src="~/Scripts/Area/Area.js"></script>
     @Scripts.Render("~/bundles/vue")
     @Scripts.Render("~/bundles/vuex")
     @Scripts.Render("~/bundles/konva")
@@ -132,6 +131,12 @@
     @Scripts.Render("~/bundles/jqgrid")
     @Styles.Render("~/bundles/fontawesomecss")
     @Scripts.Render("~/bundles/notify")
+
+    <script src="~/Scripts/Complementos/Lienzo.js"></script>
+    <script src="~/Scripts/Complementos/Punto.js"></script>
+    <script src="~/Scripts/Complementos/Linea.js"></script>
+    @*<script src="~/Scripts/Complementos/IslaRect.js"></script>*@
+    <script src="~/Scripts/Area/Area.js"></script>
 
     <script>
         var objSer = {
@@ -153,8 +158,8 @@
         inicializarArea();
 
         if (objSer.Dato.AreaSeleccionada != null)
-            //vueArea.Area = objSer.Dato.AreaSeleccionada;
-            this.$store.commit('setArea', objSer.Dato.AreaSeleccionada);
+            vueArea.Area = objSer.Dato.AreaSeleccionada;
+            //this.$store.commit('setArea', objSer.Dato.AreaSeleccionada);
         else
             vueArea.iniciarDibujo();
     });
@@ -183,40 +188,40 @@
             });
         }
 
-        var store = new Vuex.Store({
-            state: {
-                AreaActiva: null,
-                PuntoActivo: null,
-                LineaActiva: null,
-                ModalActivo: false,
-            },
-            mutations: {
-                setArea(state, Area) {
-                    state.AreaActiva = Area;
-                },
-                setPunto(state, Punto) {
-                    state.PuntoActivo = Punto;
-                },
-                setLinea(state, Linea) {
-                    state.LineaActiva = Linea;
-                },
-                setModal(state, Modal) {
-                    state.ModalActivo = Modal;
-                },
-            }
-        });
+        //var store = new Vuex.Store({
+        //    state: {
+        //        AreaActiva: null,
+        //        PuntoActivo: null,
+        //        LineaActiva: null,
+        //        ModalActivo: false,
+        //    },
+        //    mutations: {
+        //        setArea(state, Area) {
+        //            state.AreaActiva = Area;
+        //        },
+        //        setPunto(state, Punto) {
+        //            state.PuntoActivo = Punto;
+        //        },
+        //        setLinea(state, Linea) {
+        //            state.LineaActiva = Linea;
+        //        },
+        //        setModal(state, Modal) {
+        //            state.ModalActivo = Modal;
+        //        },
+        //    }
+        //});
 
         var vueArea= new Vue({
             el: '#app',
-            store,
+            //store,
             data() {
                 return {
                     mostrarModalArea: false,
                     dibujando: false,
-                    //Area: null,
-                    //Punto: null,
-                    //Linea: null,
-                    //Posicion: null,
+                    Area: null,
+                    Punto: null,
+                    Linea: null,
+                    Posicion: null,
                 }
             },
             watch: {
@@ -230,11 +235,8 @@
             },
             methods: {
                 seleccionarArea(id, nombre) {
-                    var area = { Id: id, Nombre: nombre };
-                    this.$store.commit('setArea', area);
-                    
-                    //this.areaId = id;
-                    //this.areaNombre = nombre;
+                    this.Area = { Id: id, Nombre: nombre };
+                    //this.$store.commit('setArea', area);
 
                     window.seleccionarArea(id);
                 },
@@ -242,13 +244,17 @@
                     window.agregarZona();
                 },
                 iniciarDibujo() {
-                    this.$store.commit('setArea', { Id: 0, Nombre: '' });
+                    //this.$store.commit('setArea', { Id: 0, Nombre: '' });
 
+                    this.Area = {
+                        Id: 0,
+                        Nombre:'',
+                    }
                     window.iniciarDibujo();
                 },
                 async editarArea() {
 
-                    this.$store.commit('setModal', true);
+                    //this.$store.commit('setModal', true);
 
                     var contenido = document.getElementById('modalEdicion').cloneNode(true);
                     contenido.style.display = 'block';
@@ -263,7 +269,7 @@
                     });
 
                     if (!pregunta.Valor) return;
-                     
+
                     const modal = $('.bootbox-body');
                     const nombreArea = modal.find('#nombreAreaEditado').val().trim();
 
@@ -312,7 +318,7 @@
                     return ({ Confirmado: true, IdPatio: idPatio, NombreArea: nombreArea });
                 },
                 async confirmarEliminarPunto(punto) {
-                    this.$store.commit('setPunto', punto);
+                    //this.$store.commit('setPunto', punto);
                     var pregunta = await MensajeAsync({
                         Titulo: 'Eliminar punto',
                         Cuerpo: 'Deseas eliminar este punto',
@@ -326,12 +332,12 @@
                         return;
                     }
 
-                    //this.Punto = punto
-                    window.eliminarPuntos(punto);
-                    this.$store.commit('setPunto', null);
+                    this.Punto = punto
+                    window.eliminarPuntos(this.Punto);
+                    //this.$store.commit('setPunto', null);
                 },
                 async confirmacionAgregarPunto(linea, posicion) {
-                    this.$store.commit('setLinea', linea);
+                    //this.$store.commit('setLinea', linea);
                     var pregunta = await MensajeAsync({
                         Titulo: 'Agregar un nuevo punto',
                         Cuerpo: 'Desea agregar un nuevo punto',
@@ -344,10 +350,10 @@
                     if (!pregunta.Valor) {
                         return;
                     }
-                    //this.Linea = linea;
-                    //this.Posicion = posicion;
-                    window.agregarPuntos(linea, posicion);
-                    this.$store.commit('setLinea', null);
+                    this.Linea = linea;
+                    this.Posicion = posicion;
+                    window.agregarPuntos(this.Linea, this.Posicion);
+                    //this.$store.commit('setLinea', null);
                 },
                 async nuevoEnu() {
                     var contenido = document.getElementById("formEnu").cloneNode(true);
@@ -395,15 +401,15 @@
                 },
             },
             computed: {
-                Area() {
-                    return this.$store.state.AreaActiva;
-                },
-                Punto() {
-                    return this.$store.state.PuntoActivo;
-                },
-                Linea() {
-                    return this.$store.state.LineaActiva;
-                },
+                //Area() {
+                //    return this.$store.state.AreaActiva;
+                //},
+                //Punto() {
+                //    return this.$store.state.PuntoActivo;
+                //},
+                //Linea() {
+                //    return this.$store.state.LineaActiva;
+                //},
                 areaSeleccionada() {
                     return this.areaNombre ? `Area: ${this.areaNombre}` : `Sin seleccion`;
                 }
